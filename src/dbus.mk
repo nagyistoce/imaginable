@@ -1,6 +1,6 @@
 # # # # # #
 #
-# Title: Imagemill
+# Title: Imaginable
 # Author: Kuzma Shapran
 # Created: 2010-02-16
 # Copyright: Kuzma Shapran <Kuzma.Shapran@gmail.com>
