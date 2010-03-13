@@ -43,12 +43,13 @@ void say_hello(void)
 void show_version(void)
 {
 	QTextStream(stderr)<<qPrintable(QString(
-		"Version %1.%2.r%3%4 (built %5-%6-%7 %8:%9:%10)\n"
+		"Version %1.%2.r%3.b%4%5 (built %6-%7-%8 %9:%10:%11)\n"
 		"\n"
 		)
 		.arg(version::major)
 		.arg(version::minor)
 		.arg(version::revision)
+		.arg(version::number)
 		.arg(version::label)
 		.arg(version::year())
 		.arg(version::month() ,2,10,QChar('0'))

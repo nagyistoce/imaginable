@@ -40,6 +40,8 @@ public slots:
 
 private:
 	QTimer m_autoCloseTimer;
+
+	//QMap<QString,image> m_images;
 };
 
 #endif // KIP_HPP
