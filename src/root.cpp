@@ -62,7 +62,7 @@ void Root::touch(void)
 {
 	if(m_autoCloseTimer.isActive())
 		m_autoCloseTimer.stop();
-	if(m_autoCloseTimer.interval() /* && no images */)
+	if(m_autoCloseTimer.interval() /* && m_images.isEmpty() */)
 		m_autoCloseTimer.start();
 }
 //add image -> touch()

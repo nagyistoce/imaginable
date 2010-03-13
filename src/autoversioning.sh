@@ -1,8 +1,25 @@
 #!/bin/bash
 
-BUILD_FILE="version-build.auto.inl"
-REVISION_FILE="version-svn.auto.inl"
+REVISION_FILE="version-revision.auto.inl"
+NUMBER_FILE="version-number.auto.inl"
+OLD_NUMBER_FILE="version-number.old.inl"
+TIME_FILE="version-time.auto.inl"
 
-date '+%s' > "${BUILD_FILE}"
+OLD_REVISION="$(cat "${REVISION_FILE}")"
+NEW_REVISION="\"$(svnversion)\""
+echo "Revision: ${NEW_REVISION}"
+echo "${NEW_REVISION}" > "${REVISION_FILE}"
 
-echo "\"$(svnversion)\"" > "${REVISION_FILE}"
+if [[ "-${OLD_REVISION}" != "-${NEW_REVISION}" ]]
+then
+	(( NEW_NUMBER = 1 ))
+else
+	OLD_NUMBER="$(cat "${NUMBER_FILE}")"
+	(( NEW_NUMBER = OLD_NUMBER + 1 ))
+fi
+echo "Build number: ${NEW_NUMBER}"
+echo "${NEW_NUMBER}" > "${NUMBER_FILE}"
+
+BUILD_TIME="$(date '+%s')"
+echo "Build time: ${BUILD_TIME} ($(date -d "@${BUILD_TIME}"))"
+echo "${BUILD_TIME}" > "${TIME_FILE}"

@@ -93,7 +93,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">/bin/bash</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
    <value key="workingDirectory" type="QString">$BUILDDIR</value>
   </valuemap>
  </data>
@@ -114,7 +114,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
    <valuelist key="makeargs" type="QVariantList">
     <value type="QString">-f</value>
     <value type="QString">dbus.mk</value>
@@ -131,15 +131,15 @@
     <value type="QString">QTDIR=/opt/qtsdk-2010.02/qt</value>
    </valuelist>
    <valuelist key="abstractProcess.arguments" type="QVariantList">
-    <value type="QString">/home/kuzma/devel/google.code/trunk/src/imaginable.pro</value>
+    <value type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src/imaginable.pro</value>
     <value type="QString">-spec</value>
     <value type="QString">linux-g++</value>
     <value type="QString">-r</value>
     <value type="QString">CONFIG+=debug</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString">/opt/qtsdk-2010.02/qt/bin/qmake</value>
-   <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.enabled" type="bool">false</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
   </valuemap>
  </data>
  <data>
@@ -157,7 +157,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
   </valuemap>
  </data>
  <data>
@@ -176,7 +176,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
    <value key="cleanConfig" type="bool">true</value>
    <valuelist key="makeargs" type="QVariantList">
     <value type="QString">clean</value>
@@ -201,7 +201,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">/usr/bin/make</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
    <valuelist key="makeargs" type="QVariantList">
     <value type="QString">-f</value>
     <value type="QString">dbus.mk</value>
@@ -224,7 +224,7 @@
    </valuelist>
    <value key="abstractProcess.command" type="QString">/bin/rm</value>
    <value key="abstractProcess.enabled" type="bool">true</value>
-   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/trunk/src</value>
+   <value key="abstractProcess.workingDirectory" type="QString">/home/kuzma/devel/google.code/imaginable/trunk/src</value>
    <value key="workingDirectory" type="QString">$BUILDDIR</value>
   </valuemap>
  </data>

@@ -4,22 +4,32 @@
 
 namespace version {
 
-const unsigned major = 0;
-
-const unsigned minor = 1;
-
-const char* revision =
-#include "version-svn.auto.inl"
+const unsigned major =
+#include "version-major.inl"
 ;
 
-const char* label ="-alpha"
+const unsigned minor =
+#include "version-minor.inl"
+;
+
+const char* revision =
+#include "version-revision.auto.inl"
+;
+
+const char* label =
+"-"
+#include "version-label.inl"
 #ifdef _DEBUG
 "-debug"
 #endif
 ;
 
-const time_t built =
-#include "version-build.auto.inl"
+const unsigned number =
+#include "version-number.auto.inl"
+;
+
+const time_t time =
+#include "version-time.auto.inl"
 ;
 
 }
