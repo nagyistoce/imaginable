@@ -6,7 +6,7 @@
  * License:   GPLv3
  *
  * * * * * */
-// $Id: version.cpp 18 2010-03-07 22:49:04Z kuzma $
+// $Id$
 
 
 #include "version.hpp"
