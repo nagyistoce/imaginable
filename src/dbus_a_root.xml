@@ -2,11 +2,28 @@
  "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node name="/name/kuzmashapran/imaginable">
 	<interface name="name.kuzmashapran.imaginable">
+
 		<property name="autoCloseTime" type="u" access="readwrite"/>
 		<method name="touch"/>
 
-		<method name="version"><arg type="s" direction="out"/></method>
+		<method name="version">
+			<arg type="s" direction="out"/>
+		</method>
+
+		<method name="newImage">
+			<arg type="t" name="Id" direction="out"/>
+		</method>
+
+		<method name="cloneImage">
+			<arg type="t" name="oldId" direction="in"/>
+			<arg type="t" name="newId" direction="out"/>
+		</method>
+
+		<method name="deleteImage">
+			<arg type="t" name="Id" direction="in"/>
+		</method>
 
 		<method name="quit"/>
+
 	</interface>
 </node>

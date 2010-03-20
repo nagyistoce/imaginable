@@ -2,17 +2,22 @@
  *
  * Title:     Imaginable
  * Created:   2010-02-16
- * Author:    Kuzma Shapran
- * Copyright: Kuzma Shapran <Kuzma.Shapran@gmail.com>
+ * Author:    Kuzma Shapran <Kuzma.Shapran@gmail.com>
  * License:   GPLv3
  *
  * * * * * */
+// $Id$
 
-#ifndef KIP_HPP
-#define KIP_HPP
+#ifndef IMAGINABLE__ROOT__INCLUDED
+#define IMAGINABLE__ROOT__INCLUDED
 
+
+#include "image_q.hpp"
+
+#include <boost/shared_ptr.hpp>
 
 #include <QtCore/QObject>
+#include <QtCore/QMap>
 #include <QtCore/QTimer>
 
 
@@ -36,12 +41,22 @@ public slots:
 
 	QString version(void) const;
 
+	qulonglong newImage(void);
+	qulonglong cloneImage(qulonglong);
+	void deleteImage(qulonglong);
+
 	void quit(void);
+
+private slots:
+	void timeout(void);
 
 private:
 	QTimer m_autoCloseTimer;
 
-	//QMap<QString,image> m_images;
+	typedef QMap<qulonglong,boost::shared_ptr<Image_Q> > ImagesMap;
+	ImagesMap m_images;
+
+	qulonglong nextIndex(void);
 };
 
-#endif // KIP_HPP
+#endif // IMAGINABLE__ROOT__INCLUDED

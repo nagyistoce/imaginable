@@ -2,19 +2,19 @@
  *
  * Title:     Imaginable
  * Created:   2010-03-06
- * Author:    Kuzma Shapran
- * Copyright: Kuzma Shapran <Kuzma.Shapran@gmail.com>
+ * Author:    Kuzma Shapran <Kuzma.Shapran@gmail.com>
  * License:   GPLv3
  *
  * * * * * */
+// $Id$
 
-#ifndef MAIN_HPP
-#define MAIN_HPP
+#ifndef IMAGINABLE__MAIN__INCLUDED
+#define IMAGINABLE__MAIN__INCLUDED
 
 
 #include "options.hpp"
 
 
-extern const Options* program_options(void);
+extern const Options& program_options(void);
 
-#endif // MAIN_HPP
+#endif // IMAGINABLE__MAIN__INCLUDED

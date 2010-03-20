@@ -14,15 +14,21 @@ TOUCH = touch
 
 SOURCES = \
 	dbus_a_root.cpp \
-	dbus_a_root.h
+	dbus_a_root.h \
+	dbus_a_image_q.cpp \
+	dbus_a_image_q.h
 
 XMLS = \
-	dbus_a_root.xml
+	dbus_a_root.xml \
+	dbus_a_image_q.xml
 
 all: $(SOURCES)
 
 dbus_a_root.cpp dbus_a_root.h: dbus_a_root.xml
 	$(XMLC) -a dbus_a_root -i root.hpp -c DBus_Adaptor_Root -l Root "$<"
+
+dbus_a_image_q.cpp dbus_a_image_q.h: dbus_a_image_q.xml
+	$(XMLC) -a dbus_a_image_q -i image_q.hpp -c DBus_Adaptor_Image_Q -l Image_Q "$<"
 
 
 clean:

@@ -1,0 +1,105 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/name/kuzmashapran/imaginable">
+	<interface name="name.kuzmashapran.imaginable.image">
+
+		<method name="width" ><arg type="u" direction="out"/></method>
+		<method name="setWidth"><arg type="b" direction="out"/>
+			<arg type="u" name="width"  direction="in"/>
+		</method>
+
+		<method name="height"><arg type="u" direction="out"/></method>
+		<method name="setHeight"><arg type="b" direction="out"/>
+			<arg type="u" name="heigth" direction="in"/>
+		</method>
+
+		<method name="square"><arg type="u" direction="out"/></method>
+		<method name="setSize"><arg type="b" direction="out"/>
+			<arg type="u" name="width"  direction="in"/>
+			<arg type="u" name="heigth" direction="in"/>
+		</method>
+
+		<property name="maximum" type="q" access="readwrite"/>
+
+		<method name="empty" ><arg type="b" direction="out"/></method>
+		<method name="hasData" ><arg type="b" direction="out"/></method>
+
+		<method name="clear" />
+
+		<method name="colourSpaceToString"><arg type="s" direction="out"/>
+			<arg type="u" name="colourSpace" direction="in"/>
+		</method>
+
+		<method name="colourSpace"><arg type="u" direction="out"/></method>
+
+		<method name="colourPlaneToString"><arg type="s" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="planes"><arg type="ai" direction="out"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QintList"/>
+		</method>
+
+		<method name="hasPlane"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="hasAlpha"><arg type="b" direction="out"/></method>
+
+		<method name="planesCount"><arg type="u" direction="out"/></method>
+
+		<method name="addPlane"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="removePlane"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="movePlane"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlaneFrom" direction="in"/>
+			<arg type="i" name="colourPlaneTo"   direction="in"/>
+		</method>
+
+		<method name="planeHasName"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="planeName"><arg type="s" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="setPlaneName"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+			<arg type="s" name="name"        direction="in"/>
+		</method>
+
+		<method name="erasePlaneName"><arg type="b" direction="out"/>
+			<arg type="i" name="colourPlane" direction="in"/>
+		</method>
+
+		<method name="hasText"><arg type="b" direction="out"/>
+			<arg type="s" name="key" direction="in"/>
+		</method>
+
+		<method name="text"><arg type="s" direction="out"/>
+			<arg type="s" name="key" direction="in"/>
+		</method>
+
+		<method name="textKeys"><arg type="as" direction="out"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QStringList"/>
+		</method>
+
+		<method name="setText"><arg type="b" direction="out"/>
+			<arg type="s" name="key" direction="in"/>
+			<arg type="s" name="value" direction="in"/>
+		</method>
+
+		<method name="eraseText"><arg type="b" direction="out"/>
+			<arg type="s" name="key" direction="in"/>
+		</method>
+
+		<method name="clearTexts" />
+
+	</interface>
+</node>
