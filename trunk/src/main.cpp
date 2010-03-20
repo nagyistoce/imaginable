@@ -2,11 +2,11 @@
  *
  * Title:     Imaginable
  * Created:   2010-02-16
- * Author:    Kuzma Shapran
- * Copyright: Kuzma Shapran <Kuzma.Shapran@gmail.com>
+ * Author:    Kuzma Shapran <Kuzma.Shapran@gmail.com>
  * License:   GPLv3
  *
  * * * * * */
+// $Id$
 
 
 #include "version.hpp"
@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <QtCore/QMap>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QTextStream>
 #include <QtDBus/QDBusConnection>
@@ -43,14 +44,10 @@ void say_hello(void)
 void show_version(void)
 {
 	QTextStream(stderr)<<qPrintable(QString(
-		"Version %1.%2.r%3.b%4%5 (built %6-%7-%8 %9:%10:%11)\n"
+		"Version %1 (built %2-%3-%4 %5:%6:%7)\n"
 		"\n"
 		)
-		.arg(version::major)
-		.arg(version::minor)
-		.arg(version::revision)
-		.arg(version::number)
-		.arg(version::label)
+		.arg(version::full_string())
 		.arg(version::year())
 		.arg(version::month() ,2,10,QChar('0'))
 		.arg(version::day()   ,2,10,QChar('0'))
@@ -60,23 +57,23 @@ void show_version(void)
 		);
 }
 
-const char dbus_service_name[]="name.kuzmashapran.imagemill";
+const char dbus_service_name[]="name.kuzmashapran.imaginable";
 
 Options* s_program_options;
 
 }
 
-const Options* program_options(void)
+const Options& program_options(void)
 {
-	return s_program_options;
+	return *s_program_options;
 }
 
 int main(int argc,char* argv[])
 {
 	QCoreApplication app(argc,argv);
 	app.setOrganizationName("Kuzma Shapran");
-	app.setApplicationName("Imagemill");
-	app.setApplicationVersion(QString("%1.%2.r%3%4").arg(version::major).arg(version::minor).arg(version::revision).arg(version::label));
+	app.setApplicationName("Imaginable");
+	app.setApplicationVersion(QString::fromAscii(version::full_string()));
 
 	Options options;
 	options.setFlag("--help");
@@ -89,7 +86,7 @@ int main(int argc,char* argv[])
 	options.setAlias("-V","--version");
 	options.setAlias("-v","--verbose");
 	options.setInfo("--help","show this help and exit");
-	options.setInfo("--version","show version");
+	options.setInfo("--version","show version and exit");
 	options.setInfo("--no-hello","do not show start message");
 	options.setInfo("--verbose","be a bit more verbose");
 	options.setInfo("--input","input");
@@ -110,7 +107,10 @@ int main(int argc,char* argv[])
 		say_hello();
 
 	if(options.flag("--version"))
+	{
 		show_version();
+		return EXIT_SUCCESS;
+	}
 
 	if(options.flag("--verbose"))
 		QTextStream(stderr)<<"PID="<<QCoreApplication::applicationPid()<<"\n";

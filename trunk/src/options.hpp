@@ -2,14 +2,14 @@
  *
  * Title:     Imaginable
  * Created:   2010-03-06
- * Author:    Kuzma Shapran
- * Copyright: Kuzma Shapran <Kuzma.Shapran@gmail.com>
+ * Author:    Kuzma Shapran <Kuzma.Shapran@gmail.com>
  * License:   GPLv3
  *
  * * * * * */
+// $Id$
 
-#ifndef OPTIONS_HPP
-#define OPTIONS_HPP
+#ifndef IMAGINABLE__OPTIONS__INCLUDED
+#define IMAGINABLE__OPTIONS__INCLUDED
 
 
 #include <QtCore/QMap>
@@ -37,7 +37,7 @@ public:
 	QString info(void) const { makeInfo(); return m_info; }
 
 
-	bool flag(const char* name) { return property(name).toBool(); }
+	bool flag(const char* name) const { return property(name).toBool(); }
 
 	QStringList unnamed(void) const
 	{ return m_optionUnnamed; }
@@ -54,4 +54,4 @@ protected:
 	bool m_parsed;
 };
 
-#endif // OPTIONS_HPP
+#endif // IMAGINABLE__OPTIONS__INCLUDED

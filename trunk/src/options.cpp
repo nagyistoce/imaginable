@@ -2,11 +2,11 @@
  *
  * Title:     Imaginable
  * Created:   2010-03-06
- * Author:    Kuzma Shapran
- * Copyright: Kuzma Shapran <Kuzma.Shapran@gmail.com>
+ * Author:    Kuzma Shapran <Kuzma.Shapran@gmail.com>
  * License:   GPLv3
  *
  * * * * * */
+// $Id$
 
 
 #include "options.hpp"

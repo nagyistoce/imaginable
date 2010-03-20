@@ -1,5 +1,6 @@
 #!/bin/bash
 
+VERSION_FILE="version.cpp"
 REVISION_FILE="version-revision.auto.inl"
 NUMBER_FILE="version-number.auto.inl"
 OLD_NUMBER_FILE="version-number.old.inl"
@@ -23,3 +24,5 @@ echo "${NEW_NUMBER}" > "${NUMBER_FILE}"
 BUILD_TIME="$(date '+%s')"
 echo "Build time: ${BUILD_TIME} ($(date -d "@${BUILD_TIME}"))"
 echo "${BUILD_TIME}" > "${TIME_FILE}"
+
+touch "${VERSION_FILE}"
