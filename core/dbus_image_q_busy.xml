@@ -1,0 +1,13 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/name/kuzmashapran/imaginable">
+	<interface name="name.kuzmashapran.imaginable.image_busy">
+
+		<method name="busy"><arg type="b" direction="out"/></method>
+		<method name="percent"><arg type="d" direction="out"/></method>
+
+		<signal name="longProcessingStarted" />
+		<signal name="longProcessingFinished" />
+
+	</interface>
+</node>

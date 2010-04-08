@@ -6,7 +6,7 @@
  * License:   GPLv3
  *
  * * * * * */
-// $Id$
+// $Id: types.hpp 9 2010-03-20 09:53:22Z Kuzma.Shapran $
 
 #ifndef IMAGINABLE__TYPES__INCLUDED
 #define IMAGINABLE__TYPES__INCLUDED

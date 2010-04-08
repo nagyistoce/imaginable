@@ -54,7 +54,7 @@ const char* full_string(void)
 	if(full_str.empty())
 	{
 		char* c_str;
-		if(asprintf(&c_str,"%d.%d.r%s.b%d%s",
+		if(asprintf(&c_str,"%d.%d.%s.%d%s",
 			major,
 			minor,
 			revision,
