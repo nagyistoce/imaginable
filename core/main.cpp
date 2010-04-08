@@ -1,12 +1,26 @@
-/* * * * * *
- *
- * Title:     Imaginable
- * Created:   2010-02-16
- * Author:    Kuzma Shapran <Kuzma.Shapran@gmail.com>
- * License:   GPLv3
- *
- * * * * * */
-// $Id$
+/*************
+**
+** Project:      Imaginable
+** File info:    $Id$
+** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** License:      GPLv3
+**
+**  This file is part of Imaginable.
+**
+**  Imaginable is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  Imaginable is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with Imaginable.  If not, see <http://www.gnu.org/licenses/>.
+**
+*************/
 
 
 #include "version.hpp"
@@ -29,14 +43,15 @@ namespace {
 void say_hello(void)
 {
 	QTextStream(stderr)<<qPrintable(QString(
-		"Imaginable\n"
-		"Copyright (C) %1 %2 <Kuzma.Shapran@gmail.com>\n"
+		"%1\n"
+		"Copyright (C) 2009,%2 %3 <Kuzma.Shapran@gmail.com>\n"
 		"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
 		"\n"
 		"This is free software; you are free to change and redistribute it.\n"
 		"There is NO WARRANTY, to the extent permitted by law.\n"
 		"\n"
 		)
+		.arg(QCoreApplication::applicationName())
 		.arg(version::year())
 		.arg(QCoreApplication::organizationName())
 		);
