@@ -11,7 +11,8 @@
 
 #include "version.hpp"
 #include "options.hpp"
-#include "root.hpp"
+#include "root_q.hpp"
+#include "types.hpp"
 
 #include <cerrno>
 #include <cstdlib>
@@ -21,7 +22,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QTextStream>
 #include <QtDBus/QDBusConnection>
-
+#include <QtDBus/QDBusMetaType>
 
 namespace {
 
@@ -113,7 +114,10 @@ int main(int argc,char* argv[])
 	}
 
 	if(options.flag("--verbose"))
+	{
+		show_version();
 		QTextStream(stderr)<<"PID="<<QCoreApplication::applicationPid()<<"\n";
+	}
 
 
 	if(!QDBusConnection::sessionBus().registerService(dbus_service_name))
@@ -122,8 +126,10 @@ int main(int argc,char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	Root root;
-	if(!root.init_DBus())
+	qDBusRegisterMetaType<QintList>();
+
+	Root_Q root;
+	if(!root.init())
 		return EXIT_FAILURE;
 
 	return app.exec();
