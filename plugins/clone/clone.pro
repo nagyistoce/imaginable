@@ -56,9 +56,9 @@ OTHER_FILES += \
 
 
 autoversioning.target = version.cpp
-autoversioning.commands = "bash $${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh"
+autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh"
 autoversioning.depends = autoversioning2
 
-autoversioning2.commands = @echo Autoversioning
+autoversioning2.commands = "@echo Autoversioning ..."
 
 QMAKE_EXTRA_TARGETS += autoversioning autoversioning2
