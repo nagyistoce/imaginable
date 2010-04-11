@@ -26,11 +26,13 @@
 #define IMAGINABLE__TYPES__INCLUDED
 
 
-#include <QtCore/QList>
+#include <QtDBus/QDBusArgument>
 #include <QtCore/QMetaType>
+#include <QtCore/QList>
 
 
 typedef QList<int> QintList;
 Q_DECLARE_METATYPE(QintList)
+
 
 #endif // IMAGINABLE__TYPES__INCLUDED

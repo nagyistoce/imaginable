@@ -22,12 +22,11 @@
 ##
 ##############
 
-TARGET = clone
+TARGET = qtio
 
 TEMPLATE = lib
 CONFIG += plugin
 QT += dbus
-QT -= gui
 
 BIN_DIR = bin
 CONFIG(debug,debug|release):BUILD_DIR = /debug
@@ -52,16 +51,16 @@ INCLUDEPATH += \
 
 SOURCES += \
 	version.cpp \
-	clone.cpp
+	qtio.cpp
 
 HEADERS += \
 	version.hpp \
-	clone.hpp
+	qtio.hpp
 
 QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_plugin_clone.xml
+	dbus_plugin_qtio.xml
 
 OTHER_FILES += \
 	version-minor.inl \

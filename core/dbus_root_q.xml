@@ -39,19 +39,25 @@
 			<arg type="t" name="Id"/>
 		</signal>
 
-		<method name="deleteImage"><arg type="b" direction="out"/>
+		<method name="deleteImage"><arg type="u" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
 		</method>
 		<signal name="imageDeleted">
 			<arg type="t" name="Id"/>
 		</signal>
 
-		<method name="loadPlugin"><arg type="b" direction="out"/>
+		<method name="loadPlugin"><arg type="u" direction="out"/>
 			<arg type="s" name="fileName" direction="in"/>
 		</method>
 
 		<method name="loadAllPlugins"><arg type="as" direction="out"/>
 			<arg type="s" name="dirName" direction="in"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QStringList"/>
+		</method>
+
+		<method name="autoLoadPlugins"><arg type="as" direction="out"/>
+			<arg type="as" name="names" direction="in"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.In0"  value="QStringList"/>
 			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QStringList"/>
 		</method>
 
@@ -71,7 +77,7 @@
 			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QStringList"/>
 		</method>
 
-		<method name="unloadPlugin"><arg type="b" direction="out"/>
+		<method name="unloadPlugin"><arg type="u" direction="out"/>
 			<arg type="s" name="fileName" direction="in"/>
 		</method>
 

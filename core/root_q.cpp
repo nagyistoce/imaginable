@@ -28,6 +28,7 @@
 #include "main.hpp"
 #include "image_q.hpp"
 #include "plugin_iface.hpp"
+#include "image_q_proxy.hpp"
 
 #include <QtCore/QCoreApplication>
 
@@ -53,7 +54,7 @@ bool Root_Q::init(void)
 	new RootAdaptor(this);
 	if(!QDBusConnection::sessionBus().registerObject(dbus_object_name,this))
 	{
-		QTextStream(stderr)<<qPrintable(QString("Cannot register `root` D-Bus object '%1'\n").arg(dbus_object_name));
+		message(LOG_ALERT,"Cannot register D-Bus object interface");
 		return false;
 	}
 
@@ -70,7 +71,7 @@ QString Root_Q::version(void) const
 void Root_Q::autoCloseTimeout(void)
 {
 	if(program_options().flag("--verbose"))
-		QTextStream(stdout)<<"Root: Autoclosing now\n";
+		message(LOG_NOTICE,"Autoclosing now");
 	quit();
 }
 
@@ -88,7 +89,10 @@ void Root_Q::setAutoCloseTime(unsigned value)
 void Root_Q::restartAutoCloser(void)
 {
 	if( m_autoCloseTimer.isActive() )
+	{
 		m_autoCloseTimer.stop();
+		message(LOG_INFO,"Autoclosing cancelled");
+	}
 	if( m_autoCloseTimer.interval() && m_images.isEmpty() )
 	{
 		if(program_options().flag("--verbose"))
@@ -96,7 +100,7 @@ void Root_Q::restartAutoCloser(void)
 			unsigned m=(m_autoCloseTimer.interval()/1000/60) %60;
 			unsigned h=(m_autoCloseTimer.interval()/1000/60/60);
 
-			QTextStream(stdout)<<QString("Root: Autoclosing in %1h %2m\n").arg(h).arg(m,2,10,QChar('0'));
+			message(LOG_INFO,QString("Autoclosing in %1h %2m").arg(h).arg(m,2,10,QChar('0')));
 		}
 		m_autoCloseTimer.start();
 	}
@@ -107,12 +111,13 @@ qulonglong Root_Q::createImage(void)
 	qulonglong Id=nextIndex();
 
 	Image_Q* newImage=new Image_Q(this);
+	new image_q_proxy(Id,this,newImage);
 	if(newImage->init(QString("/%1").arg(Id)))
 	{
 		m_images[Id]=newImage;
 
 		if(program_options().flag("--verbose"))
-			QTextStream(stdout)<<QString("Root: Image[%1] created\n").arg(Id);
+			message(LOG_NOTICE,"Image created",Id);
 
 		emit imageCreated(Id);
 	}
@@ -122,34 +127,34 @@ qulonglong Root_Q::createImage(void)
 	return Id;
 }
 
-bool Root_Q::deleteImage(qulonglong Id)
+uint Root_Q::deleteImage(qulonglong Id)
 {
 	Images::Iterator I=m_images.find(Id);
 	if(I==m_images.end())
 	{
 		if(program_options().flag("--verbose"))
-			QTextStream(stdout)<<QString("Root: Image[%1] is not found for deletion\n").arg(Id);
-		return false;
+			message(LOG_ERR,"Image is not found for deletion",Id);
+		return NO_IMAGE;
 	}
 
 	if(I.value()->busy())
 	{
 		if(program_options().flag("--verbose"))
-			QTextStream(stdout)<<QString("Root: Image[%1] is busy\n").arg(Id);
-		return false;
+			message(LOG_WARNING,"Image is busy",Id);
+		return IMAGE_BUSY;
 	}
 
 	delete I.value();
 	m_images.erase(I);
 
 	if(program_options().flag("--verbose"))
-		QTextStream(stdout)<<QString("Root: Image[%1] deleted\n").arg(Id);
+		message(LOG_NOTICE,"Image deleted",Id);
 
 	emit imageDeleted(Id);
 
 	restartAutoCloser();
 
-	return true;
+	return OK;
 }
 
 qulonglong Root_Q::nextIndex(void)
@@ -192,55 +197,85 @@ namespace {
 	}
 }
 
-void Root_Q::pluginMessage(int level,QString plugin,qulonglong Id,QString message) const
+void Root_Q::message(int level,QString text,QString source,qulonglong Id) const
 {
-	QTextStream(stdout)<<QString("[%1] %2: Image[%3]: %4\n").arg(messageLevelToString(level)).arg(plugin).arg(Id).arg(message);
+	QTextStream(stdout)<<(Id?
+		(QString("[%1] %2: Image[%3]: %4\n").arg(messageLevelToString(level)).arg(source).arg(Id).arg(text)):
+		(QString("[%1] %2: %3\n")           .arg(messageLevelToString(level)).arg(source)        .arg(text)));
 }
 
-bool Root_Q::loadPlugin(QString fileName)
+uint Root_Q::loadPlugin(QString fileName)
 {
-	try
-	{
+	uint ret=OK;
+	QString msg;
+
+	fileName=QFileInfo(fileName).absoluteFilePath();
+
+	do{
 		if(isPluginLoaded(fileName))
-			throw QString("Root: Plugin[%1] cannot be loaded: already loaded\n").arg(fileName);
+		{
+			msg=QString("Plugin[%1] cannot be loaded: already loaded").arg(fileName);
+			ret=DUPLICATE_PLUGIN;
+			break;
+		}
 
 		if(!QFileInfo(fileName).isFile())
-			throw QString("Root: Plugin[%1] cannot be loaded: file does not exist\n").arg(fileName);
-	}
-	catch(QString& msg)
+		{
+			msg=QString("Plugin[%1] cannot be loaded: file does not exist").arg(fileName);
+			ret=NO_FILE;
+			break;
+		}
+	}while(false);
+	if(ret)
 	{
-		QTextStream(stdout)<<msg;
-		return false;
+		message(LOG_ERR,msg);
+		return ret;
 	}
 
 	QPluginLoader* pluginLoader=new QPluginLoader(fileName,this);
 	PluginInterface* plugin;
-	try
-	{
+	do{
 		if(!pluginLoader->load())
-			throw QString("Root: Plugin[%1] cannot be loaded: load() failed: %2\n").arg(fileName).arg(pluginLoader->errorString());
+		{
+			msg=QString("Plugin[%1] cannot be loaded: load() failed: %2").arg(fileName).arg(pluginLoader->errorString());
+			ret=PLUGINLOADER_FAILURE;
+			break;
+		}
 
 		QObject* instance=pluginLoader->instance();
 		if(!instance)
-			throw QString("Root: Plugin[%1] cannot be loaded: instance() failed: %2\n").arg(fileName).arg(pluginLoader->errorString());
+		{
+			msg=QString("Plugin[%1] cannot be loaded: instance() failed: %2").arg(fileName).arg(pluginLoader->errorString());
+			ret=PLUGINLOADER_FAILURE;
+			break;
+		}
 
 		plugin=qobject_cast<PluginInterface*>(instance);
 		if(!plugin)
-			throw QString("Root: Plugin[%1] cannot be loaded: not an Imaginable plugin\n").arg(fileName);
+		{
+			msg=QString("Plugin[%1] cannot be loaded: not an Imaginable plugin").arg(fileName);
+			ret=INVALID_PLUGIN;
+			break;
+		}
 
 		if(!plugin->init(this))
-			throw QString("Root: Plugin[%1] cannot be loaded: init() failed\n").arg(fileName);
+		{
+			msg=QString("Plugin[%1] cannot be loaded: init() failed").arg(fileName);
+			ret=PLUGINLOADER_FAILURE;
+			break;
+		}
 	}
-	catch(QString& msg)
+	while(false);
+	if(ret)
 	{
 		delete pluginLoader;
-		QTextStream(stdout)<<msg;
-		return false;
+		message(LOG_CRIT,msg);
+		return ret;
 	}
 
 	m_plugins[fileName]=pluginLoader;
-	QTextStream(stdout)<<QString("Root: Plugin[%1] loaded: \"%2\" Version: %3\n").arg(fileName).arg(plugin->name()).arg(plugin->version());
-	return true;
+	message(LOG_NOTICE,QString("Plugin[%1] loaded: \"%2\" Version: %3").arg(fileName).arg(plugin->name()).arg(plugin->version()));
+	return ret;
 }
 
 QStringList Root_Q::loadAllPlugins(QString dirName)
@@ -249,14 +284,32 @@ QStringList Root_Q::loadAllPlugins(QString dirName)
 	QDir pluginsDir(dirName);
 	if(!pluginsDir.exists())
 	{
-		QTextStream(stdout)<<QString("Root: Plugins[%1] cannot be loaded: directory does not exist\n").arg(dirName);
+		message(LOG_ERR,QString("Plugins[%1] cannot be loaded: directory does not exist").arg(dirName));
 		return ret;
 	}
 	foreach(QString fileName,pluginsDir.entryList(QDir::Files))
 	{
-		QString fullPath(pluginsDir.absoluteFilePath(fileName));
-		if(loadPlugin(fullPath))
+		QString fullPath(QFileInfo(pluginsDir.filePath(fileName)).absoluteFilePath());
+		if(!loadPlugin(fullPath))
 			ret<<fullPath;
+	}
+	return ret;
+}
+
+QStringList Root_Q::autoLoadPlugins(QStringList names)
+{
+	QStringList ret;
+	foreach(QString name,names)
+	{
+		if(QFileInfo(name).isFile())
+		{
+			if(!loadPlugin(name))
+				ret<<name;
+		}
+		else if(QFileInfo(name).isDir())
+		{
+			ret<<loadAllPlugins(name);
+		}
 	}
 	return ret;
 }
@@ -289,23 +342,23 @@ QStringList Root_Q::pluginsList(void) const
 	return m_plugins.keys();
 }
 
-bool Root_Q::unloadPlugin(QString fileName)
+uint Root_Q::unloadPlugin(QString fileName)
 {
 	Plugins::iterator I=m_plugins.find(fileName);
 	if(I==m_plugins.end())
 	{
-		QTextStream(stdout)<<QString("Root: Plugin[%1] cannot be unloaded: not loaded\n").arg(fileName);
-		return false;
+		message(LOG_ERR,QString("Plugin[%1] cannot be unloaded: not loaded").arg(fileName));
+		return NO_PLUGIN;
 	}
 
-	bool ret=I.value()->unload();
+	bool ok=I.value()->unload();
 	I.value()->deleteLater();
 	m_plugins.erase(I);
 
-	if(ret)
-		QTextStream(stdout)<<QString("Root: Plugin[%1] unloaded\n").arg(fileName);
+	if(ok)
+		message(LOG_NOTICE,QString("Plugin[%1] unloaded").arg(fileName));
 	else
-		QTextStream(stdout)<<QString("Root: Plugin[%1] cannot be unloaded: unload() failed\n").arg(fileName);
+		message(LOG_CRIT,QString("Plugin[%1] cannot be unloaded: unload() failed").arg(fileName));
 
-	return ret;
+	return ok ? OK : PLUGINLOADER_FAILURE;
 }

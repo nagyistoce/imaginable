@@ -44,19 +44,15 @@ public:
 
 	bool init(QString);
 
-	Q_PROPERTY(ushort maximum READ maximum WRITE setMaximum)
-
 signals:
 	void longProcessingStarted(void);
 	void percentChanged(double);
 	void longProcessingFinished(void);
 
+	void message(int,QString);
+
 public slots:
-	ushort maximum (void) const      { return Image::maximum(); }
-	void setMaximum(ushort maximum)  { return Image::setMaximum(maximum); }
-
 	static QString colourSpaceToString(int);
-
 	static QString colourPlaneToString(int);
 
 private:

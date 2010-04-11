@@ -25,4 +25,5 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-	clone
+	clone \
+	qtio

@@ -23,7 +23,7 @@
 *************/
 
 
-#include "plugin_clone.hpp"
+#include "clone.hpp"
 #include "dbus_plugin_clone_adaptor.h"
 
 
@@ -43,43 +43,55 @@ bool PluginClone::init(Root* root)
 
 	if(!QDBusConnection::sessionBus().registerObject(name(),new CloneAdaptor(this),QDBusConnection::ExportNonScriptableContents))
 	{
-		QTextStream(stderr)<<qPrintable(QString("Cannot register Clone plugin interface in D-Bus object '%1'\n").arg(name()));
+		COMPLAIN2(LOG_ALERT,"Cannot register D-Bus object interface");
 		return false;
 	}
 	return true;
 }
 
-bool PluginClone::clone(qulonglong from,qulonglong to)
+uint PluginClone::cloneTo(qulonglong from,qulonglong to)
 {
-	if(!from)
+	if( (from==to)
+	&& from
+	&& to )
 	{
-		COMPLAIN(LOG_CRIT,from,"Non-existent source image");
-		return false;
-	}
-	if(!to)
-	{
-		COMPLAIN(LOG_CRIT,from,"Non-existent destination image");
-		return false;
-	}
-	if(from==to)
-	{
-		COMPLAIN(LOG_WARNING,from,"Source and destination images must differ");
-		return false;
+		COMPLAIN(LOG_WARNING,"Source and destination images must differ",from);
+		return Root::SAME_IMAGE;
 	}
 
-	Image* src=GET_OR_COMPLAIN(from);
+	uint ret;
+	Image* src=GET_OR_COMPLAIN("source image",from,ret);
 	if(!src)
-		return false;
+		return ret;
 
-	Image* dst=GET_OR_COMPLAIN(to);
+	Image* dst=GET_OR_COMPLAIN("destination image",to,ret);
 	if(!dst)
-		return false;
+		return ret+100;
 
 	dst->copyFrom(*src);
+	MESSAGE(LOG_INFO,QString("Cloned from image[%1]").arg(from),to);
 
-	return true;
+	return Root::OK;
 }
 
+qulonglong PluginClone::clone(qulonglong from)
+{
+	qulonglong to=m_root->createImage();
+	if(!to)
+	{
+		COMPLAIN(LOG_CRIT,"Cannot create destination image",to);
+		return 0ULL;
+	}
+
+	if(cloneTo(from,to))
+	{
+		m_root->deleteImage(to);
+		return 0ULL;
+	}
+
+	return to;
+}
+/*
 void PluginClone::lock(qulonglong Id,int msec)
 {
 	Image* img=GET_OR_COMPLAIN(Id);
@@ -99,3 +111,4 @@ void PluginClone::long_lock(Image* img,int msec)
 	}
 	disconnect(img,SLOT(setPercent(double)));
 }
+*/
