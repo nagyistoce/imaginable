@@ -147,5 +147,7 @@ int main(int argc,char* argv[])
 	if(!root.init())
 		return EXIT_FAILURE;
 
+	root.autoLoadPlugins(options.unnamed());
+
 	return app.exec();
 }

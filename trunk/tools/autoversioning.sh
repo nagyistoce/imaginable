@@ -48,5 +48,3 @@ echo "${NEW_NUMBER}" > "${NUMBER_FILE}"
 BUILD_TIME="$(date '+%s')"
 echo "Build time: ${BUILD_TIME} ($(date -d "@${BUILD_TIME}"))"
 echo "${BUILD_TIME}" > "${TIME_FILE}"
-
-touch "${VERSION_FILE}"

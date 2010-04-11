@@ -55,23 +55,25 @@ public:
 	void     setAutoCloseTime(unsigned);
 	void restartAutoCloseTimer(void) { setAutoCloseTime(autoCloseTime()); }
 
-	Image* image(qulonglong);
-	bool hasImage(qulonglong) const;
-	void pluginMessage(int level,QString plugin,qulonglong Id,QString message) const;
-
 public slots:
 	QString version(void) const;
 
 	qulonglong createImage(void);
-	bool       deleteImage(qulonglong);
+	Image*           image(qulonglong);
+	bool          hasImage(qulonglong) const;
+	uint       deleteImage(qulonglong);
 
-	bool           loadPlugin       (QString fileName);
-	QStringList loadAllPlugins      (QString dirName);
-	bool             isPluginLoaded (QString fileName) const;
-	QString            pluginName   (QString fileName) const;
-	QString            pluginVersion(QString fileName) const;
-	QStringList        pluginsList  (void) const;
-	bool         unloadPlugin       (QString fileName);
+	void message(int level,QString text,QString source="core",qulonglong Id=0ULL) const;
+	void message(int level,QString text,qulonglong Id) const { message(level,text,"core",Id); }
+
+	uint            loadPlugin       (QString fileName);
+	QStringList  loadAllPlugins      (QString  dirName);
+	QStringList autoLoadPlugins      (QStringList names);
+	bool              isPluginLoaded (QString fileName) const;
+	QString             pluginName   (QString fileName) const;
+	QString             pluginVersion(QString fileName) const;
+	QStringList         pluginsList  (void)             const;
+	uint          unloadPlugin       (QString fileName);
 
 	void quit(void);
 

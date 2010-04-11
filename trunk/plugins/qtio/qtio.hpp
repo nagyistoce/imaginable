@@ -22,48 +22,35 @@
 **
 *************/
 
-#ifndef IMAGINABLE__ROOT__INCLUDED
-#define IMAGINABLE__ROOT__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__QTIO__QTIO__INCLUDED
+#define IMAGINABLE__PLUGINS__QTIO__QTIO__INCLUDED
 
 
-#include <QtCore/QtGlobal>
+#include "version.hpp"
 
-#include <sys/syslog.h> // for log levels
+#include <plugin_iface.hpp>
 
-
-class Image;
-
-class Root
+class PluginQTIO : public QObject, PluginInterface
 {
+Q_OBJECT
+Q_INTERFACES(PluginInterface)
 public:
-	Root(void) {}
-	virtual ~Root() {}
+	PluginQTIO(void);
+	~PluginQTIO() {}
 
-	virtual qulonglong createImage(void) =0;
-	virtual Image* image(qulonglong) =0;
-	virtual bool hasImage(qulonglong) const =0;
-	virtual uint deleteImage(qulonglong) =0;
+	bool init(Root*);
+	QString name   (void) const { return "/qtio"; }
+	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
-	virtual void message(int level,QString message,QString source,qulonglong Id=0ULL) const =0;
+signals:
+	void lock_percent(double);
 
-	enum
-	{
-		OK=0
-		, PLUGINLOADER_FAILURE
-		, DUPLICATE_PLUGIN
-		, NO_PLUGIN
-		, INVALID_PLUGIN
+public slots:
+	uint loadTo(QString filename,qulonglong Id);
+	qulonglong load(QString);
+	uint saveWithQuality(qulonglong,QString,int);
+	uint save(qulonglong,QString);
 
-		, NO_FILE
-		, FILE_EXIST
-		, INVALID_FILE
-
-		, NO_IMAGE
-		, IMAGE_BUSY
-		, SAME_IMAGE
-
-		, INVALID_COLOURSPACE
-	};
 };
 
-#endif // IMAGINABLE__ROOT__INCLUDED
+#endif // IMAGINABLE__PLUGINS__QTIO__QTIO__INCLUDED

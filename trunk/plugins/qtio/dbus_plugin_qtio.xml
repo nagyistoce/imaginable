@@ -24,21 +24,27 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.clone">
+	<interface name="name.kuzmashapran.imaginable.plugin.qtio">
 
-		<method name="cloneTo"><arg type="u" direction="out"/>
-			<arg type="t" name="fromId" direction="in"/>
-			<arg type="t" name="toId" direction="in"/>
-		</method>
-
-		<method name="clone"><arg type="t" direction="out"/>
-			<arg type="t" name="fromId" direction="in"/>
-		</method>
-
-		<!--method name="lock">
+		<method name="loadTo"><arg type="u" direction="out"/>
+			<arg type="s" name="filename" direction="in"/>
 			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="msec" direction="in"/>
-		</method-->
+		</method>
+
+		<method name="load"><arg type="t" direction="out"/>
+			<arg type="s" name="filename" direction="in"/>
+		</method>
+
+		<method name="saveWithQuality"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="s" name="filename" direction="in"/>
+			<arg type="i" name="quality" direction="in"/>
+		</method>
+
+		<method name="save"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="s" name="filename" direction="in"/>
+		</method>
 
 	</interface>
 </node>

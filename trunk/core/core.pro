@@ -56,7 +56,8 @@ SOURCES += \
 	options.cpp \
 	root_q.cpp \
 	image.cpp \
-	image_q.cpp
+	image_q.cpp \
+	image_q_proxy.cpp
 
 HEADERS += \
 	main.hpp \
@@ -64,6 +65,7 @@ HEADERS += \
 	options.hpp \
 	root_q.hpp \
 	image_q.hpp \
+	image_q_proxy.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/root.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/image.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/types.hpp \

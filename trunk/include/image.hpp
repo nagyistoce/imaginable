@@ -33,8 +33,9 @@
 #include <QtCore/QSet>
 #include <QtCore/QMap>
 #include <QtCore/QList>
-#include <QtCore/QStringList>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
+#include <QtCore/QPoint>
 #include <QtCore/QSize>
 
 
@@ -87,6 +88,9 @@ public:
 	typedef quint16 Pixel;
 	typedef QSet<QString> TextKeys;
 
+	static Pixel scaleUp  (const uchar& value) { return static_cast<Pixel>(value)*0x0101 ; }
+	static uchar scaleDown(const Pixel& value) { return static_cast<uchar>(value &0x00ff); }
+
 protected:
 	typedef boost::shared_array<Image::Pixel> Plane;
 	typedef QMap<Image::ColourPlane,Plane> ColourPlanes;
@@ -94,10 +98,10 @@ protected:
 	typedef QMap<QString,QString> Text;
 
 public:
-	Q_PROPERTY(int   width   READ width   WRITE setWidth  )
-	Q_PROPERTY(int   height  READ height  WRITE setHeight )
-	Q_PROPERTY(QSize size    READ size    WRITE setSize   )
-	Q_PROPERTY(Pixel maximum READ maximum WRITE setMaximum)
+	Q_PROPERTY(QSize  size    READ size    WRITE setSize   )
+	Q_PROPERTY(int    width   READ width   WRITE setWidth  )
+	Q_PROPERTY(int    height  READ height  WRITE setHeight )
+	Q_PROPERTY(QPoint offset  READ offset  WRITE setOffset )
 
 	Q_PROPERTY(bool   busy    READ busy    WRITE setBusy   )
 	Q_PROPERTY(double percent READ percent WRITE setPercent)
@@ -106,18 +110,19 @@ public slots:
 	virtual bool copyFrom(const Image&);
 
 
-	virtual int     width (void) const { return m_size.width();  }
+	virtual QSize   size(void) const     { return m_size; }
+	virtual void setSize(QSize value)    { setWidth(value.width()); setHeight(value.height()); }
+
+	virtual int     width (void) const   { return m_size.width();  }
 	virtual void setWidth (int);
 
-	virtual int     height(void) const { return m_size.height(); }
+	virtual int     height(void) const   { return m_size.height(); }
 	virtual void setHeight(int);
 
-	virtual QSize   size(void) const   { return m_size; }
-	virtual void setSize(QSize value)  { setWidth(value.width()); setHeight(value.height()); }
-	virtual int     area(void) const   { return width()*height(); }
+	virtual int     area(void) const     { return width()*height(); }
 
-	virtual Pixel   maximum(void) const  { return m_maximum; }
-	virtual void setMaximum(Pixel value) { m_maximum=value; }
+	virtual QPoint  offset(void) const   { return m_offset; }
+	virtual void setOffset(QPoint value) { m_offset=value; }
 
 
 	virtual void clear(void);
@@ -131,8 +136,8 @@ public slots:
 
 	virtual ColourSpace colourSpace(void) const;
 
-	virtual ColourPlaneSet planes    (void) const { return m_plane.keys().toSet(); }
-	virtual QintList       planesList(void) const { return m_plane.keys(); }
+	virtual ColourPlaneSet planes    (void)     const { return m_plane.keys().toSet(); }
+	virtual QintList       planesList(void)     const { return m_plane.keys(); }
 	virtual bool hasPlane   (ColourPlane plane) const { return m_plane.find(plane) != m_plane.end(); }
 	virtual bool hasAlpha   (void)              const { return hasPlane(Image::PLANE_ALPHA); }
 	virtual int  planesCount(void)              const { return m_plane.size(); }
@@ -171,8 +176,8 @@ public slots:
 	virtual void setPercent(double);
 
 protected:
+	QPoint m_offset;
 	QSize m_size;
-	Image::Pixel m_maximum;
 	ColourPlanes m_plane;
 	ColourPlaneNames m_planeName;
 	Text m_text;
@@ -182,6 +187,7 @@ protected:
 
 	virtual void onSetBusy(void) {}
 	virtual void onSetPercent(void) {}
+
 };
 
 #endif // IMAGINABLE__IMAGE__INCLUDED

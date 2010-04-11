@@ -27,6 +27,8 @@
 #include "dbus_image_q_main_adaptor.h"
 #include "dbus_image_q_busy_adaptor.h"
 
+#include <sys/syslog.h> // for log levels
+
 
 Image_Q::Image_Q(QObject* parent)
 	: Image(parent)
@@ -44,7 +46,7 @@ bool Image_Q::init(QString nodeName)
 
 	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceNodeName,new Image_busyAdaptor(this),QDBusConnection::ExportNonScriptableContents))
 	{
-		QTextStream(stderr)<<qPrintable(QString("Cannot register `busy` interface in D-Bus object '%1'\n").arg(m_DBusIFaceNodeName));
+		message(LOG_ALERT,"Cannot register D-Bus object interface `busy`");
 		return false;
 	}
 
@@ -57,7 +59,7 @@ bool Image_Q::set_DBus_main(void)
 {
 	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceImageNodeName,m_DBusIFaceMain,QDBusConnection::ExportNonScriptableContents))
 	{
-		QTextStream(stderr)<<qPrintable(QString("Cannot register `image` interface in D-Bus object '%1'\n").arg(m_DBusIFaceImageNodeName));
+		message(LOG_ALERT,"Cannot register D-Bus object interface");
 		return false;
 	}
 	return true;

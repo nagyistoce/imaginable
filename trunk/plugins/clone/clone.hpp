@@ -30,7 +30,7 @@
 
 #include <plugin_iface.hpp>
 
-
+/*
 class PublicThreadSleep: public QThread
 {
 public:
@@ -38,7 +38,7 @@ public:
 	static void msleep(unsigned long v) { QThread::msleep(v); }
 	static void usleep(unsigned long v) { QThread::usleep(v); }
 };
-
+*/
 class PluginClone : public QObject, PluginInterface
 {
 Q_OBJECT
@@ -55,12 +55,13 @@ signals:
 	void lock_percent(double);
 
 public slots:
-	bool clone(qulonglong from,qulonglong to);
+	uint cloneTo(qulonglong from,qulonglong to);
+	qulonglong clone(qulonglong);
 
-	void lock(qulonglong,int);
+//	void lock(qulonglong,int);
 
 private:
-	void long_lock(Image*,int);
+//	void long_lock(Image*,int);
 };
 
 #endif // IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED

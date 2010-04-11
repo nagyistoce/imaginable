@@ -43,7 +43,6 @@ bool Image::copyFrom(const Image& src)
 	if(src.busy())
 		return false;
 	m_size     =src.m_size;
-	m_maximum  =src.m_maximum;
 	m_plane    =src.m_plane;
 	m_planeName=src.m_planeName;
 	m_text     =src.m_text;
@@ -205,8 +204,8 @@ void Image::setHeight(int height)
 
 void Image::clear(void)
 {
+	m_offset=QPoint();
 	m_size=QSize();
-	m_maximum=static_cast<Image::Pixel>(-1);
 	m_plane.clear();
 	m_text.clear();
 }

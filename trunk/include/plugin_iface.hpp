@@ -48,34 +48,43 @@ public:
 protected:
 	Root* m_root;
 
-	void complain(int level,qulonglong Id,const char* function,QString message)
-	{ m_root->pluginMessage(level,name(),Id,QString("%1() failed: %2").arg(function).arg(message)); }
-#define COMPLAIN(LEVEL,ID,MESSAGE) complain(LEVEL,ID,__FUNCTION__,MESSAGE)
+	void message(int level,const char* function,QString text,qulonglong Id=0ULL) const
+	{ m_root->message(level,QString("%1() %2").arg(function).arg(text),name(),Id); }
+#define MESSAGE(LEVEL,TEXT,ID) message(LEVEL,__FUNCTION__,TEXT,ID)
+#define MESSAGE2(LEVEL,TEXT) message(LEVEL,__FUNCTION__,TEXT)
 
-	void complainNoImage(const char* function,qulonglong Id)
-	{ complain(LOG_CRIT,Id,function,"does not exist"); }
-#define COMPLAIN_NO_IMAGE(ID) complainNoImage(__FUNCTION__,ID)
+	void complain(int level,const char* function,QString text,qulonglong Id=0ULL) const
+	{ m_root->message(level,QString("%1() failed: %2").arg(function).arg(text),name(),Id); }
+#define COMPLAIN(LEVEL,TEXT,ID) complain(LEVEL,__FUNCTION__,TEXT,ID)
+#define COMPLAIN2(LEVEL,TEXT) complain(LEVEL,__FUNCTION__,TEXT)
 
-	void complainBusy(const char* function,qulonglong Id)
-	{ complain(LOG_ERR,Id,function,"is busy"); }
-#define COMPLAIN_BUSY(ID) complainBusy(__FUNCTION__,ID)
+	void complainNoImage(const char* function,QString prefix,qulonglong Id) const
+	{ complain(LOG_CRIT,function,prefix+" does not exist",Id); }
+#define COMPLAIN_NO_IMAGE(PREFIX,ID) complainNoImage(__FUNCTION__,PREFIX,ID)
 
-	Image* getOrComplain(const char* function,qulonglong Id)
+	void complainBusy(const char* function,QString prefix,qulonglong Id) const
+	{ complain(LOG_ERR,function,prefix+" is busy",Id); }
+#define COMPLAIN_BUSY(PREFIX,ID) complainBusy(__FUNCTION__,PREFIX,ID)
+
+	Image* getOrComplain(const char* function,QString prefix,qulonglong Id,uint& ret) const
 	{
 		Image* image=m_root->image(Id);
 		if(!image)
 		{
-			complainNoImage(function,Id);
+			complainNoImage(function,prefix,Id);
+			ret=Root::NO_IMAGE;
 			return NULL;
 		}
 		if(image->busy())
 		{
-			complainBusy(function,Id);
+			complainBusy(function,prefix,Id);
+			ret=Root::IMAGE_BUSY;
 			return NULL;
 		}
+		ret=Root::OK;
 		return image;
 	}
-#define GET_OR_COMPLAIN(ID) getOrComplain(__FUNCTION__,ID)
+#define GET_OR_COMPLAIN(MESSAGE,ID,RET) getOrComplain(__FUNCTION__,MESSAGE,ID,RET)
 
 
 
