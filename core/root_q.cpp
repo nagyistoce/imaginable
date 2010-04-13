@@ -28,7 +28,6 @@
 #include "main.hpp"
 #include "image_q.hpp"
 #include "plugin_iface.hpp"
-#include "image_q_proxy.hpp"
 
 #include <QtCore/QCoreApplication>
 
@@ -111,7 +110,6 @@ qulonglong Root_Q::createImage(void)
 	qulonglong Id=nextIndex();
 
 	Image_Q* newImage=new Image_Q(this);
-	new image_q_proxy(Id,this,newImage);
 	if(newImage->init(QString("/%1").arg(Id)))
 	{
 		m_images[Id]=newImage;
@@ -134,14 +132,14 @@ uint Root_Q::deleteImage(qulonglong Id)
 	{
 		if(program_options().flag("--verbose"))
 			message(LOG_ERR,"Image is not found for deletion",Id);
-		return NO_IMAGE;
+		return CODE_NO_IMAGE;
 	}
 
 	if(I.value()->busy())
 	{
 		if(program_options().flag("--verbose"))
 			message(LOG_WARNING,"Image is busy",Id);
-		return IMAGE_BUSY;
+		return CODE_IMAGE_BUSY;
 	}
 
 	delete I.value();
@@ -154,7 +152,7 @@ uint Root_Q::deleteImage(qulonglong Id)
 
 	restartAutoCloser();
 
-	return OK;
+	return CODE_OK;
 }
 
 qulonglong Root_Q::nextIndex(void)
@@ -177,6 +175,15 @@ Image* Root_Q::image(qulonglong Id)
 	if(I!=m_images.end())
 		return I.value();
 	return NULL;
+}
+
+Image* Root_Q::image(qulonglong Id,bool& busy)
+{
+	Image* ret=image(Id);
+	busy=false;
+	if(ret)
+		busy=ret->busy();
+	return ret;
 }
 
 namespace {
@@ -206,7 +213,7 @@ void Root_Q::message(int level,QString text,QString source,qulonglong Id) const
 
 uint Root_Q::loadPlugin(QString fileName)
 {
-	uint ret=OK;
+	uint ret=CODE_OK;
 	QString msg;
 
 	fileName=QFileInfo(fileName).absoluteFilePath();
@@ -215,14 +222,14 @@ uint Root_Q::loadPlugin(QString fileName)
 		if(isPluginLoaded(fileName))
 		{
 			msg=QString("Plugin[%1] cannot be loaded: already loaded").arg(fileName);
-			ret=DUPLICATE_PLUGIN;
+			ret=CODE_DUPLICATE_PLUGIN;
 			break;
 		}
 
 		if(!QFileInfo(fileName).isFile())
 		{
 			msg=QString("Plugin[%1] cannot be loaded: file does not exist").arg(fileName);
-			ret=NO_FILE;
+			ret=CODE_NO_PLUGIN_FILE;
 			break;
 		}
 	}while(false);
@@ -238,7 +245,7 @@ uint Root_Q::loadPlugin(QString fileName)
 		if(!pluginLoader->load())
 		{
 			msg=QString("Plugin[%1] cannot be loaded: load() failed: %2").arg(fileName).arg(pluginLoader->errorString());
-			ret=PLUGINLOADER_FAILURE;
+			ret=CODE_PLUGINLOADER_FAILURE;
 			break;
 		}
 
@@ -246,7 +253,7 @@ uint Root_Q::loadPlugin(QString fileName)
 		if(!instance)
 		{
 			msg=QString("Plugin[%1] cannot be loaded: instance() failed: %2").arg(fileName).arg(pluginLoader->errorString());
-			ret=PLUGINLOADER_FAILURE;
+			ret=CODE_PLUGINLOADER_FAILURE;
 			break;
 		}
 
@@ -254,14 +261,14 @@ uint Root_Q::loadPlugin(QString fileName)
 		if(!plugin)
 		{
 			msg=QString("Plugin[%1] cannot be loaded: not an Imaginable plugin").arg(fileName);
-			ret=INVALID_PLUGIN;
+			ret=CODE_INVALID_PLUGIN;
 			break;
 		}
 
 		if(!plugin->init(this))
 		{
 			msg=QString("Plugin[%1] cannot be loaded: init() failed").arg(fileName);
-			ret=PLUGINLOADER_FAILURE;
+			ret=CODE_PLUGINLOADER_FAILURE;
 			break;
 		}
 	}
@@ -348,7 +355,7 @@ uint Root_Q::unloadPlugin(QString fileName)
 	if(I==m_plugins.end())
 	{
 		message(LOG_ERR,QString("Plugin[%1] cannot be unloaded: not loaded").arg(fileName));
-		return NO_PLUGIN;
+		return CODE_NO_PLUGIN_LOADED;
 	}
 
 	bool ok=I.value()->unload();
@@ -360,5 +367,31 @@ uint Root_Q::unloadPlugin(QString fileName)
 	else
 		message(LOG_CRIT,QString("Plugin[%1] cannot be unloaded: unload() failed").arg(fileName));
 
-	return ok ? OK : PLUGINLOADER_FAILURE;
+	return ok ?
+		static_cast<uint>(CODE_OK) :
+		static_cast<uint>(CODE_PLUGINLOADER_FAILURE);
+}
+
+QString Root_Q::errorCodeToString(uint errorCode) const
+{
+	switch(errorCode)
+	{
+		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
+		CASE(OK,"OK")
+
+		CASE(NO_IMAGE  ,"No image")
+		CASE(IMAGE_BUSY,"Image is busy")
+		CASE(NO_SRC_IMAGE  ,"No source image")
+		CASE(SRC_IMAGE_BUSY,"Source image is busy")
+		CASE(NO_DST_IMAGE  ,"No destination image")
+		CASE(DST_IMAGE_BUSY,"Destination image is busy")
+
+		CASE(DUPLICATE_PLUGIN    ,"Duplicate plugin")
+		CASE(NO_PLUGIN_FILE      ,"No plugin file")
+		CASE(PLUGINLOADER_FAILURE,"PluginLoader failure")
+		CASE(INVALID_PLUGIN      ,"Invalid plugin")
+		CASE(NO_PLUGIN_LOADED    ,"No plugin loaded")
+		#undef CASE
+	}
+	return QString();
 }

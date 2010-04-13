@@ -43,7 +43,7 @@ bool PluginClone::init(Root* root)
 
 	if(!QDBusConnection::sessionBus().registerObject(name(),new CloneAdaptor(this),QDBusConnection::ExportNonScriptableContents))
 	{
-		COMPLAIN2(LOG_ALERT,"Cannot register D-Bus object interface");
+		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
 		return false;
 	}
 	return true;
@@ -55,23 +55,23 @@ uint PluginClone::cloneTo(qulonglong from,qulonglong to)
 	&& from
 	&& to )
 	{
-		COMPLAIN(LOG_WARNING,"Source and destination images must differ",from);
-		return Root::SAME_IMAGE;
+		complain(LOG_WARNING,__FUNCTION__,"Source and destination images must differ",from);
+		return CODE_IMAGES_DONT_DIFFER;
 	}
 
-	uint ret;
-	Image* src=GET_OR_COMPLAIN("source image",from,ret);
+	bool busy;
+	Image* src=getOrComplain("clone","source image",from,busy);
 	if(!src)
-		return ret;
+		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
 
-	Image* dst=GET_OR_COMPLAIN("destination image",to,ret);
+	Image* dst=getOrComplain("clone","destination image",to,busy);
 	if(!dst)
-		return ret+100;
+		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
 
 	dst->copyFrom(*src);
-	MESSAGE(LOG_INFO,QString("Cloned from image[%1]").arg(from),to);
+	message(LOG_INFO,"clone",QString("Cloned from image [%1]").arg(from),to);
 
-	return Root::OK;
+	return Root::CODE_OK;
 }
 
 qulonglong PluginClone::clone(qulonglong from)
@@ -79,7 +79,7 @@ qulonglong PluginClone::clone(qulonglong from)
 	qulonglong to=m_root->createImage();
 	if(!to)
 	{
-		COMPLAIN(LOG_CRIT,"Cannot create destination image",to);
+		complain(LOG_CRIT,"clone","Cannot create destination image",to);
 		return 0ULL;
 	}
 
@@ -112,3 +112,14 @@ void PluginClone::long_lock(Image* img,int msec)
 	disconnect(img,SLOT(setPercent(double)));
 }
 */
+
+QString PluginClone::errorCodeToString(uint errorCode) const
+{
+	switch(errorCode)
+	{
+		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
+		CASE(IMAGES_DONT_DIFFER,"Images do not differ")
+		#undef CASE
+	}
+	return m_root->errorCodeToString(errorCode);
+}

@@ -24,26 +24,24 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.qtio">
+	<interface name="name.kuzmashapran.imaginable.plugin.inb_io">
 
-		<method name="loadTo"><arg type="u" direction="out"/>
+		<method name="load"><arg type="u" direction="out"/>
 			<arg type="s" name="filename" direction="in"/>
 			<arg type="t" name="Id" direction="in"/>
 		</method>
 
-		<method name="load"><arg type="t" direction="out"/>
+		<method name="loadNew"><arg type="t" direction="out"/>
 			<arg type="s" name="filename" direction="in"/>
-		</method>
-
-		<method name="saveWithQuality"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="s" name="filename" direction="in"/>
-			<arg type="i" name="quality" direction="in"/>
 		</method>
 
 		<method name="save"><arg type="u" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
 			<arg type="s" name="filename" direction="in"/>
+		</method>
+
+		<method name="errorCodeToString"><arg type="s" direction="out"/>
+			<arg type="u" name="errorCode" direction="in"/>
 		</method>
 
 	</interface>

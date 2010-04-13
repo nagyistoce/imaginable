@@ -60,6 +60,7 @@ public slots:
 
 	qulonglong createImage(void);
 	Image*           image(qulonglong);
+	Image*           image(qulonglong,bool&);
 	bool          hasImage(qulonglong) const;
 	uint       deleteImage(qulonglong);
 
@@ -75,24 +76,37 @@ public slots:
 	QStringList         pluginsList  (void)             const;
 	uint          unloadPlugin       (QString fileName);
 
+	QString errorCodeToString(uint errorCode) const;
+
 	void quit(void);
-
-protected:
-	typedef QMap<qulonglong,Image_Q*> Images;
-	Images m_images;
-
-	qulonglong nextIndex(void);
 
 private slots:
 	void autoCloseTimeout(void);
 
 private:
+	typedef QMap<qulonglong,Image_Q*> Images;
+	Images m_images;
+
+	qulonglong nextIndex(void);
+
+
 	QTimer m_autoCloseTimer;
 
 	void restartAutoCloser(void);
 
+
 	typedef QMap<QString,QPluginLoader*> Plugins;
 	Plugins m_plugins;
+
+
+	enum
+	{
+		/**/CODE_DUPLICATE_PLUGIN     = CODE__CORE
+		,   CODE_NO_PLUGIN_FILE
+		,   CODE_PLUGINLOADER_FAILURE
+		,   CODE_INVALID_PLUGIN
+		,   CODE_NO_PLUGIN_LOADED
+	};
 };
 
 #endif // IMAGINABLE__CORE__ROOT_Q__INCLUDED

@@ -22,12 +22,11 @@
 ##
 ##############
 
-TARGET = imaginable
+TARGET = inb_io
 
-TEMPLATE = app
-CONFIG += console
+TEMPLATE = lib
+CONFIG += plugin
 QT += dbus
-QT -= gui
 
 BIN_DIR = bin
 CONFIG(debug,debug|release):BUILD_DIR = /debug
@@ -35,7 +34,7 @@ else:BUILD_DIR = /release
 
 CONFIG(debug,debug|release):DEFINES += _DEBUG
 
-PATH_TO_PROJECT_ROOT = ..
+PATH_TO_PROJECT_ROOT = ../..
 
 MAIN_DIR = $${PATH_TO_PROJECT_ROOT}/$${BIN_DIR}$${BUILD_DIR}
 DESTDIR = $${MAIN_DIR}/$${TEMPLATE}
@@ -51,38 +50,23 @@ INCLUDEPATH += \
 	$${PATH_TO_PROJECT_ROOT}/include
 
 SOURCES += \
-	main.cpp \
 	version.cpp \
-	options.cpp \
-	root_q.cpp \
-	image.cpp \
-	image_q.cpp
+	inb_io.cpp
 
 HEADERS += \
-	main.hpp \
 	version.hpp \
-	options.hpp \
-	root_q.hpp \
-	image_q.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/root.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/image.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/types.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/plugin_iface.hpp
+	inb_io.hpp
 
-QMAKE_QDBUSXML2CPP = \
-	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
+QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_root_q.xml \
-	dbus_image_q_main.xml \
-	dbus_image_q_busy.xml
+	dbus_plugin_inb_io.xml
 
 OTHER_FILES += \
 	version-minor.inl \
 	version-major.inl \
 	version-label.inl \
-	$${DBUS_ADAPTORS} \
-	$${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh
+	$${DBUS_ADAPTORS}
 
 
 autoversioning.target = version.cpp

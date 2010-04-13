@@ -22,53 +22,48 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
-#define IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
+#define IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
 
 
 #include "version.hpp"
 
 #include <plugin_iface.hpp>
 
-/*
-class PublicThreadSleep: public QThread
-{
-public:
-	static void  sleep(unsigned long v) { QThread:: sleep(v); }
-	static void msleep(unsigned long v) { QThread::msleep(v); }
-	static void usleep(unsigned long v) { QThread::usleep(v); }
-};
-*/
-class PluginClone : public QObject, PluginInterface
+class PluginINB_IO : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginClone(void);
-	~PluginClone() {}
+	PluginINB_IO(void);
+	~PluginINB_IO() {}
 
 	bool init(Root*);
-	QString name   (void) const { return "/cloneImage"; }
+	QString name   (void) const { return "/inb_io"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
 	void lock_percent(double);
 
 public slots:
-	QString errorCodeToString(uint errorCode) const;
+	QString errorCodeToString(uint) const;
 
-	uint cloneTo(qulonglong from,qulonglong to);
-	qulonglong clone(qulonglong);
-
-//	void lock(qulonglong,int);
+	uint load(QString filename,qulonglong Id);
+	qulonglong loadNew(QString);
+	uint save(qulonglong,QString);
 
 private:
-//	void long_lock(Image*,int);
 
 	enum
 	{
-		/**/CODE_IMAGES_DONT_DIFFER = Root::CODE__CUSTOM
+		/**/CODE_NO_SRC_FILE                  = Root::CODE__CUSTOM
+		,   CODE_ERROR_SRC_FILE
+		,   CODE_INVALID_SRC_FILE
+		,   CODE_ARCHIVE_ERROR
+		,   CODE_SRC_FILE_UNSUPPORTED_VERSION
+		,   CODE_DST_FILE_EXIST
+		,   CODE_INVALID_DST_FILE
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
+#endif // IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
