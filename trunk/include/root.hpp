@@ -39,30 +39,30 @@ public:
 	Root(void) {}
 	virtual ~Root() {}
 
-	virtual qulonglong createImage(void) =0;
-	virtual Image* image(qulonglong) =0;
-	virtual bool hasImage(qulonglong) const =0;
-	virtual uint deleteImage(qulonglong) =0;
+	virtual qulonglong createImage(void)                   =0;
+	virtual Image*           image(qulonglong)             =0;
+	virtual Image*           image(qulonglong,bool&)       =0;
+	virtual bool          hasImage(qulonglong)       const =0;
+	virtual uint       deleteImage(qulonglong)             =0;
 
+	virtual QString errorCodeToString(uint) const =0;
+	
 	virtual void message(int level,QString message,QString source,qulonglong Id=0ULL) const =0;
 
 	enum
 	{
-		OK=0
-		, PLUGINLOADER_FAILURE
-		, DUPLICATE_PLUGIN
-		, NO_PLUGIN
-		, INVALID_PLUGIN
+		/**/CODE_OK         =   0
 
-		, NO_FILE
-		, FILE_EXIST
-		, INVALID_FILE
+		,   CODE_NO_IMAGE
+		,   CODE_IMAGE_BUSY
+		,   CODE_NO_SRC_IMAGE
+		,   CODE_SRC_IMAGE_BUSY
+		,   CODE_NO_DST_IMAGE
+		,   CODE_DST_IMAGE_BUSY
 
-		, NO_IMAGE
-		, IMAGE_BUSY
-		, SAME_IMAGE
+		,   CODE__CORE
 
-		, INVALID_COLOURSPACE
+		,   CODE__CUSTOM    = 100
 	};
 };
 

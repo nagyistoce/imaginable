@@ -22,7 +22,7 @@
 ##
 ##############
 
-TARGET = qtio
+TARGET = qt_io
 
 TEMPLATE = lib
 CONFIG += plugin
@@ -51,16 +51,16 @@ INCLUDEPATH += \
 
 SOURCES += \
 	version.cpp \
-	qtio.cpp
+	qt_io.cpp
 
 HEADERS += \
 	version.hpp \
-	qtio.hpp
+	qt_io.hpp
 
 QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_plugin_qtio.xml
+	dbus_plugin_qt_io.xml
 
 OTHER_FILES += \
 	version-minor.inl \

@@ -23,57 +23,52 @@
 *************/
 
 
-#include "qtio.hpp"
-#include "dbus_plugin_qtio_adaptor.h"
+#include "qt_io.hpp"
+#include "dbus_plugin_qt_io_adaptor.h"
 
 #include <QtGui/QImage>
 
 
-Q_EXPORT_PLUGIN2(qtio,PluginQTIO)
+Q_EXPORT_PLUGIN2(qt_io,PluginQT_IO)
 
 
-PluginQTIO::PluginQTIO(void)
+PluginQT_IO::PluginQT_IO(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
 }
 
-bool PluginQTIO::init(Root* root)
+bool PluginQT_IO::init(Root* root)
 {
 	m_root=root;
 
-	if(!QDBusConnection::sessionBus().registerObject(name(),new QtioAdaptor(this),QDBusConnection::ExportNonScriptableContents))
+	if(!QDBusConnection::sessionBus().registerObject(name(),new Qt_ioAdaptor(this),QDBusConnection::ExportNonScriptableContents))
 	{
-		COMPLAIN2(LOG_ALERT,"Cannot register D-Bus object interface");
+		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
 		return false;
 	}
 	return true;
 }
 
-uint PluginQTIO::loadTo(QString fileName,qulonglong Id)
+uint PluginQT_IO::load(QString fileName,qulonglong Id)
 {
-	if(!QFileInfo(fileName).exists())
-	{
-		COMPLAIN2(LOG_ERR,"Non-existent source image file");
-		return Root::NO_FILE;
-	}
 	if(!QFileInfo(fileName).isFile())
 	{
-		COMPLAIN2(LOG_WARNING,"Source image is not a file");
-		return Root::NO_FILE;
+		complain(LOG_WARNING,"load",QString("Source image [\"%1\"] is not a file").arg(fileName));
+		return CODE_NO_SRC_FILE;
 	}
 
 	QImage src;
 	if(!src.load(fileName))
 	{
-		COMPLAIN2(LOG_WARNING,"Cannot load source image");
-		return Root::INVALID_FILE;
+		complain(LOG_WARNING,"load",QString("Cannot load source image [\"%1\"]").arg(fileName));
+		return CODE_INVALID_SRC_FILE;
 	}
 
-	uint ret;
-	Image* dst=GET_OR_COMPLAIN("destination image",Id,ret);
+	bool busy;
+	Image* dst=getOrComplain("load","destination image",Id,busy);
 	if(!dst)
-		return ret;
+		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
 
 
 	src=src.convertToFormat(src.hasAlphaChannel()?(QImage::Format_ARGB32):(QImage::Format_RGB32));
@@ -123,23 +118,23 @@ uint PluginQTIO::loadTo(QString fileName,qulonglong Id)
 	}
 
 
-	MESSAGE(LOG_INFO,QString("Loaded from file[%1]").arg(fileName),Id);
+	message(LOG_INFO,"load",QString("Loaded from file [%1]").arg(fileName),Id);
 
-	return Root::OK;
+	return Root::CODE_OK;
 }
 
-qulonglong PluginQTIO::load(QString fileName)
+qulonglong PluginQT_IO::loadNew(QString fileName)
 {
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
 	qulonglong Id=m_root->createImage();
 	if(!Id)
 	{
-		COMPLAIN(LOG_CRIT,"Cannot create destination image",Id);
+		complain(LOG_CRIT,"load","Cannot create destination image",Id);
 		return 0ULL;
 	}
 
-	if(loadTo(fileName,Id))
+	if(load(fileName,Id))
 	{
 		m_root->deleteImage(Id);
 		return 0ULL;
@@ -148,31 +143,31 @@ qulonglong PluginQTIO::load(QString fileName)
 	return Id;
 }
 
-uint PluginQTIO::saveWithQuality(qulonglong Id,QString fileName,int quality)
+uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 {
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
-	uint ret;
-	Image* src=GET_OR_COMPLAIN("source image",Id,ret);
+	bool busy;
+	Image* src=getOrComplain("save","source image",Id,busy);
 	if(!src)
-		return ret;
+		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
 
 	if(src->colourSpace()!=Image::SPACE_RGB)
 	{
-		COMPLAIN(LOG_WARNING,"Not supported colour space",Id);
-		return Root::INVALID_COLOURSPACE;
+		complain(LOG_WARNING,"save","Not supported colour space",Id);
+		return CODE_NOT_SUPPORTED_COLOURSPACE;
 	}
 
 	if(QFileInfo(fileName).exists())
 	{
-		COMPLAIN2(LOG_WARNING,"Destination image file already exists");
-		return Root::FILE_EXIST;
+		complain(LOG_WARNING,"save",QString("Destination image file [\"%1\"] already exists").arg(fileName));
+		return CODE_DST_FILE_EXIST;
 	}
 
 	if( (quality<-1)
 	||  (quality>100) )
 	{
-		COMPLAIN2(LOG_WARNING,QString("Invalid quality=%1").arg(quality));
+		complain(LOG_WARNING,"save",QString("Invalid quality=%1").arg(quality));
 		quality=-1;
 	}
 
@@ -216,19 +211,35 @@ uint PluginQTIO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 
 	if(!dst.save(fileName,NULL,quality))
 	{
-		COMPLAIN2(LOG_WARNING,"Cannot save destination image");
-		return Root::INVALID_FILE;
+		complain(LOG_WARNING,"save",QString("Cannot save destination image [\"%1\"]").arg(fileName));
+		return CODE_INVALID_DST_FILE;
 	}
 
 	if(quality<0)
-		MESSAGE(LOG_INFO,QString("Saved to file[%1] with default quality").arg(fileName),Id);
+		message(LOG_INFO,"save",QString("Saved to file [%1] with default quality").arg(fileName),Id);
 	else
-		MESSAGE(LOG_INFO,QString("Saved to file[%1] with quality %2").arg(fileName).arg(quality),Id);
+		message(LOG_INFO,"save",QString("Saved to file [%1] with quality %2").arg(fileName).arg(quality),Id);
 
-	return Root::OK;
+	return Root::CODE_OK;
 }
 
-uint PluginQTIO::save(qulonglong Id,QString fileName)
+uint PluginQT_IO::save(qulonglong Id,QString fileName)
 {
 	return saveWithQuality(Id,fileName,-1);
+}
+
+QString PluginQT_IO::errorCodeToString(uint errorCode) const
+{
+	switch(errorCode)
+	{
+		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
+		CASE(NO_SRC_FILE     ,"No source file")
+		CASE(INVALID_SRC_FILE,"Invalid source file")
+
+		CASE(NOT_SUPPORTED_COLOURSPACE,"Not supported colour space")
+		CASE(DST_FILE_EXIST           ,"Destination file exists")
+		CASE(INVALID_DST_FILE         ,"Invalid destination file")
+		#undef CASE
+	}
+	return m_root->errorCodeToString(errorCode);
 }
