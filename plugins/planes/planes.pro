@@ -1,7 +1,7 @@
 ##############
 ##
 ## Project:      Imaginable
-## File info:    $Id$
+## File info:    $Id: clone.pro 15 2010-04-11 06:37:48Z Kuzma.Shapran $
 ## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
@@ -22,7 +22,7 @@
 ##
 ##############
 
-TARGET = clone
+TARGET = planes
 
 TEMPLATE = lib
 CONFIG += plugin
@@ -52,16 +52,16 @@ INCLUDEPATH += \
 
 SOURCES += \
 	version.cpp \
-	clone.cpp
+	planes.cpp
 
 HEADERS += \
 	version.hpp \
-	clone.hpp
+	planes.hpp
 
 QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_plugin_clone.xml
+	dbus_plugin_planes.xml
 
 OTHER_FILES += \
 	version-minor.inl \

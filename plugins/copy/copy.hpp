@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
-#define IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#define IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
 
 
 #include "version.hpp"
@@ -39,16 +39,16 @@ public:
 	static void usleep(unsigned long v) { QThread::usleep(v); }
 };
 */
-class PluginClone : public QObject, PluginInterface
+class PluginCopy : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginClone(void);
-	~PluginClone() {}
+	PluginCopy(void);
+	~PluginCopy() {}
 
 	bool init(Root*);
-	QString name   (void) const { return "/cloneImage"; }
+	QString name   (void) const { return "/copy"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -57,8 +57,8 @@ signals:
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
-	uint cloneTo(qulonglong from,qulonglong to);
-	qulonglong clone(qulonglong);
+	uint copyTo(qulonglong from,qulonglong to);
+	qulonglong copyNew(qulonglong);
 
 //	void lock(qulonglong,int);
 
@@ -71,4 +71,4 @@ private:
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
+#endif // IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED

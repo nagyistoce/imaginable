@@ -89,7 +89,7 @@ public:
 	typedef QSet<QString> TextKeys;
 
 	static Pixel scaleUp  (const uchar& value) { return static_cast<Pixel>(value)*0x0101 ; }
-	static uchar scaleDown(const Pixel& value) { return static_cast<uchar>(value &0x00ff); }
+	static uchar scaleDown(const Pixel& value) { return static_cast<uchar>(value>>8); }
 
 protected:
 	typedef boost::shared_array<Image::Pixel> Plane;
@@ -136,24 +136,24 @@ public slots:
 
 	virtual ColourSpace colourSpace(void) const;
 
-	virtual ColourPlaneSet planes    (void)     const { return m_plane.keys().toSet(); }
-	virtual QintList       planesList(void)     const { return m_plane.keys(); }
-	virtual bool hasPlane   (ColourPlane plane) const { return m_plane.find(plane) != m_plane.end(); }
-	virtual bool hasAlpha   (void)              const { return hasPlane(Image::PLANE_ALPHA); }
-	virtual int  planesCount(void)              const { return m_plane.size(); }
+	virtual ColourPlaneSet planes    (void)      const { return m_plane.keys().toSet(); }
+	virtual QintList       planesList(void)      const { return m_plane.keys(); }
+	virtual bool        hasPlane     (int plane) const { return m_plane.find(plane) != m_plane.end(); }
+	virtual bool        hasAlpha     (void)      const { return hasPlane(Image::PLANE_ALPHA); }
+	virtual int         planesCount  (void)      const { return m_plane.size(); }
 
-	virtual bool    addPlane(ColourPlane);
-	virtual bool removePlane(ColourPlane);
-	virtual bool   movePlane(ColourPlane from,ColourPlane to);
+	virtual bool    addPlane(int);
+	virtual bool removePlane(int);
+	virtual bool   movePlane(int from,int to);
 
-	virtual bool      planeHasName(ColourPlane) const;
-	virtual QString   planeName   (ColourPlane) const;
-	virtual bool   setPlaneName   (ColourPlane,QString);
-	virtual bool erasePlaneName   (ColourPlane);
+	virtual bool      planeHasName(int) const;
+	virtual QString   planeName   (int) const;
+	virtual bool   setPlaneName   (int,QString);
+	virtual bool erasePlaneName   (int);
 
 
-	virtual const Pixel* plane(ColourPlane) const;
-	virtual       Pixel* plane(ColourPlane);
+	virtual const Pixel* plane(int) const;
+	virtual       Pixel* plane(int);
 
 
 	virtual bool     hasText        (QString key) const { return m_text.find(key)!=m_text.end(); }

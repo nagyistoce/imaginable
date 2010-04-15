@@ -216,7 +216,7 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 	}
 
 	if(quality<0)
-		message(LOG_INFO,"save",QString("Saved to file [%1] with default quality").arg(fileName),Id);
+		message(LOG_INFO,"save",QString("Saved to file [%1]")                .arg(fileName)             ,Id);
 	else
 		message(LOG_INFO,"save",QString("Saved to file [%1] with quality %2").arg(fileName).arg(quality),Id);
 

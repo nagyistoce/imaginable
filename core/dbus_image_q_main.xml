@@ -26,19 +26,54 @@
 <node name="/name/kuzmashapran/imaginable">
 	<interface name="name.kuzmashapran.imaginable.image_main">
 
-		<property name="size" type="(ii)" access="readwrite">
+		<!--property name="size" type="(ii)" access="readwrite">
 			<annotation name="com.trolltech.QtDBus.QtTypeName" value="QSize"/>
-		</property>
-		<property name="width" type="i" access="readwrite"/>
-		<property name="height" type="i" access="readwrite"/>
+		</property-->
+
+		<method name="size"><arg type="(ii)" direction="out"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QSize"/>
+		</method>
+
+		<method name="setSize">
+			<arg type="(ii)" name="value" direction="in"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QSize"/>
+		</method>
+
+		<!--property name="width" type="i" access="readwrite"/-->
+
+		<method name="width"><arg type="i" direction="out"/></method>
+
+		<method name="setWidth">
+			<arg type="i" name="value" direction="in"/>
+		</method>
+
+		<!--property name="height" type="i" access="readwrite"/-->
+
+		<method name="height"><arg type="i" direction="out"/></method>
+
+		<method name="setHeight">
+			<arg type="i" name="value" direction="in"/>
+		</method>
+
 		<method name="area"><arg type="i" direction="out"/></method>
 
-		<property name="offset" type="(ii)" access="readwrite">
-			<annotation name="com.trolltech.QtDBus.QtTypeName" value="QPoint"/>
-		</property>
 
-		<method name="isEmpty" ><arg type="b" direction="out"/></method>
-		<method name="hasData" ><arg type="b" direction="out"/></method>
+		<!--property name="offset" type="(ii)" access="readwrite">
+			<annotation name="com.trolltech.QtDBus.QtTypeName" value="QPoint"/>
+		</property-->
+
+		<method name="offset"><arg type="(ii)" direction="out"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QPoint"/>
+		</method>
+
+		<method name="setOffset">
+			<arg type="(ii)" name="value" direction="in"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="QPoint"/>
+		</method>
+
+
+		<method name="isEmpty"><arg type="b" direction="out"/></method>
+		<method name="hasData"><arg type="b" direction="out"/></method>
 
 		<method name="clear" />
 
