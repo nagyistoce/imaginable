@@ -23,25 +23,25 @@
 *************/
 
 
-#include "clone.hpp"
-#include "dbus_plugin_clone_adaptor.h"
+#include "copy.hpp"
+#include "dbus_plugin_copy_adaptor.h"
 
 
 
-Q_EXPORT_PLUGIN2(clone,PluginClone)
+Q_EXPORT_PLUGIN2(clone,PluginCopy)
 
 
-PluginClone::PluginClone(void)
+PluginCopy::PluginCopy(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
 }
 
-bool PluginClone::init(Root* root)
+bool PluginCopy::init(Root* root)
 {
 	m_root=root;
 
-	if(!QDBusConnection::sessionBus().registerObject(name(),new CloneAdaptor(this),QDBusConnection::ExportNonScriptableContents))
+	if(!QDBusConnection::sessionBus().registerObject(name(),new CopyAdaptor(this),QDBusConnection::ExportNonScriptableContents))
 	{
 		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
 		return false;
@@ -49,41 +49,39 @@ bool PluginClone::init(Root* root)
 	return true;
 }
 
-uint PluginClone::cloneTo(qulonglong from,qulonglong to)
+uint PluginCopy::copyTo(qulonglong from,qulonglong to)
 {
-	if( (from==to)
-	&& from
-	&& to )
+	if(from==to)
 	{
 		complain(LOG_WARNING,__FUNCTION__,"Source and destination images must differ",from);
 		return CODE_IMAGES_DONT_DIFFER;
 	}
 
 	bool busy;
-	Image* src=getOrComplain("clone","source image",from,busy);
+	Image* src=getOrComplain("copy","source image",from,busy);
 	if(!src)
 		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
 
-	Image* dst=getOrComplain("clone","destination image",to,busy);
+	Image* dst=getOrComplain("copy","destination image",to,busy);
 	if(!dst)
 		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
 
 	dst->copyFrom(*src);
-	message(LOG_INFO,"clone",QString("Cloned from image [%1]").arg(from),to);
+	message(LOG_INFO,"copy",QString("Copied from image [%1]").arg(from),to);
 
 	return Root::CODE_OK;
 }
 
-qulonglong PluginClone::clone(qulonglong from)
+qulonglong PluginCopy::copyNew(qulonglong from)
 {
 	qulonglong to=m_root->createImage();
 	if(!to)
 	{
-		complain(LOG_CRIT,"clone","Cannot create destination image",to);
+		complain(LOG_CRIT,"copy","Cannot create destination image",to);
 		return 0ULL;
 	}
 
-	if(cloneTo(from,to))
+	if(copyTo(from,to))
 	{
 		m_root->deleteImage(to);
 		return 0ULL;
@@ -92,16 +90,16 @@ qulonglong PluginClone::clone(qulonglong from)
 	return to;
 }
 /*
-void PluginClone::lock(qulonglong Id,int msec)
+void PluginCopy::lock(qulonglong Id,int msec)
 {
 	Image* img=GET_OR_COMPLAIN(Id);
 	if(!img)
 		return;
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginClone::long_lock,img,msec));
+	doLongProcessing(img,QtConcurrent::run(this,&PluginCopy::long_lock,img,msec));
 }
 
-void PluginClone::long_lock(Image* img,int msec)
+void PluginCopy::long_lock(Image* img,int msec)
 {
 	connect(this,SIGNAL(lock_percent(double)),img,SLOT(setPercent(double)));
 	for(unsigned percent=0;percent<100;percent+=1)
@@ -113,7 +111,7 @@ void PluginClone::long_lock(Image* img,int msec)
 }
 */
 
-QString PluginClone::errorCodeToString(uint errorCode) const
+QString PluginCopy::errorCodeToString(uint errorCode) const
 {
 	switch(errorCode)
 	{

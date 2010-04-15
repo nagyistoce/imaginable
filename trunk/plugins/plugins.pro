@@ -25,6 +25,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS = \
-	clone \
+	copy \
 	qt_io \
-	inb_io
+	inb_io \
+	planes

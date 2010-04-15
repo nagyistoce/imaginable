@@ -24,14 +24,14 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.clone">
+	<interface name="name.kuzmashapran.imaginable.plugin.copy">
 
-		<method name="cloneTo"><arg type="u" direction="out"/>
+		<method name="copyTo"><arg type="u" direction="out"/>
 			<arg type="t" name="fromId" direction="in"/>
 			<arg type="t" name="toId" direction="in"/>
 		</method>
 
-		<method name="clone"><arg type="t" direction="out"/>
+		<method name="copyNew"><arg type="t" direction="out"/>
 			<arg type="t" name="fromId" direction="in"/>
 		</method>
 

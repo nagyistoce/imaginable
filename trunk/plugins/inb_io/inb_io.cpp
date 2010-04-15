@@ -236,15 +236,14 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 	out << src->offset();
 	out << src->size();
 	{
-		quint32 textCount=src->textKeysList().size();
-		out << textCount;
+		out << static_cast<quint32>(src->textKeysList().size());
 		foreach(QString textKey,src->textKeysList())
 			out << textKey << src->text(textKey);
 	}
 	{
 		boost::scoped_array<Image::Pixel> planeData(new Image::Pixel[src->area()]);
-		quint32 planeCount=src->planesCount();
-		out << planeCount;
+
+		out << static_cast<quint32>(src->planesCount());
 		foreach(int colourPlane,src->planesList())
 		{
 			out << colourPlane << src->planeHasName(colourPlane);
