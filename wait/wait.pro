@@ -1,7 +1,7 @@
 ##############
 ##
 ## Project:      Imaginable
-## File info:    $Id$
+## File info:    $Id: core.pro 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
 ## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
@@ -22,7 +22,7 @@
 ##
 ##############
 
-TARGET = imaginable
+TARGET = wait
 
 TEMPLATE = app
 CONFIG += console
@@ -48,41 +48,34 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/include \
 	$${PATH_TO_PROJECT_ROOT}/common
 
 SOURCES += \
 	main.cpp \
 	version.cpp \
 	../common/options.cpp \
-	root_q.cpp \
-	image.cpp \
-	image_q.cpp
+	wait.cpp \
+	wait1.cpp
 
 HEADERS += \
 	main.hpp \
 	version.hpp \
 	../common/options.hpp \
-	root_q.hpp \
-	image_q.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/root.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/image.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/types.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/plugin_iface.hpp
+	wait.hpp \
+	wait1.hpp
 
 QMAKE_QDBUSXML2CPP = \
 	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
-DBUS_ADAPTORS += \
-	dbus_root_q.xml \
-	dbus_image_q_main.xml \
-	dbus_image_q_busy.xml
+DBUS_INTERFACES += \
+	../core/dbus_image_q_busy.xml \
+	../core/dbus_root_q.xml
 
 OTHER_FILES += \
 	version-minor.inl \
 	version-major.inl \
 	version-label.inl \
-	$${DBUS_ADAPTORS} \
+	$${DBUS_INTERFACES} \
 	$${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh
 
 

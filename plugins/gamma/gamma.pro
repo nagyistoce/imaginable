@@ -1,7 +1,7 @@
 ##############
 ##
 ## Project:      Imaginable
-## File info:    $Id$
+## File info:    $Id: clone.pro 15 2010-04-11 06:37:48Z Kuzma.Shapran $
 ## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
@@ -22,10 +22,10 @@
 ##
 ##############
 
-TARGET = imaginable
+TARGET = gamma
 
-TEMPLATE = app
-CONFIG += console
+TEMPLATE = lib
+CONFIG += plugin
 QT += dbus
 QT -= gui
 
@@ -35,7 +35,7 @@ else:BUILD_DIR = /release
 
 CONFIG(debug,debug|release):DEFINES += _DEBUG
 
-PATH_TO_PROJECT_ROOT = ..
+PATH_TO_PROJECT_ROOT = ../..
 
 MAIN_DIR = $${PATH_TO_PROJECT_ROOT}/$${BIN_DIR}$${BUILD_DIR}
 DESTDIR = $${MAIN_DIR}/$${TEMPLATE}
@@ -48,42 +48,26 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/include \
-	$${PATH_TO_PROJECT_ROOT}/common
+	$${PATH_TO_PROJECT_ROOT}/include
 
 SOURCES += \
-	main.cpp \
 	version.cpp \
-	../common/options.cpp \
-	root_q.cpp \
-	image.cpp \
-	image_q.cpp
+	gamma.cpp
 
 HEADERS += \
-	main.hpp \
 	version.hpp \
-	../common/options.hpp \
-	root_q.hpp \
-	image_q.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/root.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/image.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/types.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/plugin_iface.hpp
+	gamma.hpp
 
-QMAKE_QDBUSXML2CPP = \
-	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
+QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_root_q.xml \
-	dbus_image_q_main.xml \
-	dbus_image_q_busy.xml
+	dbus_plugin_gamma.xml
 
 OTHER_FILES += \
 	version-minor.inl \
 	version-major.inl \
 	version-label.inl \
-	$${DBUS_ADAPTORS} \
-	$${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh
+	$${DBUS_ADAPTORS}
 
 
 autoversioning.target = version.cpp

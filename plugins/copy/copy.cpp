@@ -89,27 +89,6 @@ qulonglong PluginCopy::copyNew(qulonglong from)
 
 	return to;
 }
-/*
-void PluginCopy::lock(qulonglong Id,int msec)
-{
-	Image* img=GET_OR_COMPLAIN(Id);
-	if(!img)
-		return;
-
-	doLongProcessing(img,QtConcurrent::run(this,&PluginCopy::long_lock,img,msec));
-}
-
-void PluginCopy::long_lock(Image* img,int msec)
-{
-	connect(this,SIGNAL(lock_percent(double)),img,SLOT(setPercent(double)));
-	for(unsigned percent=0;percent<100;percent+=1)
-	{
-		PublicThreadSleep::msleep(msec/100);
-		emit lock_percent(static_cast<double>(percent));
-	}
-	disconnect(img,SLOT(setPercent(double)));
-}
-*/
 
 QString PluginCopy::errorCodeToString(uint errorCode) const
 {

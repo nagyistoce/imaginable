@@ -25,7 +25,8 @@
 TEMPLATE = subdirs
 SUBDIRS = \
 	core \
-	plugins
+	plugins \
+	wait
 
 fullclean.depends = FORCE
 fullclean.commands += "rm -rf bin ; find . -name '*.pro.user' -exec rm '{}' \;"

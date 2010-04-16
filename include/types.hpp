@@ -34,5 +34,8 @@
 typedef QList<int> QintList;
 Q_DECLARE_METATYPE(QintList)
 
+typedef QList<qulonglong> QulonglongList;
+Q_DECLARE_METATYPE(QulonglongList)
+
 
 #endif // IMAGINABLE__TYPES__INCLUDED

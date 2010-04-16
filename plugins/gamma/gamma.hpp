@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id$
+** File info:    $Id: clone.hpp 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
-#define IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#define IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
 
 
 #include "version.hpp"
@@ -31,29 +31,35 @@
 #include <plugin_iface.hpp>
 
 
-class PluginCopy : public QObject, PluginInterface
+class PluginGamma : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginCopy(void);
-	~PluginCopy() {}
+	PluginGamma(void);
+	~PluginGamma() {}
 
 	bool init(Root*);
-	QString name   (void) const { return "/copy"; }
+	QString name   (void) const { return "/gamma"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
+
+signals:
+	void setPercent(double);
 
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
-	uint copyTo(qulonglong from,qulonglong to);
-	qulonglong copyNew(qulonglong);
+	uint gammaAll(qulonglong,double);
+	uint gamma(qulonglong,int,double);
 
 private:
+	void do_gammaAll(qulonglong,Image*,double);
+	void do_gamma(qulonglong,Image*,int,double,double,double);
+
 	enum
 	{
-		/**/CODE_IMAGES_DONT_DIFFER = Root::CODE__CUSTOM
+		/**/CODE_NO_SOURCE_PLANE = Root::CODE__CUSTOM
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#endif // IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED

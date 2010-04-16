@@ -44,7 +44,8 @@ bool Image_Q::init(QString nodeName)
 {
 	m_DBusIFaceNodeName=nodeName;
 
-	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceNodeName,new Image_busyAdaptor(this),QDBusConnection::ExportNonScriptableContents))
+	new Image_busyAdaptor(this);
+	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceNodeName,this))
 	{
 		message(LOG_ALERT,"Cannot register D-Bus object interface `busy`");
 		return false;
@@ -57,7 +58,7 @@ bool Image_Q::init(QString nodeName)
 
 bool Image_Q::set_DBus_main(void)
 {
-	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceImageNodeName,m_DBusIFaceMain,QDBusConnection::ExportNonScriptableContents))
+	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceImageNodeName,m_DBusIFaceMain,QDBusConnection::ExportAllContents))
 	{
 		message(LOG_ALERT,"Cannot register D-Bus object interface");
 		return false;

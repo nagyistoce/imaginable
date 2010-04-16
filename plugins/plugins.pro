@@ -28,4 +28,5 @@ SUBDIRS = \
 	copy \
 	qt_io \
 	inb_io \
-	planes
+	planes \
+	gamma

@@ -37,6 +37,17 @@
 #include <QtCore/QStringList>
 #include <QtCore/QPoint>
 #include <QtCore/QSize>
+//#include <QtCore/QThread>
+
+
+
+//class ThreadSleep: public QThread
+//{
+//public:
+//	static void  sleep(unsigned long v) { QThread:: sleep(v); }
+//	static void msleep(unsigned long v) { QThread::msleep(v); }
+//	static void usleep(unsigned long v) { QThread::usleep(v); }
+//};
 
 
 class QObject;
@@ -182,8 +193,8 @@ protected:
 	ColourPlaneNames m_planeName;
 	Text m_text;
 
-	bool m_busy;
-	double m_percent;
+	volatile bool m_busy;
+	volatile double m_percent;
 
 	virtual void onSetBusy(void) {}
 	virtual void onSetPercent(void) {}

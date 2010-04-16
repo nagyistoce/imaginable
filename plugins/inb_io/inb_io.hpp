@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
-#define IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__INB_IO__INB_IO__INCLUDED
+#define IMAGINABLE__PLUGINS__INB_IO__INB_IO__INCLUDED
 
 
 #include "version.hpp"
@@ -41,9 +41,6 @@ public:
 	bool init(Root*);
 	QString name   (void) const { return "/inb_io"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
-
-signals:
-	void lock_percent(double);
 
 public slots:
 	QString errorCodeToString(uint) const;
@@ -66,4 +63,4 @@ private:
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
+#endif // IMAGINABLE__PLUGINS__INB_IO__INB_IO__INCLUDED
