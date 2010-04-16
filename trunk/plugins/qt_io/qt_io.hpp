@@ -42,9 +42,6 @@ public:
 	QString name   (void) const { return "/qt_io"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
-signals:
-	void lock_percent(double);
-
 public slots:
 	QString errorCodeToString(uint) const;
 

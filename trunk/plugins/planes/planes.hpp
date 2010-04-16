@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
-#define IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__PLANES__PLANES__INCLUDED
+#define IMAGINABLE__PLUGINS__PLANES__PLANES__INCLUDED
 
 
 #include "version.hpp"
@@ -44,7 +44,7 @@ public:
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
-	void lock_percent(double);
+	void setPercent(double);
 
 public slots:
 	QString errorCodeToString(uint errorCode) const;
@@ -67,6 +67,20 @@ public slots:
 
 
 private:
+	void do_rgb2luma(qulonglong,Image*);
+
+	void do_rgb2hsv(qulonglong,Image*);
+	void do_hsv2rgb(qulonglong,Image*);
+
+	void do_rgb2hsl(qulonglong,Image*);
+	void do_hsl2rgb(qulonglong,Image*);
+
+	void do_hsv2hsl(qulonglong,Image*);
+	void do_hsl2hsv(qulonglong,Image*);
+
+	void do_uncompressHue(qulonglong,Image*);
+	void do_compressHue  (qulonglong,Image*);
+
 	enum
 	{
 		/**/CODE_PLANES_DONT_DIFFER       = Root::CODE__CUSTOM
@@ -76,4 +90,4 @@ private:
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__CLONE__CLONE__INCLUDED
+#endif // IMAGINABLE__PLUGINS__PLANES__PLANES__INCLUDED

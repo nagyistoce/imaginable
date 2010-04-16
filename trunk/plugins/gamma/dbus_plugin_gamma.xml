@@ -3,7 +3,7 @@
 <!-- *********
 **
 ** Project:      Imaginable
-** File info:    $Id$
+** File info:    $Id: dbus_plugin_clone.xml 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -24,14 +24,22 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.image_busy">
+	<interface name="name.kuzmashapran.imaginable.plugin.gamma">
 
-		<method name="busy"><arg type="b" direction="out"/></method>
-		<method name="percent"><arg type="d" direction="out"/></method>
+		<method name="gammaAll"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="d" name="value" direction="in"/>
+		</method>
 
-		<signal name="longProcessingStarted" />
-		<signal name="percentChanged"><arg type="d"/></signal>
-		<signal name="longProcessingFinished" />
+		<method name="gamma"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="i" name="plane" direction="in"/>
+			<arg type="d" name="value" direction="in"/>
+		</method>
+
+		<method name="errorCodeToString"><arg type="s" direction="out"/>
+			<arg type="u" name="errorCode" direction="in"/>
+		</method>
 
 	</interface>
 </node>

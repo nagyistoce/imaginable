@@ -28,7 +28,7 @@
 
 
 
-Q_EXPORT_PLUGIN2(clone,PluginPlanes)
+Q_EXPORT_PLUGIN2(planes,PluginPlanes)
 
 
 PluginPlanes::PluginPlanes(void)
@@ -288,6 +288,17 @@ uint PluginPlanes::rgb2luma(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: RGB -> luma",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_rgb2luma,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_rgb2luma(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -300,6 +311,8 @@ uint PluginPlanes::rgb2luma(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -313,9 +326,9 @@ uint PluginPlanes::rgb2luma(qulonglong Id)
 	img->removePlane(Image::PLANE_BLUE);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: RGB -> luma",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"rgb2luma","Colour planes converted: RGB -> luma",Id);
 }
 
 uint PluginPlanes::rgb2hsv(qulonglong Id)
@@ -337,6 +350,17 @@ uint PluginPlanes::rgb2hsv(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: RGB -> HSV",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_rgb2hsv,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_rgb2hsv(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -355,6 +379,8 @@ uint PluginPlanes::rgb2hsv(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -368,9 +394,9 @@ uint PluginPlanes::rgb2hsv(qulonglong Id)
 	img->removePlane(Image::PLANE_BLUE);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: RGB -> HSV",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"rgb2hsv","Colour planes converted: RGB -> HSV",Id);
 }
 
 uint PluginPlanes::hsv2rgb(qulonglong Id)
@@ -392,6 +418,17 @@ uint PluginPlanes::hsv2rgb(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSV -> RGB",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsv2rgb,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_hsv2rgb(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -409,6 +446,8 @@ uint PluginPlanes::hsv2rgb(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -423,9 +462,9 @@ uint PluginPlanes::hsv2rgb(qulonglong Id)
 	img->removePlane(Image::PLANE_HSV_VALUE);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: HSV -> RGB",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"hsv2rgb","Colour planes converted: HSV -> RGB",Id);
 }
 
 uint PluginPlanes::rgb2hsl(qulonglong Id)
@@ -447,6 +486,17 @@ uint PluginPlanes::rgb2hsl(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: RGB -> HSL",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_rgb2hsl,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_rgb2hsl(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -465,6 +515,8 @@ uint PluginPlanes::rgb2hsl(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -478,9 +530,9 @@ uint PluginPlanes::rgb2hsl(qulonglong Id)
 	img->removePlane(Image::PLANE_BLUE);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: RGB -> HSL",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"rgb2hsl","Colour planes converted: RGB -> HSL",Id);
 }
 
 uint PluginPlanes::hsl2rgb(qulonglong Id)
@@ -502,6 +554,17 @@ uint PluginPlanes::hsl2rgb(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSL -> RGB",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsl2rgb,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_hsl2rgb(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -519,6 +582,8 @@ uint PluginPlanes::hsl2rgb(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -533,9 +598,9 @@ uint PluginPlanes::hsl2rgb(qulonglong Id)
 	img->removePlane(Image::PLANE_LIGHTNESS);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: HSL -> RGB",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"hsl2rgb","Colour planes converted: HSL -> RGB",Id);
 }
 
 uint PluginPlanes::hsv2hsl(qulonglong Id)
@@ -555,6 +620,17 @@ uint PluginPlanes::hsv2hsl(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSV -> HSL",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsv2hsl,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_hsv2hsl(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -566,6 +642,8 @@ uint PluginPlanes::hsv2hsl(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -577,9 +655,9 @@ uint PluginPlanes::hsv2hsl(qulonglong Id)
 	img->removePlane(Image::PLANE_HSV_VALUE);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: HSV -> HSL",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"hsv2hsl","Colour planes converted: HSV -> HSL",Id);
 }
 
 uint PluginPlanes::hsl2hsv(qulonglong Id)
@@ -599,6 +677,17 @@ uint PluginPlanes::hsl2hsv(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSL -> HSV",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsl2hsv,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_hsl2hsv(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -610,6 +699,8 @@ uint PluginPlanes::hsl2hsv(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -621,9 +712,9 @@ uint PluginPlanes::hsl2hsv(qulonglong Id)
 	img->removePlane(Image::PLANE_LIGHTNESS);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: HSL -> HSV",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"hsl2hsv","Colour planes converted: HSL -> HSV",Id);
 }
 
 uint PluginPlanes::uncompressHue(qulonglong Id)
@@ -640,6 +731,17 @@ uint PluginPlanes::uncompressHue(qulonglong Id)
 		return CODE_DESTINATION_PLANE_EXISTS;
 
 
+	message(LOG_INFO,__FUNCTION__,"Uncompressing hue",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_uncompressHue,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_uncompressHue(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -650,6 +752,8 @@ uint PluginPlanes::uncompressHue(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -659,9 +763,9 @@ uint PluginPlanes::uncompressHue(qulonglong Id)
 	}
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: HSV -> HSL",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"uncompressHue","Hue uncompressed",Id);
 }
 
 uint PluginPlanes::compressHue(qulonglong Id)
@@ -676,6 +780,17 @@ uint PluginPlanes::compressHue(qulonglong Id)
 		return CODE_NO_SOURCE_PLANE;
 
 
+	message(LOG_INFO,__FUNCTION__,"Compressing hue",Id);
+
+	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_compressHue,Id,img));
+
+	return Root::CODE_OK;
+}
+
+void PluginPlanes::do_compressHue(qulonglong Id,Image* img)
+{
+	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
+
 	const int& width =img->width();
 	const int& height=img->height();
 
@@ -684,6 +799,8 @@ uint PluginPlanes::compressHue(qulonglong Id)
 
 	for(int y=0;y<height;++y)
 	{
+		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
+
 		int yo=y*width;
 		for(int x=0;x<width;++x)
 		{
@@ -695,9 +812,9 @@ uint PluginPlanes::compressHue(qulonglong Id)
 	img->removePlane(Image::PLANE_HUE_SECTOR);
 
 
-	message(LOG_INFO,__FUNCTION__,"Colour planes converted: HSL -> HSV",Id);
+	disconnect(img,SLOT(setPercent(double)));
 
-	return Root::CODE_OK;
+	message(LOG_INFO,"compressHue","Hue compressed",Id);
 }
 
 QString PluginPlanes::errorCodeToString(uint errorCode) const
@@ -707,7 +824,8 @@ QString PluginPlanes::errorCodeToString(uint errorCode) const
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
 		CASE(PLANES_DONT_DIFFER      ,"Planes do not differ")
 		CASE(NO_SOURCE_PLANE         ,"No source colour plane")
-		CASE(DESTINATION_PLANE_EXISTS,"Detination colour plane already exists")
+		CASE(DESTINATION_PLANE_EXISTS,"Destination colour plane already exists")
+		CASE(SIZES_DIFFER            ,"Sizes differ")
 		#undef CASE
 	}
 	return m_root->errorCodeToString(errorCode);

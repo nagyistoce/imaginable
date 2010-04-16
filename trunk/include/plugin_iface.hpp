@@ -31,7 +31,7 @@
 
 #include <QtCore/QtConcurrentRun>
 #include <QtCore/QFutureWatcher>
-#include <QtCore/QThread>
+//#include <QtCore/QThread>
 
 
 class PluginInterface

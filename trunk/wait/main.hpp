@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id$
+** File info:    $Id: main.hpp 14 2010-04-08 09:31:32Z Kuzma.Shapran@gmail.com $
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -22,38 +22,13 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
-#define IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#ifndef IMAGINABLE__WAIT__MAIN__INCLUDED
+#define IMAGINABLE__WAIT__MAIN__INCLUDED
 
 
-#include "version.hpp"
-
-#include <plugin_iface.hpp>
+#include "options.hpp"
 
 
-class PluginCopy : public QObject, PluginInterface
-{
-Q_OBJECT
-Q_INTERFACES(PluginInterface)
-public:
-	PluginCopy(void);
-	~PluginCopy() {}
+extern const Options& program_options(void);
 
-	bool init(Root*);
-	QString name   (void) const { return "/copy"; }
-	QString version(void) const { return QString::fromAscii(version::full_string()); }
-
-public slots:
-	QString errorCodeToString(uint errorCode) const;
-
-	uint copyTo(qulonglong from,qulonglong to);
-	qulonglong copyNew(qulonglong);
-
-private:
-	enum
-	{
-		/**/CODE_IMAGES_DONT_DIFFER = Root::CODE__CUSTOM
-	};
-};
-
-#endif // IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#endif // IMAGINABLE__WAIT__MAIN__INCLUDED

@@ -69,8 +69,7 @@ QString Root_Q::version(void) const
 
 void Root_Q::autoCloseTimeout(void)
 {
-	if(program_options().flag("--verbose"))
-		message(LOG_NOTICE,"Autoclosing now");
+	message(LOG_NOTICE,"Autoclosing now");
 	quit();
 }
 
@@ -94,7 +93,6 @@ void Root_Q::restartAutoCloser(void)
 	}
 	if( m_autoCloseTimer.interval() && m_images.isEmpty() )
 	{
-		if(program_options().flag("--verbose"))
 		{
 			unsigned m=(m_autoCloseTimer.interval()/1000/60) %60;
 			unsigned h=(m_autoCloseTimer.interval()/1000/60/60);
@@ -114,8 +112,7 @@ qulonglong Root_Q::createImage(void)
 	{
 		m_images[Id]=newImage;
 
-		if(program_options().flag("--verbose"))
-			message(LOG_NOTICE,"Image created",Id);
+		message(LOG_NOTICE,"Image created",Id);
 
 		emit imageCreated(Id);
 	}
@@ -130,23 +127,20 @@ uint Root_Q::deleteImage(qulonglong Id)
 	Images::Iterator I=m_images.find(Id);
 	if(I==m_images.end())
 	{
-		if(program_options().flag("--verbose"))
-			message(LOG_ERR,"Image is not found for deletion",Id);
+		message(LOG_ERR,"Image is not found for deletion",Id);
 		return CODE_NO_IMAGE;
 	}
 
 	if(I.value()->busy())
 	{
-		if(program_options().flag("--verbose"))
-			message(LOG_WARNING,"Image is busy",Id);
+		message(LOG_WARNING,"Image is busy",Id);
 		return CODE_IMAGE_BUSY;
 	}
 
 	delete I.value();
 	m_images.erase(I);
 
-	if(program_options().flag("--verbose"))
-		message(LOG_NOTICE,"Image deleted",Id);
+	message(LOG_NOTICE,"Image deleted",Id);
 
 	emit imageDeleted(Id);
 
@@ -186,22 +180,29 @@ Image* Root_Q::image(qulonglong Id,bool& busy)
 	return ret;
 }
 
+QulonglongList Root_Q::imagesList(void) const
+{
+	return m_images.keys();
+}
+
+
 namespace {
-	QString messageLevelToString(int level)
+
+QString messageLevelToString(int level)
+{
+	switch(level)
 	{
-		switch(level)
-		{
-			case LOG_EMERG:   return "Emergency";
-			case LOG_ALERT:   return "Alert";
-			case LOG_CRIT:    return "Critical";
-			case LOG_ERR:     return "Error";
-			case LOG_WARNING: return "Warning";
-			case LOG_NOTICE:  return "Notice";
-			case LOG_INFO:    return "Info";
-			case LOG_DEBUG:   return "Debug";
-			default: return QString("#%1").arg(level);
-		}
+		case LOG_EMERG:   return "Emergency";
+		case LOG_ALERT:   return "Alert";
+		case LOG_CRIT:    return "Critical";
+		case LOG_ERR:     return "Error";
+		case LOG_WARNING: return "Warning";
+		case LOG_NOTICE:  return "Notice";
+		case LOG_INFO:    return "Info";
+		case LOG_DEBUG:   return "Debug";
+		default: return QString("#%1").arg(level);
 	}
+}
 }
 
 void Root_Q::message(int level,QString text,QString source,qulonglong Id) const

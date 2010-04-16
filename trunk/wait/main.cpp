@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id$
+** File info:    $Id: main.cpp 15 2010-04-11 06:37:48Z Kuzma.Shapran $
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -25,8 +25,7 @@
 
 #include "version.hpp"
 #include "options.hpp"
-#include "root_q.hpp"
-#include "types.hpp"
+#include "wait.hpp"
 
 #include <cerrno>
 #include <cstdlib>
@@ -35,6 +34,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QCoreApplication>
 #include <QtCore/QTextStream>
+#include <QtCore/QFileInfo>
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMetaType>
 
@@ -73,8 +73,6 @@ void show_version(void)
 		);
 }
 
-const char dbus_service_name[]="name.kuzmashapran.imaginable";
-
 Options* s_program_options;
 
 }
@@ -88,7 +86,7 @@ int main(int argc,char* argv[])
 {
 	QCoreApplication app(argc,argv);
 	app.setOrganizationName("Kuzma Shapran");
-	app.setApplicationName("Imaginable");
+	app.setApplicationName("Wait");
 	app.setApplicationVersion(QString::fromAscii(version::full_string()));
 
 	Options options;
@@ -110,7 +108,9 @@ int main(int argc,char* argv[])
 	if(options.flag("--help"))
 	{
 		say_hello();
-		QTextStream(stderr)<<"Possible options are:\n"<<options.info();
+		QTextStream(stderr)<<"Possible options are:\n"<<options.info()
+			<<"\n"
+			<<QString("Usage:\n%1 [Id] ...\n").arg(QFileInfo(QCoreApplication::argv()[0]).fileName());
 		return EXIT_SUCCESS;
 	}
 
@@ -124,24 +124,8 @@ int main(int argc,char* argv[])
 		return EXIT_SUCCESS;
 	}
 
-	show_version();
-	QTextStream(stderr)<<"PID="<<QCoreApplication::applicationPid()<<"\n";
-
-
-	if(!QDBusConnection::sessionBus().registerService(dbus_service_name))
-	{
-		QTextStream(stderr)<<qPrintable(QString("Cannot register D-Bus service '%1': Probably already running.\n").arg(dbus_service_name));
-		return EXIT_FAILURE;
-	}
-
-	qDBusRegisterMetaType<QintList>();
-	qDBusRegisterMetaType<QulonglongList>();
-
-	Root_Q root;
-	if(!root.init())
-		return EXIT_FAILURE;
-
-	root.autoLoadPlugins(options.unnamed());
+	Wait wait;
+	Q_UNUSED(wait);
 
 	return app.exec();
 }

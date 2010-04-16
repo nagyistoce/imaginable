@@ -46,6 +46,15 @@
 			<arg type="t" name="Id"/>
 		</signal>
 
+		<method name="hasImage"><arg type="b" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+		</method>
+
+		<method name="imagesList"><arg type="at" direction="out"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QulonglongList"/>
+		</method>
+
+
 		<method name="loadPlugin"><arg type="u" direction="out"/>
 			<arg type="s" name="fileName" direction="in"/>
 		</method>

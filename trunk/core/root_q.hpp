@@ -63,6 +63,7 @@ public slots:
 	Image*           image(qulonglong,bool&);
 	bool          hasImage(qulonglong) const;
 	uint       deleteImage(qulonglong);
+	QulonglongList   imagesList(void) const;
 
 	void message(int level,QString text,QString source="core",qulonglong Id=0ULL) const;
 	void message(int level,QString text,qulonglong Id) const { message(level,text,"core",Id); }
