@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: root_q.cpp 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
+** File info:    $Id$
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -22,17 +22,40 @@
 **
 *************/
 
+#ifndef IMAGINABLE__PLUGINS__ROTATE__ROTATE__INCLUDED
+#define IMAGINABLE__PLUGINS__ROTATE__ROTATE__INCLUDED
 
-#include "wait1.hpp"
+
+#include "version.hpp"
+
+#include <plugin_iface.hpp>
 
 
-Wait1::Wait1(qulonglong Id,QObject* parent)
-	: QObject(parent)
-	, m_Id(Id)
+class PluginRotate : public QObject, PluginInterface
 {
-}
+Q_OBJECT
+Q_INTERFACES(PluginInterface)
+public:
+	PluginRotate(void);
+	~PluginRotate() {}
 
-void Wait1::finished(void)
-{
-	emit finishedId(m_Id);
-}
+	bool init(Root*);
+	QString name   (void) const { return "/rotate"; }
+	QString version(void) const { return QString::fromAscii(version::full_string()); }
+
+signals:
+	void setPercent(double);
+
+public slots:
+	QString errorCodeToString(uint errorCode) const;
+
+	qulonglong rotate(qulonglong,double);
+
+private:
+	typedef QMap<qulonglong,uint> lastErrorCodes_t;
+	lastErrorCodes_t m_lastErrorCodes;
+
+	void do_rotate(qulonglong,Image*,qulonglong,Image*,double);
+};
+
+#endif // IMAGINABLE__PLUGINS__ROTATE__ROTATE__INCLUDED

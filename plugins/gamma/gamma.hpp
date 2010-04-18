@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: clone.hpp 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
+** File info:    $Id$
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **

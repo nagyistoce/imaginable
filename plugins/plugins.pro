@@ -29,4 +29,5 @@ SUBDIRS = \
 	qt_io \
 	inb_io \
 	planes \
-	gamma
+	gamma \
+	rotate

@@ -40,12 +40,12 @@ Root_Q::Root_Q(QObject* parent)
 	: QObject(parent)
 	, Root()
 {
+	message(LOG_INFO,"Starting");
+
 	connect(&m_autoCloseTimer,SIGNAL(timeout()),this,SLOT(autoCloseTimeout()));
 
 	m_autoCloseTimer.setSingleShot(true);
 	setAutoCloseTime(1*60);
-
-//	m_plugins<<(new PluginCloneImage(this));
 }
 
 bool Root_Q::init(void)
@@ -56,9 +56,6 @@ bool Root_Q::init(void)
 		message(LOG_ALERT,"Cannot register D-Bus object interface");
 		return false;
 	}
-
-//	foreach(PluginInterface* plugin,m_plugins)
-//		plugin->init();
 	return true;
 }
 
@@ -75,6 +72,7 @@ void Root_Q::autoCloseTimeout(void)
 
 void Root_Q::quit(void)
 {
+	message(LOG_INFO,"Quitting");
 	QCoreApplication::quit();
 }
 
@@ -207,9 +205,10 @@ QString messageLevelToString(int level)
 
 void Root_Q::message(int level,QString text,QString source,qulonglong Id) const
 {
+	QDateTime now(QDateTime::currentDateTime());
 	QTextStream(stdout)<<(Id?
-		(QString("[%1] %2: Image[%3]: %4\n").arg(messageLevelToString(level)).arg(source).arg(Id).arg(text)):
-		(QString("[%1] %2: %3\n")           .arg(messageLevelToString(level)).arg(source)        .arg(text)));
+		(QString("%1 [%2] %3: Image[%4]: %5\n").arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")).arg(messageLevelToString(level),-9).arg(source).arg(Id).arg(text)):
+		(QString("%1 [%2] %3: %4\n")           .arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")).arg(messageLevelToString(level),-9).arg(source)        .arg(text)));
 }
 
 uint Root_Q::loadPlugin(QString fileName)

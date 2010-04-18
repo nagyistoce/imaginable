@@ -29,6 +29,7 @@
 #include <image.hpp>
 #include <root.hpp>
 
+#include <QtCore/QtPlugin>
 #include <QtCore/QtConcurrentRun>
 #include <QtCore/QFutureWatcher>
 //#include <QtCore/QThread>

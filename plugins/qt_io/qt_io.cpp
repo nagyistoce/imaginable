@@ -26,6 +26,7 @@
 #include "qt_io.hpp"
 #include "dbus_plugin_qt_io_adaptor.h"
 
+#include <QtCore/QFileInfo>
 #include <QtGui/QImage>
 
 
@@ -58,18 +59,28 @@ uint PluginQT_IO::load(QString fileName,qulonglong Id)
 		return CODE_NO_SRC_FILE;
 	}
 
-	QImage src;
-	if(!src.load(fileName))
-	{
-		complain(LOG_WARNING,"load",QString("Cannot load source image [\"%1\"]").arg(fileName));
-		return CODE_INVALID_SRC_FILE;
-	}
-
 	bool busy;
 	Image* dst=getOrComplain("load","destination image",Id,busy);
 	if(!dst)
 		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
 
+
+	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
+
+	doLongProcessing(dst,QtConcurrent::run(this,&PluginQT_IO::do_load,fileName,Id,dst));
+
+	return Root::CODE_OK;
+}
+
+void PluginQT_IO::do_load(QString fileName,qulonglong Id,Image* dst)
+{
+	QImage src;
+	if(!src.load(fileName))
+	{
+		complain(LOG_WARNING,"load",QString("Cannot load source image [\"%1\"]").arg(fileName));
+		m_lastErrorCodes[Id]=CODE_INVALID_SRC_FILE;
+		return;
+	}
 
 	src=src.convertToFormat(src.hasAlphaChannel()?(QImage::Format_ARGB32):(QImage::Format_RGB32));
 
@@ -120,7 +131,7 @@ uint PluginQT_IO::load(QString fileName,qulonglong Id)
 
 	message(LOG_INFO,"load",QString("Loaded from file [%1]").arg(fileName),Id);
 
-	return Root::CODE_OK;
+	m_lastErrorCodes.remove(Id);
 }
 
 qulonglong PluginQT_IO::loadNew(QString fileName)
@@ -172,6 +183,15 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 	}
 
 
+	message(LOG_INFO,"save",QString("Saving to file [%1]").arg(fileName),Id);
+
+	doLongProcessing(src,QtConcurrent::run(this,&PluginQT_IO::do_save,Id,src,fileName,quality));
+
+	return Root::CODE_OK;
+}
+
+void PluginQT_IO::do_save(qulonglong Id,Image* src,QString fileName,int quality)
+{
 	bool alpha=src->hasAlpha();
 	QImage dst(src->width(),src->height(),alpha?(QImage::Format_ARGB32):(QImage::Format_RGB32));
 
@@ -212,7 +232,8 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 	if(!dst.save(fileName,NULL,quality))
 	{
 		complain(LOG_WARNING,"save",QString("Cannot save destination image [\"%1\"]").arg(fileName));
-		return CODE_INVALID_DST_FILE;
+		m_lastErrorCodes[Id]=CODE_INVALID_DST_FILE;
+		return;
 	}
 
 	if(quality<0)
@@ -220,7 +241,7 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 	else
 		message(LOG_INFO,"save",QString("Saved to file [%1] with quality %2").arg(fileName).arg(quality),Id);
 
-	return Root::CODE_OK;
+	m_lastErrorCodes.remove(Id);
 }
 
 uint PluginQT_IO::save(qulonglong Id,QString fileName)

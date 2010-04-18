@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: root_q.hpp 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
+** File info:    $Id$
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -26,8 +26,13 @@
 #define IMAGINABLE__WAIT__WAIT__INCLUDED
 
 
-#include <QtCore/QObject>
+#include "dbus_image_q_busy_interface.h"
 
+#include <QtCore/QObject>
+#include <QtCore/QMap>
+
+
+class QTimer;
 
 class Wait : public QObject
 {
@@ -36,13 +41,18 @@ public:
 	Wait(QObject* parent=NULL);
 
 public slots:
-	void finished(qulonglong);
+	void finished(void);
+	void timeout(void);
 
 private slots:
 	void init(void);
 
 private:
 	int m_rest;
+
+	QTimer* m_timer;
+
+	QMap<qulonglong,name::kuzmashapran::imaginable::image_busy*> m_images;
 };
 
 #endif // IMAGINABLE__WAIT__WAIT__INCLUDED

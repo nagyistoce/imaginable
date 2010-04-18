@@ -1,6 +1,4 @@
-<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
-	"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-<!-- *********
+/*************
 **
 ** Project:      Imaginable
 ** File info:    $Id$
@@ -22,24 +20,42 @@
 **  You should have received a copy of the GNU General Public License
 **  along with Imaginable.  If not, see <http://www.gnu.org/licenses/>.
 **
-********** -->
-<node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.gamma">
+*************/
 
-		<method name="gammaAll"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="d" name="value" direction="in"/>
-		</method>
 
-		<method name="gamma"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="plane" direction="in"/>
-			<arg type="d" name="value" direction="in"/>
-		</method>
+#include "point.hpp"
 
-		<method name="errorCodeToString"><arg type="s" direction="out"/>
-			<arg type="u" name="errorCode" direction="in"/>
-		</method>
+#include <cmath>
 
-	</interface>
-</node>
+
+point::point(void)
+	: x(0.)
+	, y(0.)
+{
+}
+
+point::point(double X,double Y)
+	: x(X)
+	, y(Y)
+{
+}
+
+point::~point()
+{
+}
+
+point point::polar(void) const
+{
+	point ret;
+	ret.r=sqrt(x*x+y*y);
+	ret.f=atan2(y,x);
+	return ret;
+}
+
+point point::rect(void) const
+{
+	point ret;
+	ret.x=r*cos(f);
+	ret.y=r*sin(f);
+	return ret;
+}

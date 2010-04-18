@@ -47,10 +47,18 @@ public slots:
 
 	uint load(QString filename,qulonglong Id);
 	qulonglong loadNew(QString);
+
 	uint saveWithQuality(qulonglong,QString,int);
 	uint save(qulonglong,QString);
 
+	uint lastErrorCode(qulonglong);
+
 private:
+	typedef QMap<qulonglong,uint> lastErrorCodes_t;
+	lastErrorCodes_t m_lastErrorCodes;
+
+	void do_load(QString,qulonglong,Image*);
+	void do_save(qulonglong,Image*,QString,int);
 
 	enum
 	{

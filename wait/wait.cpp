@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: root_q.cpp 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
+** File info:    $Id$
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -25,19 +25,23 @@
 
 #include "wait.hpp"
 #include "main.hpp"
-#include "wait1.hpp"
 
-#include "dbus_image_q_busy_interface.h"
 #include "dbus_root_q_interface.h"
 
 #include <QtCore/QTextStream>
+#include <QtCore/QTimer>
 
 
 Wait::Wait(QObject* parent)
 	: QObject(parent)
 	, m_rest(0)
+	, m_timer(new QTimer(this))
 {
 	QTimer::singleShot(0,this,SLOT(init()));
+
+	m_timer->setSingleShot(false);
+	m_timer->setInterval(333);
+	connect(m_timer,SIGNAL(timeout()),this,SLOT(timeout()));
 }
 
 void Wait::init(void)
@@ -46,7 +50,7 @@ void Wait::init(void)
 
 	foreach(QString Id,program_options().unnamed())
 	{
-		name::kuzmashapran::imaginable::image_busy* image;
+		name::kuzmashapran::imaginable::image_busy* image=NULL;
 		bool ok;
 		qulonglong intId=Id.toULongLong(&ok);
 		if( ok
@@ -56,10 +60,9 @@ void Wait::init(void)
 		{
 			if(image->busy())
 			{
-				Wait1* wait1=new Wait1(intId,this);
-				connect(image,SIGNAL(longProcessingFinished()),wait1,SLOT(finished()));
-				connect(wait1,SIGNAL(finishedId(qulonglong)),this,SLOT(finished(qulonglong)));
+				connect(image,SIGNAL(longProcessingFinished()),this,SLOT(finished()));
 
+				m_images[intId]=image;
 				++m_rest;
 				QTextStream(stdout)<<QString("Waiting for image [%1].\n").arg(intId);
 			}
@@ -75,16 +78,40 @@ void Wait::init(void)
 		QTextStream(stdout)<<QString("Nothing to wait for.\n");
 		QCoreApplication::quit();
 	}
+	else
+	{
+		foreach(qulonglong Id,m_images.keys())
+			QTextStream(stdout)<<QString(" %1").arg(Id,6);
+		QTextStream(stdout)<<"\n";
+		QTextStream(stdout).flush();
+		m_timer->start();
+	}
 }
 
-void Wait::finished(qulonglong Id)
+void Wait::finished(void)
 {
 	--m_rest;
-	QTextStream(stdout)<<QString("Image [%1] is idle.\n").arg(Id);
+	timeout();
 
 	if(!m_rest)
 	{
-		QTextStream(stdout)<<QString("Nothing to wait for anymore.\n");
+		QTextStream(stdout)<<QString("All images are idle.\n");
 		QCoreApplication::quit();
 	}
+}
+
+void Wait::timeout(void)
+{
+	foreach(qulonglong Id,m_images.keys())
+	{
+		if(m_images[Id]->busy())
+		{
+			double v=m_images[Id]->percent();
+			QTextStream(stdout)<<QString(" %1\%").arg(v,5,'f',(v>=100.)?1:((v>=10.)?2:3));
+		}
+		else
+			QTextStream(stdout)<<" idle";
+	}
+	QTextStream(stdout)<<"\r";
+	QTextStream(stdout).flush();
 }
