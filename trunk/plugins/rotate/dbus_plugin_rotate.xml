@@ -24,17 +24,11 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.gamma">
+	<interface name="name.kuzmashapran.imaginable.plugin.rotate">
 
-		<method name="gammaAll"><arg type="u" direction="out"/>
+		<method name="rotate"><arg type="t" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
-			<arg type="d" name="value" direction="in"/>
-		</method>
-
-		<method name="gamma"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="plane" direction="in"/>
-			<arg type="d" name="value" direction="in"/>
+			<arg type="d" name="radian" direction="in"/>
 		</method>
 
 		<method name="errorCodeToString"><arg type="s" direction="out"/>

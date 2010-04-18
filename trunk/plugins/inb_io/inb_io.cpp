@@ -28,6 +28,9 @@
 
 #include <boost/scoped_array.hpp>
 
+#include <QtCore/QFile>
+#include <QtCore/QProcess>
+#include <QtCore/QBuffer>
 
 Q_EXPORT_PLUGIN2(inb_io,PluginINB_IO)
 
@@ -58,26 +61,36 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 		return CODE_NO_SRC_FILE;
 	}
 
-	QFile src(fileName);
-	if(!src.open(QIODevice::ReadOnly))
-	{
-		complain(LOG_WARNING,"load",QString("Cannot open source image [\"%1\"]").arg(fileName));
-		return CODE_ERROR_SRC_FILE;
-	}
-
 	bool busy;
 	Image* dst=getOrComplain("load","destination image",Id,busy);
 	if(!dst)
 		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
 
 
+	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
+
+	doLongProcessing(dst,QtConcurrent::run(this,&PluginINB_IO::do_load,fileName,Id,dst));
+
+	return Root::CODE_OK;
+}
+
+void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
+{
+	QFile src(fileName);
+	if(!src.open(QIODevice::ReadOnly))
+	{
+		complain(LOG_WARNING,"load",QString("Cannot open source image [\"%1\"]").arg(fileName));
+		m_lastErrorCodes[Id]=CODE_ERROR_SRC_FILE;
+		return;
+	}
+
 	QByteArray uncompressed;
 	QBuffer buffer;
 	QDataStream in;
 
 	QMap<QString,QPair<QString,QStringList> > archives;
-	archives["gz" ]=qMakePair<QString,QStringList>("gzip" ,QStringList() << "-c" << "-d");
-	archives["bz2"]=qMakePair<QString,QStringList>("bzip2",QStringList() << "-c" << "-d");
+	archives["gz" ]=qMakePair<QString,QStringList>("gzip" ,QStringList() << "--stdout" << "--decompress");
+	archives["bz2"]=qMakePair<QString,QStringList>("bzip2",QStringList() << "--stdout" << "--decompress");
 
 	QMap<QString,QPair<QString,QStringList> >::ConstIterator A=archives.constFind(QFileInfo(fileName).suffix());
 	if(A!=archives.constEnd())
@@ -87,7 +100,8 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 		if(!arch.waitForStarted())
 		{
 			complain(LOG_WARNING,"load",QString("Cannot unpack image [\"%1\"]").arg(fileName));
-			return CODE_ARCHIVE_ERROR;
+			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
+			return;
 		}
 
 		arch.write(src.readAll());
@@ -96,7 +110,8 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 		if(!arch.waitForFinished())
 		{
 			complain(LOG_WARNING,"load",QString("Cannot unpack image [\"%1\"]").arg(fileName));
-			return CODE_ARCHIVE_ERROR;
+			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
+			return;
 		}
 
 		uncompressed=arch.readAll();
@@ -115,7 +130,8 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 		if(magic != 0x494e4200)
 		{
 			complain(LOG_WARNING,"load",QString("Image file [\"%1\"] has invalid signature [%2]").arg(fileName).arg(magic,8,0x10,QChar('0')));
-			return CODE_INVALID_SRC_FILE;
+			m_lastErrorCodes[Id]=CODE_INVALID_SRC_FILE;
+			return;
 		}
 	}
 	{
@@ -124,7 +140,8 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 		if(version > 1)
 		{
 			complain(LOG_WARNING,"load",QString("Image file [\"%1\"] has unsupported version [%2]").arg(fileName).arg(version));
-			return CODE_SRC_FILE_UNSUPPORTED_VERSION;
+			m_lastErrorCodes[Id]=CODE_SRC_FILE_UNSUPPORTED_VERSION;
+			return;
 		}
 	}
 
@@ -183,7 +200,7 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 
 	message(LOG_INFO,"load",QString("Loaded from file [%1]").arg(fileName),Id);
 
-	return Root::CODE_OK;
+	m_lastErrorCodes.remove(Id);
 }
 
 qulonglong PluginINB_IO::loadNew(QString fileName)
@@ -221,6 +238,16 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 		return CODE_DST_FILE_EXIST;
 	}
 
+
+	message(LOG_INFO,"save",QString("Saving to file [%1]").arg(fileName),Id);
+
+	doLongProcessing(src,QtConcurrent::run(this,&PluginINB_IO::do_save,Id,src,fileName));
+
+	return Root::CODE_OK;
+}
+
+void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
+{
 	QByteArray uncompressed;
 	QDataStream out(&uncompressed,QIODevice::WriteOnly);
 
@@ -261,8 +288,8 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 
 
 	QMap<QString,QPair<QString,QStringList> > archives;
-	archives["gz" ]=qMakePair<QString,QStringList>("gzip" ,QStringList() << "-c");
-	archives["bz2"]=qMakePair<QString,QStringList>("bzip2",QStringList() << "-c");
+	archives["gz" ]=qMakePair<QString,QStringList>("gzip" ,QStringList() << "--stdout");
+	archives["bz2"]=qMakePair<QString,QStringList>("bzip2",QStringList() << "--stdout");
 
 	QByteArray output;
 
@@ -274,7 +301,8 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 		if(!arch.waitForStarted())
 		{
 			complain(LOG_WARNING,"save",QString("Cannot pack image [\"%1\"]").arg(fileName));
-			return CODE_ARCHIVE_ERROR;
+			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
+			return;
 		}
 
 		arch.write(uncompressed);
@@ -283,7 +311,8 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 		if(!arch.waitForFinished())
 		{
 			complain(LOG_WARNING,"save",QString("Cannot pack image [\"%1\"]").arg(fileName));
-			return CODE_ARCHIVE_ERROR;
+			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
+			return;
 		}
 
 		output=arch.readAll();
@@ -296,14 +325,23 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 	if(!dst.open(QIODevice::WriteOnly))
 	{
 		complain(LOG_WARNING,"save",QString("Cannot open destination image [\"%1\"]").arg(fileName));
-		return CODE_INVALID_DST_FILE;
+		m_lastErrorCodes[Id]=CODE_INVALID_DST_FILE;
+		return;
 	}
 	dst.write(output);
 
 
 	message(LOG_INFO,"save",QString("Saved to file [%1]").arg(fileName),Id);
 
-	return Root::CODE_OK;
+	m_lastErrorCodes.remove(Id);
+}
+
+uint PluginINB_IO::lastErrorCode(qulonglong image)
+{
+	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
+	if(I==m_lastErrorCodes.constEnd())
+		return Root::CODE_OK;
+	return I.value();
 }
 
 QString PluginINB_IO::errorCodeToString(uint errorCode) const

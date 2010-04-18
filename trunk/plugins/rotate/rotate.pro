@@ -22,10 +22,10 @@
 ##
 ##############
 
-TARGET = wait
+TARGET = rotate
 
-TEMPLATE = app
-CONFIG += console
+TEMPLATE = lib
+CONFIG += plugin
 QT += dbus
 QT -= gui
 
@@ -35,7 +35,7 @@ else:BUILD_DIR = /release
 
 CONFIG(debug,debug|release):DEFINES += _DEBUG
 
-PATH_TO_PROJECT_ROOT = ..
+PATH_TO_PROJECT_ROOT = ../..
 
 MAIN_DIR = $${PATH_TO_PROJECT_ROOT}/$${BIN_DIR}$${BUILD_DIR}
 DESTDIR = $${MAIN_DIR}/$${TEMPLATE}
@@ -48,33 +48,28 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/common
+	$${PATH_TO_PROJECT_ROOT}/include
 
 SOURCES += \
-	main.cpp \
 	version.cpp \
-	../common/options.cpp \
-	wait.cpp
+	rotate.cpp \
+	point.cpp
 
 HEADERS += \
-	main.hpp \
 	version.hpp \
-	../common/options.hpp \
-	wait.hpp
+	rotate.hpp \
+	point.hpp
 
-QMAKE_QDBUSXML2CPP = \
-	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
+QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
-DBUS_INTERFACES += \
-	../core/dbus_image_q_busy.xml \
-	../core/dbus_root_q.xml
+DBUS_ADAPTORS += \
+	dbus_plugin_rotate.xml
 
 OTHER_FILES += \
 	version-minor.inl \
 	version-major.inl \
 	version-label.inl \
-	$${DBUS_INTERFACES} \
-	$${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh
+	$${DBUS_ADAPTORS}
 
 
 autoversioning.target = version.cpp

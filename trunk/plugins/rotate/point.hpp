@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: root_q.hpp 16 2010-04-13 10:59:29Z Kuzma.Shapran@gmail.com $
+** File info:    $Id$
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -22,27 +22,57 @@
 **
 *************/
 
-#ifndef IMAGINABLE__WAIT__WAIT_ONE__INCLUDED
-#define IMAGINABLE__WAIT__WAIT_ONE__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__ROTATE__POINT__INCLUDED
+#define IMAGINABLE__PLUGINS__ROTATE__POINT__INCLUDED
 
 
-#include <QtCore/QObject>
-
-
-class Wait1 : public QObject
+class point
 {
-Q_OBJECT
 public:
-	Wait1(qulonglong,QObject* parent=NULL);
+	union {
+		double x;
+		double r;
+	};
+	union {
+		double y;
+		double f;
+	};
 
-signals:
-	void finishedId(qulonglong);
+	point(void);
+	point(double X,double Y);
+	~point();
 
-public slots:
-	void finished(void);
+	point polar(void) const;
+	point rect (void) const;
 
-private:
-	qulonglong m_Id;
+	#define OPERATOR(OP) \
+	inline point& operator OP (double value) \
+	{ \
+		x OP value; \
+		y OP value; \
+		return *this; \
+	}
+	OPERATOR(*=)
+	OPERATOR(/=)
+	#undef OPERATOR
+
+	#define OPERATOR(OP) \
+	inline point& operator OP (const point& rs) \
+	{ \
+		x OP rs.x; \
+		y OP rs.y; \
+		return *this; \
+	}
+	OPERATOR(+=)
+	OPERATOR(-=)
+	OPERATOR(*=)
+	OPERATOR(/=)
+	#undef OPERATOR
 };
 
-#endif // IMAGINABLE__WAIT__WAIT_ONE__INCLUDED
+template<typename T> static inline point make_point(T a,T b)
+{
+	return point(static_cast<double>(a),static_cast<double>(b));
+}
+
+#endif // IMAGINABLE__PLUGINS__ROTATE__POINT__INCLUDED

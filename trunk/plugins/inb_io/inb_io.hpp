@@ -30,6 +30,9 @@
 
 #include <plugin_iface.hpp>
 
+#include <QtCore/QMap>
+
+
 class PluginINB_IO : public QObject, PluginInterface
 {
 Q_OBJECT
@@ -49,7 +52,14 @@ public slots:
 	qulonglong loadNew(QString);
 	uint save(qulonglong,QString);
 
+	uint lastErrorCode(qulonglong);
+
 private:
+	typedef QMap<qulonglong,uint> lastErrorCodes_t;
+	lastErrorCodes_t m_lastErrorCodes;
+
+	void do_load(QString,qulonglong,Image*);
+	void do_save(qulonglong,Image*,QString);
 
 	enum
 	{
