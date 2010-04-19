@@ -35,44 +35,73 @@ public:
 	};
 	union {
 		double y;
-		double f;
-	};
+                double f;
+        };
 
-	point(void);
-	point(double X,double Y);
-	~point();
 
-	point polar(void) const;
-	point rect (void) const;
+        point(void)
+                : x(0.)
+                , y(0.)
+        {}
 
-	#define OPERATOR(OP) \
-	inline point& operator OP (double value) \
-	{ \
-		x OP value; \
-		y OP value; \
-		return *this; \
-	}
-	OPERATOR(*=)
-	OPERATOR(/=)
-	#undef OPERATOR
+        explicit point(double X,double Y)
+                : x(X)
+                , y(Y)
+        {}
 
-	#define OPERATOR(OP) \
-	inline point& operator OP (const point& rs) \
-	{ \
-		x OP rs.x; \
-		y OP rs.y; \
-		return *this; \
-	}
-	OPERATOR(+=)
-	OPERATOR(-=)
-	OPERATOR(*=)
-	OPERATOR(/=)
-	#undef OPERATOR
+        template<typename T1,typename T2>
+        point(T2 X,T2 Y)
+                : x(static_cast<double>(X))
+                , y(static_cast<double>(Y))
+        {}
+
+        ~point()
+        {}
+
+
+        point& to_polar(void);
+        point& to_rect (void);
+
+        point polar(void) const { return point(*this).to_polar(); }
+        point rect (void) const { return point(*this).to_rect (); }
+
+
+        #define OPERATOR(OP) \
+        point& operator OP (const point& rs) \
+        { \
+                x OP rs.x; \
+                y OP rs.y; \
+                return *this; \
+        }
+        OPERATOR(+=)
+        OPERATOR(-=)
+        OPERATOR(*=)
+        OPERATOR(/=)
+        #undef OPERATOR
+
+        #define OPERATOR(OP) \
+        point& operator OP (double value) \
+        { \
+                return ( *this OP point(value,value) ); \
+        }
+        OPERATOR(+=)
+        OPERATOR(-=)
+        OPERATOR(*=)
+        OPERATOR(/=)
+        #undef OPERATOR
+
+        #define OPERATOR(OP) \
+        point operator OP (const point& rs) \
+        { \
+                point ret(*this); \
+                ret OP ## = rs; \
+                return ret; \
+        }
+        OPERATOR(+)
+        OPERATOR(-)
+        OPERATOR(*)
+        OPERATOR(/)
+        #undef OPERATOR
 };
-
-template<typename T> static inline point make_point(T a,T b)
-{
-	return point(static_cast<double>(a),static_cast<double>(b));
-}
 
 #endif // IMAGINABLE__PLUGINS__ROTATE__POINT__INCLUDED
