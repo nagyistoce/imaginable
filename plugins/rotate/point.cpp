@@ -28,34 +28,20 @@
 #include <cmath>
 
 
-point::point(void)
-	: x(0.)
-	, y(0.)
+point& point::to_polar(void)
 {
+        double x_=x;
+        double y_=y;
+        r=sqrt(x_*x_+y_*y_);
+        f=atan2(y_,x_);
+        return *this;
 }
 
-point::point(double X,double Y)
-	: x(X)
-	, y(Y)
+point& point::to_rect(void)
 {
-}
-
-point::~point()
-{
-}
-
-point point::polar(void) const
-{
-	point ret;
-	ret.r=sqrt(x*x+y*y);
-	ret.f=atan2(y,x);
-	return ret;
-}
-
-point point::rect(void) const
-{
-	point ret;
-	ret.x=r*cos(f);
-	ret.y=r*sin(f);
-	return ret;
+        double r_=r;
+        double f_=f;
+        x=r_*cos(f_);
+        y=r_*sin(f_);
+        return *this;
 }
