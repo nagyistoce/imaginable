@@ -41,8 +41,7 @@ public:
 	PluginResize(void);
 	~PluginResize() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/resize"; }
+	QString name   (void) const { return "resize"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -89,7 +88,7 @@ private:
 
 	enum
 	{
-		/**/CODE_INCORrect_WIDTH     = Root::CODE__CUSTOM
+		/**/CODE_INCORrect_WIDTH     = Core::CODE__CUSTOM
 		,   CODE_INCORrect_HEIGHT
 		,   CODE_INCORrect_NEWCOLOUR
 		,   CODE_NO_ALPHA

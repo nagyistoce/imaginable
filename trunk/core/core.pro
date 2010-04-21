@@ -54,18 +54,18 @@ INCLUDEPATH += \
 SOURCES += \
 	main.cpp \
 	version.cpp \
-	../common/options.cpp \
-	root_q.cpp \
+	core_q.cpp \
 	image.cpp \
-	image_q.cpp
+	image_q.cpp \
+	$${PATH_TO_PROJECT_ROOT}/common/options.cpp
 
 HEADERS += \
 	main.hpp \
 	version.hpp \
-	../common/options.hpp \
-	root_q.hpp \
+	core_q.hpp \
 	image_q.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/root.hpp \
+	$${PATH_TO_PROJECT_ROOT}/common/options.hpp \
+	$${PATH_TO_PROJECT_ROOT}/include/core.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/image.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/types.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/plugin_iface.hpp
@@ -74,7 +74,7 @@ QMAKE_QDBUSXML2CPP = \
 	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_root_q.xml \
+	dbus_core_q.xml \
 	dbus_image_q_main.xml \
 	dbus_image_q_busy.xml
 

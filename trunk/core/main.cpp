@@ -25,7 +25,7 @@
 
 #include "version.hpp"
 #include "options.hpp"
-#include "root_q.hpp"
+#include "core_q.hpp"
 #include "types.hpp"
 
 #include <cerrno>
@@ -138,11 +138,11 @@ int main(int argc,char* argv[])
 	qDBusRegisterMetaType<QulonglongList>();
 	qDBusRegisterMetaType<QfullPixel>();
 
-	Root_Q root;
-	if(!root.init())
+	Core_Q core;
+	if(!core.init())
 		return EXIT_FAILURE;
 
-	root.autoLoadPlugins(options.unnamed());
+	core.autoLoadPlugins(options.unnamed());
 
 	return app.exec();
 }

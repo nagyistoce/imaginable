@@ -34,31 +34,17 @@ PluginGamma::PluginGamma(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginGamma::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new GammaAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-
-	return true;
+	new GammaAdaptor(this);
 }
 
 namespace {
-
-void gamma_Pixel(Image::Pixel& p,double value)
-{
-	if(value<0.)
-		p=static_cast<Image::Pixel>(0xffffu*( (exp(-value*(static_cast<double>(p)/65535.))-1.)/(exp(-value)-1.)           ));
-	if(value>0.)
-		p=static_cast<Image::Pixel>(0xffffu*(  log(       (static_cast<double>(p)/65535.)     *(exp( value)-1.)+1.)/value ));
-}
-
+	void gamma_Pixel(Image::Pixel& p,double value)
+	{
+		if(value<0.)
+			p=static_cast<Image::Pixel>(0xffffu*( (exp(-value*(static_cast<double>(p)/65535.))-1.)/(exp(-value)-1.)           ));
+		if(value>0.)
+			p=static_cast<Image::Pixel>(0xffffu*(  log(       (static_cast<double>(p)/65535.)     *(exp( value)-1.)+1.)/value ));
+	}
 }
 
 uint PluginGamma::gammaAll(qulonglong Id,double value)
@@ -66,14 +52,14 @@ uint PluginGamma::gammaAll(qulonglong Id,double value)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 
 	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1]").arg(value),Id);
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginGamma::do_gammaAll,this,Id,img,value)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginGamma::do_gammaAll(qulonglong Id,Image* img,double value)
@@ -98,7 +84,7 @@ uint PluginGamma::gamma(qulonglong Id,int colourPlane,double value)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if(!img->hasPlane(colourPlane))
 		return CODE_NO_SOURCE_PLANE;
@@ -109,7 +95,7 @@ uint PluginGamma::gamma(qulonglong Id,int colourPlane,double value)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginGamma::do_gamma,this,Id,img,colourPlane,value,0.,100.)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginGamma::do_gamma(qulonglong Id,Image* img,int colourPlane,double value,double fromPercent,double stepPercent)
@@ -147,5 +133,5 @@ QString PluginGamma::errorCodeToString(uint errorCode) const
 		CASE(NO_SOURCE_PLANE ,"No source colour plane")
 		#undef CASE
 	}
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }

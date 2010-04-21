@@ -32,7 +32,7 @@
 #include <QtCore/QStringList>
 
 
-class Root_Q;
+class Core_Q;
 class Image_mainAdaptor;
 
 class Image_Q : public Image
@@ -56,7 +56,7 @@ public slots:
 	static QString colourPlaneToString(int);
 
 private:
-	friend class Root_Q;
+	friend class Core_Q;
 
 	QString m_DBusIFaceNodeName;
 	QString m_DBusIFaceImageNodeName;

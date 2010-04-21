@@ -37,18 +37,7 @@ PluginQT_IO::PluginQT_IO(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginQT_IO::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new Qt_ioAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-	return true;
+	new Qt_ioAdaptor(this);
 }
 
 uint PluginQT_IO::load(QString fileName,qulonglong Id)
@@ -62,14 +51,14 @@ uint PluginQT_IO::load(QString fileName,qulonglong Id)
 	bool busy;
 	Image* dst=getOrComplain("load","destination image",Id,busy);
 	if(!dst)
-		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
+		return busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 
 
 	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
 
 	doLongProcessing(dst,QtConcurrent::run(boost::bind(&PluginQT_IO::do_load,this,fileName,Id,dst)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginQT_IO::do_load(QString fileName,qulonglong Id,Image* dst)
@@ -138,7 +127,7 @@ qulonglong PluginQT_IO::loadNew(QString fileName)
 {
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
-	qulonglong Id=m_root->createImage();
+	qulonglong Id=m_core->createImage();
 	if(!Id)
 	{
 		complain(LOG_CRIT,"load","Cannot create destination image",Id);
@@ -147,7 +136,7 @@ qulonglong PluginQT_IO::loadNew(QString fileName)
 
 	if(load(fileName,Id))
 	{
-		m_root->deleteImage(Id);
+		m_core->deleteImage(Id);
 		return 0ULL;
 	}
 
@@ -161,7 +150,7 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 	bool busy;
 	Image* src=getOrComplain("save","source image",Id,busy);
 	if(!src)
-		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
+		return busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 
 	if(src->colourSpace()!=Image::SPACE_RGB)
 	{
@@ -187,7 +176,7 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 
 	doLongProcessing(src,QtConcurrent::run(boost::bind(&PluginQT_IO::do_save,this,Id,src,fileName,quality)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginQT_IO::do_save(qulonglong Id,Image* src,QString fileName,int quality)
@@ -262,5 +251,5 @@ QString PluginQT_IO::errorCodeToString(uint errorCode) const
 		CASE(INVALID_DST_FILE         ,"Invalid destination file")
 		#undef CASE
 	}
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }

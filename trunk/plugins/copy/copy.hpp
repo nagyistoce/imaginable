@@ -39,8 +39,7 @@ public:
 	PluginCopy(void);
 	~PluginCopy() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/copy"; }
+	QString name   (void) const { return "copy"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 public slots:
@@ -52,7 +51,7 @@ public slots:
 private:
 	enum
 	{
-		/**/CODE_IMAGES_DONT_DIFFER = Root::CODE__CUSTOM
+		/**/CODE_IMAGES_DONT_DIFFER = Core::CODE__CUSTOM
 	};
 };
 

@@ -27,7 +27,7 @@
 
 
 #include <image.hpp>
-#include <root.hpp>
+#include <core.hpp>
 
 #include <QtCore/QtPlugin>
 #include <QtCore/QtConcurrentRun>
@@ -39,27 +39,29 @@
 class PluginInterface
 {
 public:
-	PluginInterface(void) {}
-	virtual ~PluginInterface() {}
+	PluginInterface(void)
+		: m_core(Core::instance())
+	{}
+	virtual ~PluginInterface()
+	{}
 
-	virtual bool init(Root*)=0;
 	virtual QString name(void) const =0;
 	virtual QString version(void) const =0;
 	virtual QString errorCodeToString(uint) const =0;
 
 
 protected:
-	Root* m_root;
+	Core* m_core;
 
 	void message(int level,const char* function,QString text,qulonglong Id=0ULL) const
-	{ m_root->message(level,QString("%1() %2").arg(function).arg(text),name(),Id); }
+	{ m_core->message(level,QString("%1() %2").arg(function).arg(text),name(),Id); }
 
 	void complain(int level,const char* function,QString text,qulonglong Id=0ULL) const
-	{ m_root->message(level,QString("%1() failed: %2").arg(function).arg(text),name(),Id); }
+	{ m_core->message(level,QString("%1() failed: %2").arg(function).arg(text),name(),Id); }
 
 	Image* getOrComplain(const char* function,QString prefix,qulonglong Id,bool& busy) const
 	{
-		Image* image=m_root->image(Id,busy);
+		Image* image=m_core->image(Id,busy);
 		if(!image)
 		{
 			if(busy)

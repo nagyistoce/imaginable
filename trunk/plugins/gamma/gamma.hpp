@@ -39,8 +39,7 @@ public:
 	PluginGamma(void);
 	~PluginGamma() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/gamma"; }
+	QString name   (void) const { return "gamma"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -58,7 +57,7 @@ private:
 
 	enum
 	{
-		/**/CODE_NO_SOURCE_PLANE = Root::CODE__CUSTOM
+		/**/CODE_NO_SOURCE_PLANE = Core::CODE__CUSTOM
 	};
 };
 

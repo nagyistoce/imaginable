@@ -24,7 +24,7 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.root">
+	<interface name="name.kuzmashapran.imaginable.core">
 
 		<property      name="autoCloseTime" type="u" access="readwrite"/>
 		<method name="restartAutoCloseTimer"/>

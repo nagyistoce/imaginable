@@ -39,8 +39,7 @@ public:
 	PluginPlanes(void);
 	~PluginPlanes() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/planes"; }
+	QString name   (void) const { return "planes"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -83,7 +82,7 @@ private:
 
 	enum
 	{
-		/**/CODE_PLANES_DONT_DIFFER       = Root::CODE__CUSTOM
+		/**/CODE_PLANES_DONT_DIFFER       = Core::CODE__CUSTOM
 		,   CODE_NO_SOURCE_PLANE
 		,   CODE_DESTINATION_PLANE_EXISTS
 		,   CODE_SIZES_DIFFER

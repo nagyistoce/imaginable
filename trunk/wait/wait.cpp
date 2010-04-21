@@ -26,7 +26,7 @@
 #include "wait.hpp"
 #include "main.hpp"
 
-#include "dbus_root_q_interface.h"
+#include "dbus_core_q_interface.h"
 
 #include <QtCore/QTextStream>
 #include <QtCore/QTimer>
@@ -46,7 +46,7 @@ Wait::Wait(QObject* parent)
 
 void Wait::init(void)
 {
-	name::kuzmashapran::imaginable::root* root=new name::kuzmashapran::imaginable::root("name.kuzmashapran.imaginable","/",QDBusConnection::sessionBus(),this);
+	name::kuzmashapran::imaginable::core* core=new name::kuzmashapran::imaginable::core("name.kuzmashapran.imaginable","/",QDBusConnection::sessionBus(),this);
 
 	foreach(QString Id,program_options().unnamed())
 	{
@@ -54,7 +54,7 @@ void Wait::init(void)
 		bool ok;
 		qulonglong intId=Id.toULongLong(&ok);
 		if( ok
-		&&  root->hasImage(intId)
+		&&  core->hasImage(intId)
 		&&  (image=new name::kuzmashapran::imaginable::image_busy("name.kuzmashapran.imaginable",QString("/%1").arg(Id),QDBusConnection::sessionBus(),this))
 		&&  image->isValid() )
 		{

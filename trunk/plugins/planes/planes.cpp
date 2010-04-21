@@ -35,195 +35,183 @@ PluginPlanes::PluginPlanes(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginPlanes::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new PlanesAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-
-	return true;
+	new PlanesAdaptor(this);
 }
 
 namespace {
 
-void rgb2luma_Pixel(
-	Image::Pixel r,
-	Image::Pixel g,
-	Image::Pixel b,
-	Image::Pixel& l )
-{
-	l=static_cast<Image::Pixel>( (
-		0x4c8b*static_cast<unsigned>(r) +
-		0x9646*static_cast<unsigned>(g) +
-		0x1d2f*static_cast<unsigned>(b) )/0x10000 );
-}
-
-void rgb2hsv_Pixel(
-	Image::Pixel r,
-	Image::Pixel g,
-	Image::Pixel b,
-	Image::Pixel& H,
-	Image::Pixel& h,
-	Image::Pixel& s,
-	Image::Pixel& v )
-{
-	H=0;
-	h=0;
-	s=0;
-	Image::Pixel rgbmin=std::min(r,std::min(g,b));
-	/**/         v     =std::max(r,std::max(g,b));
-	Image::Pixel rgbdelta=v-rgbmin;
-
-	if(v)
-		s=static_cast<Image::Pixel>(0xffffu*static_cast<unsigned>(rgbdelta)/v);
-
-	if(s)
+	void rgb2luma_Pixel(
+		Image::Pixel r,
+		Image::Pixel g,
+		Image::Pixel b,
+		Image::Pixel& l )
 	{
-		if(r==v)
+		l=static_cast<Image::Pixel>( (
+			0x4c8b*static_cast<unsigned>(r) +
+			0x9646*static_cast<unsigned>(g) +
+			0x1d2f*static_cast<unsigned>(b) )/0x10000 );
+	}
+
+	void rgb2hsv_Pixel(
+		Image::Pixel r,
+		Image::Pixel g,
+		Image::Pixel b,
+		Image::Pixel& H,
+		Image::Pixel& h,
+		Image::Pixel& s,
+		Image::Pixel& v )
+	{
+		H=0;
+		h=0;
+		s=0;
+		Image::Pixel rgbmin=std::min(r,std::min(g,b));
+		/**/         v     =std::max(r,std::max(g,b));
+		Image::Pixel rgbdelta=v-rgbmin;
+
+		if(v)
+			s=static_cast<Image::Pixel>(0xffffu*static_cast<unsigned>(rgbdelta)/v);
+
+		if(s)
 		{
-			if(g>=b)
+			if(r==v)
 			{
-				H=0;
-				h=static_cast<Image::Pixel>(0xffffu*(        static_cast<unsigned>(g)-static_cast<unsigned>(b))/rgbdelta);
+				if(g>=b)
+				{
+					H=0;
+					h=static_cast<Image::Pixel>(0xffffu*(        static_cast<unsigned>(g)-static_cast<unsigned>(b))/rgbdelta);
+				}
+				else
+				{
+					H=5;
+					h=static_cast<Image::Pixel>(0xffffu*(0xffffu+static_cast<unsigned>(g)-static_cast<unsigned>(b))/rgbdelta);
+				}
 			}
 			else
+			if(g==v)
 			{
-				H=5;
-				h=static_cast<Image::Pixel>(0xffffu*(0xffffu+static_cast<unsigned>(g)-static_cast<unsigned>(b))/rgbdelta);
-			}
-		}
-		else
-		if(g==v)
-		{
-			if(b>=r)
-			{
-				H=2;
-				h=static_cast<Image::Pixel>(0xffffu*(        static_cast<unsigned>(b)-static_cast<unsigned>(r))/rgbdelta);
-			}
-			else
-			{
-				H=1;
-				h=static_cast<Image::Pixel>(0xffffu*(0xffffu+static_cast<unsigned>(b)-static_cast<unsigned>(r))/rgbdelta);
-			}
-		}
-		else
-		if(b==v)
-		{
-			if(r>=g)
-			{
-				H=4;
-				h=static_cast<Image::Pixel>(0xffffu*(        static_cast<unsigned>(r)-static_cast<unsigned>(g))/rgbdelta);
+				if(b>=r)
+				{
+					H=2;
+					h=static_cast<Image::Pixel>(0xffffu*(        static_cast<unsigned>(b)-static_cast<unsigned>(r))/rgbdelta);
+				}
+				else
+				{
+					H=1;
+					h=static_cast<Image::Pixel>(0xffffu*(0xffffu+static_cast<unsigned>(b)-static_cast<unsigned>(r))/rgbdelta);
+				}
 			}
 			else
+			if(b==v)
 			{
-				H=3;
-				h=static_cast<Image::Pixel>(0xffffu*(0xffffu+static_cast<unsigned>(r)-static_cast<unsigned>(g))/rgbdelta);
+				if(r>=g)
+				{
+					H=4;
+					h=static_cast<Image::Pixel>(0xffffu*(        static_cast<unsigned>(r)-static_cast<unsigned>(g))/rgbdelta);
+				}
+				else
+				{
+					H=3;
+					h=static_cast<Image::Pixel>(0xffffu*(0xffffu+static_cast<unsigned>(r)-static_cast<unsigned>(g))/rgbdelta);
+				}
 			}
 		}
 	}
-}
 
-void hsv2rgb_Pixel(
-	Image::Pixel H,
-	Image::Pixel h,
-	Image::Pixel s,
-	Image::Pixel v,
-	Image::Pixel& r,
-	Image::Pixel& g,
-	Image::Pixel& b )
-{
-	if(!s)
-		r=g=b=v;
-	else
+	void hsv2rgb_Pixel(
+		Image::Pixel H,
+		Image::Pixel h,
+		Image::Pixel s,
+		Image::Pixel v,
+		Image::Pixel& r,
+		Image::Pixel& g,
+		Image::Pixel& b )
 	{
-		Image::Pixel p=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu- static_cast<unsigned>(s)                                            ))/0xffffu);
-		Image::Pixel q=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu-(static_cast<unsigned>(s)*         static_cast<unsigned>(h) )/0xffffu))/0xffffu);
-		Image::Pixel t=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu-(static_cast<unsigned>(s)*(0xffffu-static_cast<unsigned>(h)))/0xffffu))/0xffffu);
-
-		switch(H%6)
+		if(!s)
+			r=g=b=v;
+		else
 		{
-			case 0: r=v; g=t; b=p; break;
-			case 1: r=q; g=v; b=p; break;
-			case 2: r=p; g=v; b=t; break;
-			case 3: r=p; g=q; b=v; break;
-			case 4: r=t; g=p; b=v; break;
-			case 5: r=v; g=p; b=q; break;
+			Image::Pixel p=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu- static_cast<unsigned>(s)                                            ))/0xffffu);
+			Image::Pixel q=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu-(static_cast<unsigned>(s)*         static_cast<unsigned>(h) )/0xffffu))/0xffffu);
+			Image::Pixel t=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu-(static_cast<unsigned>(s)*(0xffffu-static_cast<unsigned>(h)))/0xffffu))/0xffffu);
+
+			switch(H%6)
+			{
+				case 0: r=v; g=t; b=p; break;
+				case 1: r=q; g=v; b=p; break;
+				case 2: r=p; g=v; b=t; break;
+				case 3: r=p; g=q; b=v; break;
+				case 4: r=t; g=p; b=v; break;
+				case 5: r=v; g=p; b=q; break;
+			}
 		}
 	}
-}
 
-void hsv2hsl_Pixel(
-	Image::Pixel& s,
-	Image::Pixel  v,
-	Image::Pixel& l )
-{
-	l=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu-static_cast<unsigned>(s)/2))/0xffffu);
-	if( (l>=0x8000u) && (l< 0xffffu) )
-		s=static_cast<Image::Pixel>(((static_cast<unsigned>(s)*0xffffu)/(2*(0xffffu-static_cast<unsigned>(l)))));
-}
+	void hsv2hsl_Pixel(
+		Image::Pixel& s,
+		Image::Pixel  v,
+		Image::Pixel& l )
+	{
+		l=static_cast<Image::Pixel>((static_cast<unsigned>(v)*(0xffffu-static_cast<unsigned>(s)/2))/0xffffu);
+		if( (l>=0x8000u) && (l< 0xffffu) )
+			s=static_cast<Image::Pixel>(((static_cast<unsigned>(s)*0xffffu)/(2*(0xffffu-static_cast<unsigned>(l)))));
+	}
 
-void hsl2hsv_Pixel(
-	Image::Pixel& s,
-	Image::Pixel l,
-	Image::Pixel& v )
-{
-	if(l>=0x8000u)
-		s=static_cast<Image::Pixel>((static_cast<unsigned>(s)*2*(0xffffu-static_cast<unsigned>(l)))/0xffffu);
-	v=static_cast<Image::Pixel>(static_cast<unsigned>(l)*0xffffu/(0xffffu-static_cast<unsigned>(s)/2));
-}
+	void hsl2hsv_Pixel(
+		Image::Pixel& s,
+		Image::Pixel l,
+		Image::Pixel& v )
+	{
+		if(l>=0x8000u)
+			s=static_cast<Image::Pixel>((static_cast<unsigned>(s)*2*(0xffffu-static_cast<unsigned>(l)))/0xffffu);
+		v=static_cast<Image::Pixel>(static_cast<unsigned>(l)*0xffffu/(0xffffu-static_cast<unsigned>(s)/2));
+	}
 
-///TODO: Make direct conversion
-void rgb2hsl_Pixel(
-	Image::Pixel r,
-	Image::Pixel g,
-	Image::Pixel b,
-	Image::Pixel& H,
-	Image::Pixel& h,
-	Image::Pixel& s,
-	Image::Pixel& l )
-{
-	Image::Pixel v;
-	rgb2hsv_Pixel(r,g,b,H,h,s,v);
-	hsv2hsl_Pixel(s,v,l);
+	///TODO: Make direct conversion
+	void rgb2hsl_Pixel(
+		Image::Pixel r,
+		Image::Pixel g,
+		Image::Pixel b,
+		Image::Pixel& H,
+		Image::Pixel& h,
+		Image::Pixel& s,
+		Image::Pixel& l )
+	{
+		Image::Pixel v;
+		rgb2hsv_Pixel(r,g,b,H,h,s,v);
+		hsv2hsl_Pixel(s,v,l);
 
-}
+	}
 
-///TODO: Make direct conversion
-void hsl2rgb_Pixel(
-	Image::Pixel H,
-	Image::Pixel h,
-	Image::Pixel s,
-	Image::Pixel l,
-	Image::Pixel& r,
-	Image::Pixel& g,
-	Image::Pixel& b )
-{
-	Image::Pixel v;
-	hsl2hsv_Pixel(s,l,v);
-	hsv2rgb_Pixel(H,h,s,v,r,g,b);
-}
+	///TODO: Make direct conversion
+	void hsl2rgb_Pixel(
+		Image::Pixel H,
+		Image::Pixel h,
+		Image::Pixel s,
+		Image::Pixel l,
+		Image::Pixel& r,
+		Image::Pixel& g,
+		Image::Pixel& b )
+	{
+		Image::Pixel v;
+		hsl2hsv_Pixel(s,l,v);
+		hsv2rgb_Pixel(H,h,s,v,r,g,b);
+	}
 
-void uncompressHue_Pixel(
-	Image::Pixel& H,
-	Image::Pixel& h )
-{
-	unsigned h6=static_cast<unsigned>(h)*6;
-	H=static_cast<Image::Pixel>(h6/0x10000u);
-	h=static_cast<Image::Pixel>(h6%0x10000u);
-}
+	void uncompressHue_Pixel(
+		Image::Pixel& H,
+		Image::Pixel& h )
+	{
+		unsigned h6=static_cast<unsigned>(h)*6;
+		H=static_cast<Image::Pixel>(h6/0x10000u);
+		h=static_cast<Image::Pixel>(h6%0x10000u);
+	}
 
-void compressHue_Pixel(
-	Image::Pixel H,
-	Image::Pixel& h )
-{
-	h=static_cast<Image::Pixel>(((static_cast<unsigned>(H)%6)*0x10000u+static_cast<unsigned>(h))/6);
-}
+	void compressHue_Pixel(
+		Image::Pixel H,
+		Image::Pixel& h )
+	{
+		h=static_cast<Image::Pixel>(((static_cast<unsigned>(H)%6)*0x10000u+static_cast<unsigned>(h))/6);
+	}
 
 }
 
@@ -239,7 +227,7 @@ uint PluginPlanes::copy(qulonglong fromId,qulonglong toId,int fromPlane,int toPl
 	bool busy;
 	Image* src=getOrComplain(__FUNCTION__,"source image",fromId,busy);
 	if(!src)
-		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
+		return busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 
 	Image* dst;
 	if(fromId==toId)
@@ -248,7 +236,7 @@ uint PluginPlanes::copy(qulonglong fromId,qulonglong toId,int fromPlane,int toPl
 	{
 		dst=getOrComplain(__FUNCTION__,"destination image",toId,busy);
 		if(!dst)
-			return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
+			return busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 	}
 
 	if( (fromId!=toId)
@@ -269,7 +257,7 @@ uint PluginPlanes::copy(qulonglong fromId,qulonglong toId,int fromPlane,int toPl
 	message(LOG_INFO,__FUNCTION__,QString("Plane [%1] from image [%2] copied to plane [%3]").arg(fromPlane).arg(fromId).arg(toPlane),toId);
 
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 uint PluginPlanes::rgb2luma(qulonglong Id)
@@ -277,7 +265,7 @@ uint PluginPlanes::rgb2luma(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_RED))
 	||  (!img->hasPlane(Image::PLANE_GREEN))
@@ -292,7 +280,7 @@ uint PluginPlanes::rgb2luma(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_rgb2luma,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_rgb2luma(qulonglong Id,Image* img)
@@ -336,7 +324,7 @@ uint PluginPlanes::rgb2hsv(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_RED))
 	||  (!img->hasPlane(Image::PLANE_GREEN))
@@ -354,7 +342,7 @@ uint PluginPlanes::rgb2hsv(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_rgb2hsv,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_rgb2hsv(qulonglong Id,Image* img)
@@ -404,7 +392,7 @@ uint PluginPlanes::hsv2rgb(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_HUE_SECTOR))
 	||  (!img->hasPlane(Image::PLANE_HUE))
@@ -422,7 +410,7 @@ uint PluginPlanes::hsv2rgb(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsv2rgb,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_hsv2rgb(qulonglong Id,Image* img)
@@ -472,7 +460,7 @@ uint PluginPlanes::rgb2hsl(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_RED))
 	||  (!img->hasPlane(Image::PLANE_GREEN))
@@ -490,7 +478,7 @@ uint PluginPlanes::rgb2hsl(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_rgb2hsl,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_rgb2hsl(qulonglong Id,Image* img)
@@ -540,7 +528,7 @@ uint PluginPlanes::hsl2rgb(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_HUE_SECTOR))
 	||  (!img->hasPlane(Image::PLANE_HUE))
@@ -558,7 +546,7 @@ uint PluginPlanes::hsl2rgb(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsl2rgb,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_hsl2rgb(qulonglong Id,Image* img)
@@ -608,7 +596,7 @@ uint PluginPlanes::hsv2hsl(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_HUE_SECTOR))
 	||  (!img->hasPlane(Image::PLANE_HUE))
@@ -624,7 +612,7 @@ uint PluginPlanes::hsv2hsl(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsv2hsl,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_hsv2hsl(qulonglong Id,Image* img)
@@ -665,7 +653,7 @@ uint PluginPlanes::hsl2hsv(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_HUE_SECTOR))
 	||  (!img->hasPlane(Image::PLANE_HUE))
@@ -681,7 +669,7 @@ uint PluginPlanes::hsl2hsv(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsl2hsv,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_hsl2hsv(qulonglong Id,Image* img)
@@ -722,7 +710,7 @@ uint PluginPlanes::uncompressHue(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if(!img->hasPlane(Image::PLANE_HUE))
 		return CODE_NO_SOURCE_PLANE;
@@ -735,7 +723,7 @@ uint PluginPlanes::uncompressHue(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_uncompressHue,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_uncompressHue(qulonglong Id,Image* img)
@@ -773,7 +761,7 @@ uint PluginPlanes::compressHue(qulonglong Id)
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
-		return busy?(Root::CODE_IMAGE_BUSY):(Root::CODE_NO_IMAGE);
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if( (!img->hasPlane(Image::PLANE_HUE_SECTOR))
 	||  (!img->hasPlane(Image::PLANE_HUE)) )
@@ -784,7 +772,7 @@ uint PluginPlanes::compressHue(qulonglong Id)
 
 	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_compressHue,this,Id,img)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginPlanes::do_compressHue(qulonglong Id,Image* img)
@@ -828,5 +816,5 @@ QString PluginPlanes::errorCodeToString(uint errorCode) const
 		CASE(SIZES_DIFFER            ,"Sizes differ")
 		#undef CASE
 	}
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }

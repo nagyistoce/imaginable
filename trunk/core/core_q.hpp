@@ -22,11 +22,11 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__ROOT_Q__INCLUDED
-#define IMAGINABLE__CORE__ROOT_Q__INCLUDED
+#ifndef IMAGINABLE__CORE__CORE_Q__INCLUDED
+#define IMAGINABLE__CORE__CORE_Q__INCLUDED
 
 
-#include "root.hpp"
+#include "core.hpp"
 #include "image_q.hpp"
 
 #include <QtCore/QObject>
@@ -37,11 +37,11 @@
 
 class Image;
 
-class Root_Q : public QObject, public Root
+class Core_Q : public QObject, public Core
 {
 Q_OBJECT
 public:
-	Root_Q(QObject* parent=NULL);
+	Core_Q(QObject* parent=NULL);
 
 	bool init(void);
 
@@ -106,8 +106,10 @@ private:
 		,   CODE_NO_PLUGIN_FILE
 		,   CODE_PLUGINLOADER_FAILURE
 		,   CODE_INVALID_PLUGIN
+		,   CODE_INVALID_PLUGIN_NAME
+		,   CODE_PLUGIN_DBUS_REGISTRATION
 		,   CODE_NO_PLUGIN_LOADED
 	};
 };
 
-#endif // IMAGINABLE__CORE__ROOT_Q__INCLUDED
+#endif // IMAGINABLE__CORE__CORE_Q__INCLUDED
