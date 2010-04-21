@@ -67,7 +67,7 @@ uint PluginQT_IO::load(QString fileName,qulonglong Id)
 
 	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
 
-	doLongProcessing(dst,QtConcurrent::run(this,&PluginQT_IO::do_load,fileName,Id,dst));
+	doLongProcessing(dst,QtConcurrent::run(boost::bind(&PluginQT_IO::do_load,this,fileName,Id,dst)));
 
 	return Root::CODE_OK;
 }
@@ -185,7 +185,7 @@ uint PluginQT_IO::saveWithQuality(qulonglong Id,QString fileName,int quality)
 
 	message(LOG_INFO,"save",QString("Saving to file [%1]").arg(fileName),Id);
 
-	doLongProcessing(src,QtConcurrent::run(this,&PluginQT_IO::do_save,Id,src,fileName,quality));
+	doLongProcessing(src,QtConcurrent::run(boost::bind(&PluginQT_IO::do_save,this,Id,src,fileName,quality)));
 
 	return Root::CODE_OK;
 }

@@ -174,7 +174,11 @@ Image* Root_Q::image(qulonglong Id,bool& busy)
 	Image* ret=image(Id);
 	busy=false;
 	if(ret)
+	{
 		busy=ret->busy();
+		if(busy)
+			ret=NULL;
+	}
 	return ret;
 }
 

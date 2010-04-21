@@ -290,7 +290,7 @@ uint PluginPlanes::rgb2luma(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: RGB -> luma",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_rgb2luma,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_rgb2luma,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -352,7 +352,7 @@ uint PluginPlanes::rgb2hsv(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: RGB -> HSV",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_rgb2hsv,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_rgb2hsv,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -420,7 +420,7 @@ uint PluginPlanes::hsv2rgb(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSV -> RGB",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsv2rgb,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsv2rgb,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -488,7 +488,7 @@ uint PluginPlanes::rgb2hsl(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: RGB -> HSL",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_rgb2hsl,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_rgb2hsl,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -556,7 +556,7 @@ uint PluginPlanes::hsl2rgb(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSL -> RGB",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsl2rgb,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsl2rgb,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -622,7 +622,7 @@ uint PluginPlanes::hsv2hsl(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSV -> HSL",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsv2hsl,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsv2hsl,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -679,7 +679,7 @@ uint PluginPlanes::hsl2hsv(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Converting colour planes: HSL -> HSV",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_hsl2hsv,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_hsl2hsv,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -733,7 +733,7 @@ uint PluginPlanes::uncompressHue(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Uncompressing hue",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_uncompressHue,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_uncompressHue,this,Id,img)));
 
 	return Root::CODE_OK;
 }
@@ -782,7 +782,7 @@ uint PluginPlanes::compressHue(qulonglong Id)
 
 	message(LOG_INFO,__FUNCTION__,"Compressing hue",Id);
 
-	doLongProcessing(img,QtConcurrent::run(this,&PluginPlanes::do_compressHue,Id,img));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginPlanes::do_compressHue,this,Id,img)));
 
 	return Root::CODE_OK;
 }

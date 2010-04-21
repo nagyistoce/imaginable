@@ -69,7 +69,7 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 
 	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
 
-	doLongProcessing(dst,QtConcurrent::run(this,&PluginINB_IO::do_load,fileName,Id,dst));
+	doLongProcessing(dst,QtConcurrent::run(boost::bind(&PluginINB_IO::do_load,this,fileName,Id,dst)));
 
 	return Root::CODE_OK;
 }
@@ -241,7 +241,7 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 
 	message(LOG_INFO,"save",QString("Saving to file [%1]").arg(fileName),Id);
 
-	doLongProcessing(src,QtConcurrent::run(this,&PluginINB_IO::do_save,Id,src,fileName));
+	doLongProcessing(src,QtConcurrent::run(boost::bind(&PluginINB_IO::do_save,this,Id,src,fileName)));
 
 	return Root::CODE_OK;
 }

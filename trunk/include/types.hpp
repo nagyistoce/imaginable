@@ -29,6 +29,7 @@
 #include <QtDBus/QDBusArgument>
 #include <QtCore/QMetaType>
 #include <QtCore/QList>
+#include <QtCore/QHash>
 
 
 typedef QList<int> QintList;
@@ -36,6 +37,9 @@ Q_DECLARE_METATYPE(QintList)
 
 typedef QList<qulonglong> QulonglongList;
 Q_DECLARE_METATYPE(QulonglongList)
+
+typedef QHash<int,quint16> QfullPixel;
+Q_DECLARE_METATYPE(QfullPixel)
 
 
 #endif // IMAGINABLE__TYPES__INCLUDED

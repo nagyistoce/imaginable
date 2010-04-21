@@ -32,7 +32,8 @@
 #include <QtCore/QtPlugin>
 #include <QtCore/QtConcurrentRun>
 #include <QtCore/QFutureWatcher>
-//#include <QtCore/QThread>
+
+#include <boost/bind.hpp>
 
 
 class PluginInterface

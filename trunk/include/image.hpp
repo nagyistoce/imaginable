@@ -26,12 +26,12 @@
 #define IMAGINABLE__IMAGE__INCLUDED
 
 
-#include "types.hpp"
+#include <types.hpp>
 
 #include <boost/shared_array.hpp>
 
 #include <QtCore/QSet>
-#include <QtCore/QMap>
+#include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -104,15 +104,18 @@ public:
 
 protected:
 	typedef boost::shared_array<Image::Pixel> Plane;
-	typedef QMap<Image::ColourPlane,Plane> ColourPlanes;
-	typedef QMap<Image::ColourPlane,QString> ColourPlaneNames;
-	typedef QMap<QString,QString> Text;
+	typedef QHash<Image::ColourPlane,Plane> ColourPlanes;
+	typedef QHash<Image::ColourPlane,QString> ColourPlaneNames;
+	typedef QHash<QString,QString> Text;
 
 public:
 	Q_PROPERTY(QSize  size    READ size    WRITE setSize   )
 	Q_PROPERTY(int    width   READ width   WRITE setWidth  )
 	Q_PROPERTY(int    height  READ height  WRITE setHeight )
+
 	Q_PROPERTY(QPoint offset  READ offset  WRITE setOffset )
+	Q_PROPERTY(int    x       READ x       WRITE setX      )
+	Q_PROPERTY(int    y       READ y       WRITE setY      )
 
 	Q_PROPERTY(bool   busy    READ busy    WRITE setBusy   )
 	Q_PROPERTY(double percent READ percent WRITE setPercent)
@@ -124,16 +127,23 @@ public slots:
 	virtual QSize   size(void) const     { return m_size; }
 	virtual void setSize(QSize value)    { setWidth(value.width()); setHeight(value.height()); }
 
-	virtual int     width (void) const   { return m_size.width();  }
+	virtual int     width (void) const   { return m_size.width();   }
 	virtual void setWidth (int);
 
-	virtual int     height(void) const   { return m_size.height(); }
+	virtual int     height(void) const   { return m_size.height();  }
 	virtual void setHeight(int);
 
 	virtual int     area(void) const     { return width()*height(); }
 
+
 	virtual QPoint  offset(void) const   { return m_offset; }
 	virtual void setOffset(QPoint value) { m_offset=value; }
+
+	virtual int     x     (void) const   { return m_offset.x();  }
+	virtual void setX     (int value)    { m_offset.setX(value); }
+
+	virtual int     y     (void) const   { return m_offset.y();  }
+	virtual void setY     (int value)    { m_offset.setY(value); }
 
 
 	virtual void clear(void);

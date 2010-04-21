@@ -35,73 +35,88 @@ public:
 	};
 	union {
 		double y;
-                double f;
-        };
+		double f;
+	};
 
 
-        point(void)
-                : x(0.)
-                , y(0.)
-        {}
+	point(void)
+		: x(0.)
+		, y(0.)
+	{}
 
-        explicit point(double X,double Y)
-                : x(X)
-                , y(Y)
-        {}
+	explicit point(double X,double Y)
+		: x(X)
+		, y(Y)
+	{}
 
-        template<typename T1,typename T2>
-        point(T2 X,T2 Y)
-                : x(static_cast<double>(X))
-                , y(static_cast<double>(Y))
-        {}
+	template<typename T1,typename T2>
+	point(T2 X,T2 Y)
+		: x(static_cast<double>(X))
+		, y(static_cast<double>(Y))
+	{}
 
-        ~point()
-        {}
-
-
-        point& to_polar(void);
-        point& to_rect (void);
-
-        point polar(void) const { return point(*this).to_polar(); }
-        point rect (void) const { return point(*this).to_rect (); }
+	~point()
+	{}
 
 
-        #define OPERATOR(OP) \
-        point& operator OP (const point& rs) \
-        { \
-                x OP rs.x; \
-                y OP rs.y; \
-                return *this; \
-        }
-        OPERATOR(+=)
-        OPERATOR(-=)
-        OPERATOR(*=)
-        OPERATOR(/=)
-        #undef OPERATOR
+	point& to_polar(void);
+	point& to_rect (void);
 
-        #define OPERATOR(OP) \
-        point& operator OP (double value) \
-        { \
-                return ( *this OP point(value,value) ); \
-        }
-        OPERATOR(+=)
-        OPERATOR(-=)
-        OPERATOR(*=)
-        OPERATOR(/=)
-        #undef OPERATOR
+	point polar(void) const { return point(*this).to_polar(); }
+	point rect (void) const { return point(*this).to_rect (); }
 
-        #define OPERATOR(OP) \
-        point operator OP (const point& rs) \
-        { \
-                point ret(*this); \
-                ret OP ## = rs; \
-                return ret; \
-        }
-        OPERATOR(+)
-        OPERATOR(-)
-        OPERATOR(*)
-        OPERATOR(/)
-        #undef OPERATOR
+
+	#define OPERATOR(OP) \
+	point& operator OP (const point& rs) \
+	{ \
+		x OP rs.x; \
+		y OP rs.y; \
+		return *this; \
+	}
+	OPERATOR(+=)
+	OPERATOR(-=)
+	OPERATOR(*=)
+	OPERATOR(/=)
+	#undef OPERATOR
+
+	#define OPERATOR(OP) \
+	template<typename T> \
+	point& operator OP (T value) \
+	{ \
+		return ( *this OP point(value,value) ); \
+	}
+	OPERATOR(+=)
+	OPERATOR(-=)
+	OPERATOR(*=)
+	OPERATOR(/=)
+	#undef OPERATOR
+
+	#define OPERATOR(OP) \
+	point operator OP (const point& rs) \
+	{ \
+		point ret(*this); \
+		ret OP ## = rs; \
+		return ret; \
+	}
+	OPERATOR(+)
+	OPERATOR(-)
+	OPERATOR(*)
+	OPERATOR(/)
+	#undef OPERATOR
+
+	#define OPERATOR(OP) \
+	template<typename T> \
+	point operator OP (T value) \
+	{ \
+		point ret(*this); \
+		ret OP ## = point(value,value); \
+		return ret; \
+	}
+	OPERATOR(+)
+	OPERATOR(-)
+	OPERATOR(*)
+	OPERATOR(/)
+	#undef OPERATOR
 };
 
 #endif // IMAGINABLE__PLUGINS__ROTATE__POINT__INCLUDED

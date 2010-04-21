@@ -26,8 +26,6 @@
 #include "gamma.hpp"
 #include "dbus_plugin_gamma_adaptor.h"
 
-#include <boost/bind.hpp>
-
 
 Q_EXPORT_PLUGIN2(gamma,PluginGamma)
 
