@@ -51,6 +51,8 @@ public slots:
 
 	qulonglong rotate(qulonglong,double);
 
+	uint lastErrorCode(qulonglong);
+
 private:
 	typedef QMap<qulonglong,uint> lastErrorCodes_t;
 	lastErrorCodes_t m_lastErrorCodes;

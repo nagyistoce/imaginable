@@ -136,6 +136,7 @@ int main(int argc,char* argv[])
 
 	qDBusRegisterMetaType<QintList>();
 	qDBusRegisterMetaType<QulonglongList>();
+	qDBusRegisterMetaType<QfullPixel>();
 
 	Root_Q root;
 	if(!root.init())

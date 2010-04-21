@@ -30,18 +30,18 @@
 
 point& point::to_polar(void)
 {
-        double x_=x;
-        double y_=y;
-        r=sqrt(x_*x_+y_*y_);
-        f=atan2(y_,x_);
-        return *this;
+	double x_=x;
+	double y_=y;
+	r=sqrt(x_*x_+y_*y_);
+	f=atan2(y_,x_);
+	return *this;
 }
 
 point& point::to_rect(void)
 {
-        double r_=r;
-        double f_=f;
-        x=r_*cos(f_);
-        y=r_*sin(f_);
-        return *this;
+	double r_=r;
+	double f_=f;
+	x=r_*cos(f_);
+	y=r_*sin(f_);
+	return *this;
 }

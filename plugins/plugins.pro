@@ -30,4 +30,5 @@ SUBDIRS = \
 	inb_io \
 	planes \
 	gamma \
-	rotate
+	rotate \
+	resize
