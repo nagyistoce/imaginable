@@ -38,8 +38,7 @@ public:
 	PluginQT_IO(void);
 	~PluginQT_IO() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/qt_io"; }
+	QString name   (void) const { return "qt_io"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 public slots:
@@ -62,7 +61,7 @@ private:
 
 	enum
 	{
-		/**/CODE_NO_SRC_FILE               = Root::CODE__CUSTOM
+		/**/CODE_NO_SRC_FILE               = Core::CODE__CUSTOM
 		,   CODE_INVALID_SRC_FILE
 		,   CODE_NOT_SUPPORTED_COLOURSPACE
 		,   CODE_DST_FILE_EXIST

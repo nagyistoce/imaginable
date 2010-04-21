@@ -28,25 +28,14 @@
 
 
 
-Q_EXPORT_PLUGIN2(clone,PluginCopy)
+Q_EXPORT_PLUGIN2(copy,PluginCopy)
 
 
 PluginCopy::PluginCopy(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginCopy::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new CopyAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-	return true;
+	new CopyAdaptor(this);
 }
 
 uint PluginCopy::copyTo(qulonglong from,qulonglong to)
@@ -60,21 +49,21 @@ uint PluginCopy::copyTo(qulonglong from,qulonglong to)
 	bool busy;
 	Image* src=getOrComplain("copy","source image",from,busy);
 	if(!src)
-		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
+		return busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 
 	Image* dst=getOrComplain("copy","destination image",to,busy);
 	if(!dst)
-		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
+		return busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 
 	dst->copyFrom(*src);
 	message(LOG_INFO,"copy",QString("Copied from image [%1]").arg(from),to);
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 qulonglong PluginCopy::copyNew(qulonglong from)
 {
-	qulonglong to=m_root->createImage();
+	qulonglong to=m_core->createImage();
 	if(!to)
 	{
 		complain(LOG_CRIT,"copy","Cannot create destination image",to);
@@ -83,7 +72,7 @@ qulonglong PluginCopy::copyNew(qulonglong from)
 
 	if(copyTo(from,to))
 	{
-		m_root->deleteImage(to);
+		m_core->deleteImage(to);
 		return 0ULL;
 	}
 
@@ -98,5 +87,5 @@ QString PluginCopy::errorCodeToString(uint errorCode) const
 		CASE(IMAGES_DONT_DIFFER,"Images do not differ")
 		#undef CASE
 	}
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }

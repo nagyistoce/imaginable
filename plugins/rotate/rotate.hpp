@@ -39,8 +39,7 @@ public:
 	PluginRotate(void);
 	~PluginRotate() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/rotate"; }
+	QString name   (void) const { return "rotate"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:

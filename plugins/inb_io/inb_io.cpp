@@ -39,18 +39,7 @@ PluginINB_IO::PluginINB_IO(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginINB_IO::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new Inb_ioAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-	return true;
+	new Inb_ioAdaptor(this);
 }
 
 uint PluginINB_IO::load(QString fileName,qulonglong Id)
@@ -64,14 +53,14 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 	bool busy;
 	Image* dst=getOrComplain("load","destination image",Id,busy);
 	if(!dst)
-		return busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
+		return busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 
 
 	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
 
 	doLongProcessing(dst,QtConcurrent::run(boost::bind(&PluginINB_IO::do_load,this,fileName,Id,dst)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
@@ -207,7 +196,7 @@ qulonglong PluginINB_IO::loadNew(QString fileName)
 {
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
-	qulonglong Id=m_root->createImage();
+	qulonglong Id=m_core->createImage();
 	if(!Id)
 	{
 		complain(LOG_CRIT,"load","Cannot create destination image",Id);
@@ -216,7 +205,7 @@ qulonglong PluginINB_IO::loadNew(QString fileName)
 
 	if(load(fileName,Id))
 	{
-		m_root->deleteImage(Id);
+		m_core->deleteImage(Id);
 		return 0ULL;
 	}
 
@@ -230,7 +219,7 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 	bool busy;
 	Image* src=getOrComplain("save","source image",Id,busy);
 	if(!src)
-		return busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
+		return busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 
 	if(QFileInfo(fileName).exists())
 	{
@@ -243,7 +232,7 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 
 	doLongProcessing(src,QtConcurrent::run(boost::bind(&PluginINB_IO::do_save,this,Id,src,fileName)));
 
-	return Root::CODE_OK;
+	return Core::CODE_OK;
 }
 
 void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
@@ -340,7 +329,7 @@ uint PluginINB_IO::lastErrorCode(qulonglong image)
 {
 	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
 	if(I==m_lastErrorCodes.constEnd())
-		return Root::CODE_OK;
+		return Core::CODE_OK;
 	return I.value();
 }
 
@@ -359,5 +348,5 @@ QString PluginINB_IO::errorCodeToString(uint errorCode) const
 		CASE(INVALID_DST_FILE,"Invalid destination file")
 		#undef CASE
 	}
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }

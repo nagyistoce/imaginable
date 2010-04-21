@@ -41,8 +41,7 @@ public:
 	PluginINB_IO(void);
 	~PluginINB_IO() {}
 
-	bool init(Root*);
-	QString name   (void) const { return "/inb_io"; }
+	QString name   (void) const { return "inb_io"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 public slots:
@@ -63,7 +62,7 @@ private:
 
 	enum
 	{
-		/**/CODE_NO_SRC_FILE                  = Root::CODE__CUSTOM
+		/**/CODE_NO_SRC_FILE                  = Core::CODE__CUSTOM
 		,   CODE_ERROR_SRC_FILE
 		,   CODE_INVALID_SRC_FILE
 		,   CODE_ARCHIVE_ERROR

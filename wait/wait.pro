@@ -67,7 +67,7 @@ QMAKE_QDBUSXML2CPP = \
 
 DBUS_INTERFACES += \
 	../core/dbus_image_q_busy.xml \
-	../core/dbus_root_q.xml
+	../core/dbus_core_q.xml
 
 OTHER_FILES += \
 	version-minor.inl \

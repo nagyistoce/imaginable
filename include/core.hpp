@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__ROOT__INCLUDED
-#define IMAGINABLE__ROOT__INCLUDED
+#ifndef IMAGINABLE__CORE__INCLUDED
+#define IMAGINABLE__CORE__INCLUDED
 
 
 #include <QtCore/QtGlobal>
@@ -33,11 +33,13 @@
 
 class Image;
 
-class Root
+class Core
 {
 public:
-	Root(void) {}
-	virtual ~Root() {}
+	Core(void) {}
+	virtual ~Core() {}
+
+	static Core* instance(void) { return s_instance; }
 
 	virtual qulonglong createImage(void)                   =0;
 	virtual Image*           image(qulonglong)             =0;
@@ -64,6 +66,8 @@ public:
 
 		,   CODE__CUSTOM    = 100
 	};
+protected:
+	static Core* s_instance;
 };
 
-#endif // IMAGINABLE__ROOT__INCLUDED
+#endif // IMAGINABLE__CORE__INCLUDED

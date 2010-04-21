@@ -36,19 +36,7 @@ PluginResize::PluginResize(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginResize::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new ResizeAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-
-	return true;
+	new ResizeAdaptor(this);
 }
 
 qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSizePolicy_t newSizePolicy,newColourPolicy_t newColourPolicy,rect newSize,QfullPixel newColour,quint16 value)
@@ -76,7 +64,7 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 	if(!src)
 	{
 		complain(LOG_ERR,__FUNCTION__,"Cannot get source image",Id);
-		m_lastErrorCodes[Id]=busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
+		m_lastErrorCodes[Id]=busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 		return 0ULL;
 	}
 
@@ -84,10 +72,10 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 	switch(newColourPolicy)
 	{
 		case NEWCOLOUR_FULL:
-			if( (newSize.x()<=0)
-			||  (newSize.y()<=0)
-			||  (newSize.x()+newSize.width() >src->width ())
-			||  (newSize.y()+newSize.height()>src->height()) )
+			if( (newSize.left()  <=0)
+			||  (newSize.top()   <=0)
+			||  (newSize.right() >src->width ())
+			||  (newSize.bottom()>src->height()) )
 			{
 				if(newColour.keys()!=src->planesList())
 				{
@@ -115,25 +103,25 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 		case NEWSIZE_RESIZE:
 		break;
 		case NEWSIZE_CROP:
-			if(newSize.x()<=0)
+			if(newSize.left()<=0)
 			{
 				complain(LOG_WARNING,__FUNCTION__,"Shifting left side",Id);
 				newSize.setLeft(0);
 			}
-			if(newSize.y()<=0)
+			if(newSize.top() <=0)
 			{
 				complain(LOG_WARNING,__FUNCTION__,"Shifting top side",Id);
 				newSize.setTop(0);
 			}
-			if(newSize.x()+newSize.width() >src->width ())
+			if(newSize.right() >src->width ())
 			{
 				complain(LOG_WARNING,__FUNCTION__,"Shifting right side",Id);
-				newSize.setWidth(src->width()-newSize.x());
+				newSize.setRight(src->width());
 			}
-			if(newSize.y()+newSize.height()>src->height())
+			if(newSize.bottom()>src->height())
 			{
 				complain(LOG_WARNING,__FUNCTION__,"Shifting bottom side",Id);
-				newSize.setHeight(src->height()-newSize.y());
+				newSize.setBottom(src->height());
 			}
 		break;
 		case NEWSIZE_AUTOCROP:
@@ -166,11 +154,11 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 	}
 
 
-	qulonglong ret=m_root->createImage();
+	qulonglong ret=m_core->createImage();
 	if(!ret)
 	{
 		complain(LOG_CRIT,function,"Cannot create destination image",ret);
-		m_lastErrorCodes[Id]=Root::CODE_NO_DST_IMAGE;
+		m_lastErrorCodes[Id]=Core::CODE_NO_DST_IMAGE;
 		return 0ULL;
 	}
 
@@ -178,7 +166,7 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 	if(!dst)
 	{
 		complain(LOG_ERR,__FUNCTION__,"Cannot get destination image",Id);
-		m_lastErrorCodes[Id]=busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
+		m_lastErrorCodes[Id]=busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 		return 0ULL;
 	}
 
@@ -416,5 +404,5 @@ QString PluginResize::errorCodeToString(uint errorCode) const
 		CASE(TRANSPARENT_SRC_IMAGE,"Transparent source image")
 		#undef CASE
 	}
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }

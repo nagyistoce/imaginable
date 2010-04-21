@@ -36,19 +36,7 @@ PluginRotate::PluginRotate(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-}
-
-bool PluginRotate::init(Root* root)
-{
-	m_root=root;
-
-	if(!QDBusConnection::sessionBus().registerObject(name(),new RotateAdaptor(this),QDBusConnection::ExportNonScriptableContents))
-	{
-		complain(LOG_ALERT,__FUNCTION__,"Cannot register D-Bus object interface");
-		return false;
-	}
-
-	return true;
+	new RotateAdaptor(this);
 }
 
 qulonglong PluginRotate::rotate(qulonglong Id,double radian)
@@ -57,22 +45,22 @@ qulonglong PluginRotate::rotate(qulonglong Id,double radian)
 	Image* src=getOrComplain(__FUNCTION__,"source image",Id,busy);
 	if(!src)
 	{
-		m_lastErrorCodes[Id]=busy?(Root::CODE_SRC_IMAGE_BUSY):(Root::CODE_NO_SRC_IMAGE);
+		m_lastErrorCodes[Id]=busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 		return 0ULL;
 	}
 	
-	qulonglong ret=m_root->createImage();
+	qulonglong ret=m_core->createImage();
 	if(!ret)
 	{
 		complain(LOG_CRIT,__FUNCTION__,"Cannot create destination image",ret);
-		m_lastErrorCodes[Id]=Root::CODE_NO_DST_IMAGE;
+		m_lastErrorCodes[Id]=Core::CODE_NO_DST_IMAGE;
 		return 0ULL;
 	}
 
 	Image* dst=getOrComplain(__FUNCTION__,"destination image",ret,busy);
 	if(!dst)
 	{
-		m_lastErrorCodes[Id]=busy?(Root::CODE_DST_IMAGE_BUSY):(Root::CODE_NO_DST_IMAGE);
+		m_lastErrorCodes[Id]=busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 		return 0ULL;
 	}
 
@@ -299,5 +287,5 @@ void PluginRotate::do_rotate(qulonglong srcId,Image* src,qulonglong dstId,Image*
 
 QString PluginRotate::errorCodeToString(uint errorCode) const
 {
-	return m_root->errorCodeToString(errorCode);
+	return m_core->errorCodeToString(errorCode);
 }
