@@ -121,9 +121,6 @@ public:
 	Q_PROPERTY(double percent READ percent WRITE setPercent)
 
 public slots:
-	virtual bool copyFrom(const Image&);
-
-
 	virtual QSize   size(void) const     { return m_size; }
 	virtual void setSize(QSize value)    { setWidth(value.width()); setHeight(value.height()); }
 

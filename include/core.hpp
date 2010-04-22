@@ -39,8 +39,6 @@ public:
 	Core(void) {}
 	virtual ~Core() {}
 
-	static Core* instance(void) { return s_instance; }
-
 	virtual qulonglong createImage(void)                   =0;
 	virtual Image*           image(qulonglong)             =0;
 	virtual Image*           image(qulonglong,bool&)       =0;
@@ -66,8 +64,6 @@ public:
 
 		,   CODE__CUSTOM    = 100
 	};
-protected:
-	static Core* s_instance;
 };
 
 #endif // IMAGINABLE__CORE__INCLUDED

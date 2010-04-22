@@ -285,6 +285,14 @@ void PluginRotate::do_rotate(qulonglong srcId,Image* src,qulonglong dstId,Image*
 	message(LOG_INFO,"rotate",QString("Rotated to [%1] on angle [%2]").arg(dstId).arg(radian),srcId);
 }
 
+uint PluginRotate::lastErrorCode(qulonglong image)
+{
+	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
+	if(I==m_lastErrorCodes.constEnd())
+		return Core::CODE_OK;
+	return I.value();
+}
+
 QString PluginRotate::errorCodeToString(uint errorCode) const
 {
 	return m_core->errorCodeToString(errorCode);

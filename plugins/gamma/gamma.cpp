@@ -67,10 +67,10 @@ void PluginGamma::do_gammaAll(qulonglong Id,Image* img,double value)
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
 	double from=0.;
-	double step=100./static_cast<double>(img->planes().size());
-	foreach(int plane,img->planes())
+	double step=100./static_cast<double>(img->planesList().size());
+	foreach(int colourPlane,img->planesList())
 	{
-		do_gamma(Id,img,plane,value,from,from+step);
+		do_gamma(Id,img,colourPlane,value,from,step);
 		from+=step;
 	}
 
@@ -87,7 +87,7 @@ uint PluginGamma::gamma(qulonglong Id,int colourPlane,double value)
 		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 	if(!img->hasPlane(colourPlane))
-		return CODE_NO_SOURCE_PLANE;
+		return CODE_NO_COLOUR_PLANE;
 
 
 	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1] to colour plane [%2]").arg(value).arg(colourPlane),Id);
@@ -130,7 +130,7 @@ QString PluginGamma::errorCodeToString(uint errorCode) const
 	switch(errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
-		CASE(NO_SOURCE_PLANE ,"No source colour plane")
+		CASE(NO_COLOUR_PLANE,"No colour plane")
 		#undef CASE
 	}
 	return m_core->errorCodeToString(errorCode);

@@ -392,6 +392,14 @@ void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qu
 	message(LOG_INFO,function,QString("Resized to [%1] to [%2,%3 %4x%5]").arg(dstId).arg(newSize.left()).arg(newSize.top()).arg(newSize.width()).arg(newSize.height()),srcId);
 }
 
+uint PluginResize::lastErrorCode(qulonglong image)
+{
+	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
+	if(I==m_lastErrorCodes.constEnd())
+		return Core::CODE_OK;
+	return I.value();
+}
+
 QString PluginResize::errorCodeToString(uint errorCode) const
 {
 	switch(errorCode)

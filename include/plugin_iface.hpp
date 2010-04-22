@@ -40,10 +40,13 @@ class PluginInterface
 {
 public:
 	PluginInterface(void)
-		: m_core(Core::instance())
+		: m_core(NULL)
 	{}
 	virtual ~PluginInterface()
 	{}
+
+	void init(Core* core)
+	{ if(!m_core) m_core=core; }
 
 	virtual QString name(void) const =0;
 	virtual QString version(void) const =0;

@@ -31,4 +31,5 @@ SUBDIRS = \
 	planes \
 	gamma \
 	rotate \
-	resize
+	resize \
+	blur
