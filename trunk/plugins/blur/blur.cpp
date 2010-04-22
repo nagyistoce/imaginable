@@ -369,8 +369,7 @@ void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,
 
 	if(!img->hasPlane(Image::PLANE__INTERNAL))
 		img->addPlane(Image::PLANE__INTERNAL);
-	Image::Pixel* mem=img->plane(Image::PLANE__INTERNAL);
-	memcpy(mem,data,width*height*sizeof(Image::Pixel));
+	Image::Pixel* dst=img->plane(Image::PLANE__INTERNAL);
 
 //	int fullSz=size*2+1;
 //	fullSz*=fullSz;
@@ -409,7 +408,7 @@ void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,
 
 				int ysoa=ys_a*width;
 				for(int a=xs_l;a<xs_r;++a)
-					acc+=static_cast<unsigned>(mem[ysoa+a]);
+					acc+=static_cast<unsigned>(data[ysoa+a]);
 			}
 			if(yh_af)
 			{
@@ -417,7 +416,7 @@ void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,
 
 				int yhoa=yh_a*width;
 				for(int a=xh_l;a<xh_r;++a)
-					acc+=static_cast<unsigned>(mem[yhoa+a]);
+					acc+=static_cast<unsigned>(data[yhoa+a]);
 			}
 			if(ys_df)
 			{
@@ -425,7 +424,7 @@ void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,
 
 				int ysod=ys_d*width;
 				for(int a=xs_l;a<xs_r;++a)
-					acc-=static_cast<unsigned>(mem[ysod+a]);
+					acc-=static_cast<unsigned>(data[ysod+a]);
 			}
 			if(yh_df)
 			{
@@ -433,16 +432,14 @@ void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,
 
 				int yhod=yh_d*width;
 				for(int a=xh_l;a<xh_r;++a)
-					acc-=static_cast<unsigned>(mem[yhod+a]);
+					acc-=static_cast<unsigned>(data[yhod+a]);
 			}
 			if(p)
-			{
-//				mem[(y*fullSz+x)%fullSz]=data[y*width+x];
-				data[y*width+x]=static_cast<Image::Pixel>(acc/c);
-			}
+				dst[y*width+x]=static_cast<Image::Pixel>(acc/c);
 		}
 	}
-	img->removePlane(Image::PLANE__INTERNAL);
+	img->removePlane(colourPlane);
+	img->movePlane(Image::PLANE__INTERNAL,colourPlane);
 
 
 	message(LOG_INFO,"frame",QString("Frame blur [%1] [%2] applied to colour plane [%3]").arg(size).arg(hole).arg(colourPlane),Id);
