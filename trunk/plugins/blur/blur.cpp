@@ -371,11 +371,6 @@ void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,
 		img->addPlane(Image::PLANE__INTERNAL);
 	Image::Pixel* dst=img->plane(Image::PLANE__INTERNAL);
 
-//	int fullSz=size*2+1;
-//	fullSz*=fullSz;
-//	boost::scoped_array<Image::Pixel> mem_s(new Image::Pixel[fullSz]);
-//	Image::Pixel* mem=mem_s.get();
-
 	for(int x=-size;x<width;++x)
 	{
 		emit setPercent(fromPercent+static_cast<double>(x)*stepPercent/static_cast<double>(width));
