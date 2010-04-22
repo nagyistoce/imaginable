@@ -238,6 +238,14 @@ uint PluginQT_IO::save(qulonglong Id,QString fileName)
 	return saveWithQuality(Id,fileName,-1);
 }
 
+uint PluginQT_IO::lastErrorCode(qulonglong image)
+{
+	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
+	if(I==m_lastErrorCodes.constEnd())
+		return Core::CODE_OK;
+	return I.value();
+}
+
 QString PluginQT_IO::errorCodeToString(uint errorCode) const
 {
 	switch(errorCode)

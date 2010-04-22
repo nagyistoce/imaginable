@@ -55,8 +55,10 @@ uint PluginCopy::copyTo(qulonglong from,qulonglong to)
 	if(!dst)
 		return busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
 
-	dst->copyFrom(*src);
-	message(LOG_INFO,"copy",QString("Copied from image [%1]").arg(from),to);
+
+	message(LOG_INFO,"copy",QString("Copying from image [%1]").arg(from),to);
+
+	doLongProcessing(QList<Image*>()<<src<<dst,QtConcurrent::run(boost::bind(&PluginCopy::do_copy,this,from,src,to,dst)));
 
 	return Core::CODE_OK;
 }
@@ -77,6 +79,26 @@ qulonglong PluginCopy::copyNew(qulonglong from)
 	}
 
 	return to;
+}
+
+void PluginCopy::do_copy(qulonglong srcId,Image* src,qulonglong dstId,Image* dst)
+{
+	dst->clear();
+	dst->setSize(src->size());
+
+	int length=src->area()*sizeof(Image::Pixel);
+	foreach(Image::ColourPlane colourPlane,src->planesList())
+	{
+		dst->addPlane(colourPlane);
+		memcpy(dst->plane(colourPlane),src->plane(colourPlane),length);
+		if(src->planeHasName(colourPlane))
+			dst->setPlaneName(colourPlane,src->planeName(colourPlane));
+	}
+
+	foreach(QString key,src->textKeysList())
+		dst->setText(key,src->text(key));
+
+	message(LOG_INFO,"copy",QString("Copied from image [%1]").arg(srcId),dstId);
 }
 
 QString PluginCopy::errorCodeToString(uint errorCode) const

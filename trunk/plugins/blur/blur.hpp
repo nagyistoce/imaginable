@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
-#define IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__BLUR__BLUR__INCLUDED
+#define IMAGINABLE__PLUGINS__BLUR__BLUR__INCLUDED
 
 
 #include "version.hpp"
@@ -31,30 +31,45 @@
 #include <plugin_iface.hpp>
 
 
-class PluginCopy : public QObject, PluginInterface
+class PluginBlur : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginCopy(void);
-	~PluginCopy() {}
+	PluginBlur(void);
+	~PluginBlur() {}
 
-	QString name   (void) const { return "copy"; }
+	QString name   (void) const { return "blur"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
+
+signals:
+	void setPercent(double);
 
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
-	uint copyTo(qulonglong from,qulonglong to);
-	qulonglong copyNew(qulonglong);
+	uint boxAll       (qulonglong,uint);
+	uint boxAllPercent(qulonglong,uint);
+	uint box          (qulonglong,int,uint);
+	uint boxPercent   (qulonglong,int,uint);
+
+	uint frameAll       (qulonglong,uint,uint);
+	uint frame          (qulonglong,int,uint,uint);
 
 private:
-	void do_copy(qulonglong,Image*,qulonglong,Image*);
+	void do_boxAll (qulonglong,Image*,int);
+	void do_box    (qulonglong,Image*,int,int,double,double);
+	void do_boxBlur(qulonglong,Image*,int,int,double,double);
+
+	void do_frameAll (qulonglong,Image*,int,int);
+	void do_frame    (qulonglong,Image*,int,int,int,double,double);
+	void do_frameBlur(qulonglong,Image*,int,int,int,double,double);
 
 	enum
 	{
-		/**/CODE_IMAGES_DONT_DIFFER = Core::CODE__CUSTOM
+		/**/CODE_NO_COLOUR_PLANE = Core::CODE__CUSTOM
+		,   CODE_IMAGE_IS_EMPTY
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
+#endif // IMAGINABLE__PLUGINS__BLUR__BLUR__INCLUDED

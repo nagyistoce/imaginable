@@ -32,8 +32,6 @@
 #include <QtCore/QCoreApplication>
 
 
-Core* Core::s_instance;
-
 
 namespace {
 	const char dbus_object_name[]="/";
@@ -43,8 +41,6 @@ Core_Q::Core_Q(QObject* parent)
 	: QObject(parent)
 	, Core()
 {
-	s_instance=this;
-
 	message(LOG_INFO,"Starting");
 
 	connect(&m_autoCloseTimer,SIGNAL(timeout()),this,SLOT(autoCloseTimeout()));
@@ -282,6 +278,7 @@ uint Core_Q::loadPlugin(QString fileName)
 			break;
 		}
 
+		plugin->init(this);
 		if(!QDBusConnection::sessionBus().registerObject(QString("/")+plugin->name(),instance))
 		{
 			msg=QString("Plugin[%1] cannot be loaded: init() failed").arg(fileName);

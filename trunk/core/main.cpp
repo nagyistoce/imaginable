@@ -138,11 +138,16 @@ int main(int argc,char* argv[])
 	qDBusRegisterMetaType<QulonglongList>();
 	qDBusRegisterMetaType<QfullPixel>();
 
+
 	Core_Q core;
 	if(!core.init())
 		return EXIT_FAILURE;
 
 	core.autoLoadPlugins(options.unnamed());
+
+
+	if(chdir("/")<0)
+		QTextStream(stderr)<<qPrintable(QString("Cannot set the process's working directory: Error #%1 ('%2').\n").arg(errno).arg(strerror(errno)));
 
 	return app.exec();
 }

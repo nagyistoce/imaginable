@@ -38,24 +38,6 @@ Image::~Image()
 {
 }
 
-bool Image::copyFrom(const Image& src)
-{
-	if(src.busy())
-		return false;
-	m_size     =src.m_size;
-	m_plane.clear();
-	const int& square=area();
-	foreach(Image::ColourPlane colourPlane,src.m_plane.keys())
-	{
-		Plane new_plane(new Image::Pixel[square]);
-		memcpy(new_plane.get(),src.m_plane[colourPlane].get(),square*sizeof(Image::Pixel));
-		m_plane[colourPlane]=new_plane;
-	}
-	m_planeName=src.m_planeName;
-	m_text     =src.m_text;
-	return true;
-}
-
 Image::ColourSpace Image::colourSpace(void) const
 {
 	if( m_plane.isEmpty() )

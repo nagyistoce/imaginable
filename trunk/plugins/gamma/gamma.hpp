@@ -57,7 +57,7 @@ private:
 
 	enum
 	{
-		/**/CODE_NO_SOURCE_PLANE = Core::CODE__CUSTOM
+		/**/CODE_NO_COLOUR_PLANE = Core::CODE__CUSTOM
 	};
 };
 
