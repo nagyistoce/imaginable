@@ -57,7 +57,7 @@ class Image : public QObject
 Q_OBJECT
 public:
 	Image(QObject* = NULL);
-	virtual ~Image();
+	~Image();
 
 public:
 	typedef enum
@@ -90,7 +90,7 @@ public:
 		PLANE_SATURATION,
 		PLANE_HSV_VALUE,
 		PLANE_LIGHTNESS,
-		PLANE__USER    = 0x100,
+		PLANE__USER    = 100,
 		PLANE__INTERNAL=-1
 	};
 	typedef int ColourPlane;
@@ -121,8 +121,8 @@ public:
 	Q_PROPERTY(double percent READ percent WRITE setPercent)
 
 public slots:
-	virtual QSize   size(void) const     { return m_size; }
-	virtual void setSize(QSize value)    { setWidth(value.width()); setHeight(value.height()); }
+	virtual QSize   size  (void) const   { return m_size; }
+	virtual void setSize  (QSize value)  { setWidth(value.width()); setHeight(value.height()); }
 
 	virtual int     width (void) const   { return m_size.width();   }
 	virtual void setWidth (int);
@@ -130,7 +130,7 @@ public slots:
 	virtual int     height(void) const   { return m_size.height();  }
 	virtual void setHeight(int);
 
-	virtual int     area(void) const     { return width()*height(); }
+	virtual int    area   (void) const   { return width()*height(); }
 
 
 	virtual QPoint  offset(void) const   { return m_offset; }
@@ -143,35 +143,33 @@ public slots:
 	virtual void setY     (int value)    { m_offset.setY(value); }
 
 
-	virtual void clear(void);
-
-
 	/// returns true when image has non-zero dimension even if it does not have any colour plane
 	virtual bool isEmpty(void) const { return ( (!m_size.width()) && (!m_size.height()) ); }
 	/// returns true when image has at least one pixel of data
 	virtual bool hasData(void) const { return ( (!isEmpty()) && (!m_plane.isEmpty()) ); }
 
-
-	virtual ColourSpace colourSpace(void) const;
-
-	virtual ColourPlaneSet planes    (void)      const { return m_plane.keys().toSet(); }
-	virtual QintList       planesList(void)      const { return m_plane.keys(); }
-	virtual bool        hasPlane     (int plane) const { return m_plane.find(plane) != m_plane.end(); }
-	virtual bool        hasAlpha     (void)      const { return hasPlane(Image::PLANE_ALPHA); }
-	virtual int         planesCount  (void)      const { return m_plane.size(); }
-
-	virtual bool    addPlane(int);
-	virtual bool removePlane(int);
-	virtual bool   movePlane(int from,int to);
-
-	virtual bool      planeHasName(int) const;
-	virtual QString   planeName   (int) const;
-	virtual bool   setPlaneName   (int,QString);
-	virtual bool erasePlaneName   (int);
+	virtual void clear(void);
 
 
-	virtual const Pixel* plane(int) const;
-	virtual       Pixel* plane(int);
+	virtual int/*ColourSpace*/ colourSpace(void) const;
+
+
+	virtual ColourPlaneSet planes      (void)                     const { return m_plane.keys().toSet(); }
+	virtual QintList       planesList  (void)                     const { return m_plane.keys(); }
+	virtual bool        hasPlane       (int/*ColourPlane*/ plane) const { return m_plane.find(plane) != m_plane.end(); }
+	virtual bool        hasAlpha       (void)                     const { return hasPlane(Image::PLANE_ALPHA); }
+	virtual int            planesCount (void)                     const { return m_plane.size(); }
+	virtual bool        addPlane       (int/*ColourPlane*/);
+	virtual bool     removePlane       (int/*ColourPlane*/);
+	virtual bool       movePlane       (int/*ColourPlane*/ from,int/*ColourPlane*/ to);
+
+	virtual bool           planeHasName(int/*ColourPlane*/)       const;
+	virtual QString        planeName   (int/*ColourPlane*/)       const;
+	virtual bool        setPlaneName   (int/*ColourPlane*/,QString);
+	virtual bool      erasePlaneName   (int/*ColourPlane*/);
+
+	virtual const Pixel*   plane       (int/*ColourPlane*/) const;
+	virtual       Pixel*   plane       (int/*ColourPlane*/);
 
 
 	virtual bool     hasText        (QString key) const { return m_text.find(key)!=m_text.end(); }
@@ -183,15 +181,14 @@ public slots:
 	virtual void   clearTexts       (void)              { m_text.clear(); }
 
 
-
-	virtual bool    busy(void) const { return m_busy; }
-	virtual void setBusy(bool);
-
-	virtual void  startLongProcessing(void) { setBusy(true); }
-	virtual void finishLongProcessing(void) { setBusy(false); }
+	virtual bool    busy   (void) const { return m_busy; }
+	virtual void setBusy   (bool);
 
 	virtual double  percent(void) const { return m_percent; }
 	virtual void setPercent(double);
+
+	virtual void  startLongProcessing(void) { setBusy(true); }
+	virtual void finishLongProcessing(void) { setBusy(false); }
 
 protected:
 	QPoint m_offset;
@@ -200,12 +197,11 @@ protected:
 	ColourPlaneNames m_planeName;
 	Text m_text;
 
-	volatile bool m_busy;
+	volatile bool   m_busy;
 	volatile double m_percent;
 
-	virtual void onSetBusy(void) {}
+	virtual void onSetBusy   (void) {}
 	virtual void onSetPercent(void) {}
-
 };
 
 #endif // IMAGINABLE__IMAGE__INCLUDED

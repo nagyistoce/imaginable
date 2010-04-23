@@ -32,4 +32,6 @@ SUBDIRS = \
 	gamma \
 	rotate \
 	resize \
-	blur
+	blur \
+	invert \
+	overlay

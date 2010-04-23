@@ -53,7 +53,7 @@
 			<arg type="u" name="colourSpace" direction="in"/>
 		</method>
 
-		<method name="colourSpace"><arg type="u" direction="out"/></method>
+		<method name="colourSpace"><arg type="i" direction="out"/></method>
 
 		<method name="colourPlaneToString"><arg type="s" direction="out"/>
 			<arg type="i" name="colourPlane" direction="in"/>

@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
-#define IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__OVERLAY__OVERLAY__INCLUDED
+#define IMAGINABLE__PLUGINS__OVERLAY__OVERLAY__INCLUDED
 
 
 #include "version.hpp"
@@ -31,15 +31,15 @@
 #include <plugin_iface.hpp>
 
 
-class PluginGamma : public QObject, PluginInterface
+class PluginOverlay : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginGamma(void);
-	~PluginGamma() {}
+	PluginOverlay(void);
+	~PluginOverlay() {}
 
-	QString name   (void) const { return "gamma"; }
+	QString name   (void) const { return "overlay"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -48,18 +48,20 @@ signals:
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
-	uint gammaAll(qulonglong,double);
-	uint gamma(qulonglong,int,double);
+	uint difference(qulonglong,int,int,int);
+	uint alphaBlend(qulonglong,int,int,int,int);
 
 private:
-	void do_gammaAll(qulonglong,Image*,double);
-	void do_gammaPlain(qulonglong,Image*,int,double);
-	void do_gamma(qulonglong,Image*,int,double,double,double);
+	void do_difference(qulonglong,Image*,int,int,int);
+	void do_alphaBlend(qulonglong,Image*,int,int,int,int);
 
 	enum
 	{
-		/**/CODE_NO_COLOUR_PLANE = Core::CODE__CUSTOM
+		/**/CODE_NO_SRC_COLOUR_PLANE_1   = Core::CODE__CUSTOM
+		,   CODE_NO_SRC_COLOUR_PLANE_2
+		,   CODE_NO_SRC_COLOUR_PLANE_3
+		,   CODE_DST_COLOUR_PLANE_EXISTS
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#endif // IMAGINABLE__PLUGINS__OVERLAY__OVERLAY__INCLUDED

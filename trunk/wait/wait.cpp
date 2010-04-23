@@ -64,18 +64,18 @@ void Wait::init(void)
 
 				m_images[intId]=image;
 				++m_rest;
-				QTextStream(stdout)<<QString("Waiting for image [%1].\n").arg(intId);
+				QTextStream(stderr)<<QString("Waiting for image [%1].\n").arg(intId);
 			}
 			else
-				QTextStream(stdout)<<QString("Image [%1] is not busy.\n").arg(intId);
+				QTextStream(stderr)<<QString("Image [%1] is not busy.\n").arg(intId);
 		}
 		else
-			QTextStream(stdout)<<QString("Image [%1] cannot be connected.\n").arg(Id);
+			QTextStream(stderr)<<QString("Image [%1] cannot be connected.\n").arg(Id);
 
 	}
 	if(!m_rest)
 	{
-		QTextStream(stdout)<<QString("Nothing to wait for.\n");
+		QTextStream(stderr)<<QString("Nothing to wait for.\n");
 		QCoreApplication::quit();
 	}
 	else
@@ -95,7 +95,8 @@ void Wait::finished(void)
 
 	if(!m_rest)
 	{
-		QTextStream(stdout)<<QString("All images are idle.\n");
+		QTextStream(stdout)<<"\n";
+		QTextStream(stderr)<<QString("All images are idle.\n");
 		QCoreApplication::quit();
 	}
 }
@@ -110,7 +111,7 @@ void Wait::timeout(void)
 			QTextStream(stdout)<<QString(" %1\%").arg(v,5,'f',(v>=100.)?1:((v>=10.)?2:3));
 		}
 		else
-			QTextStream(stdout)<<" idle";
+			QTextStream(stdout)<<"  idle ";
 	}
 	QTextStream(stdout)<<"\r";
 	QTextStream(stdout).flush();

@@ -38,7 +38,7 @@ Image::~Image()
 {
 }
 
-Image::ColourSpace Image::colourSpace(void) const
+int Image::colourSpace(void) const
 {
 	if( m_plane.isEmpty() )
 		return Image::SPACE__EMPTY;
