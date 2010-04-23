@@ -57,13 +57,13 @@ public slots:
 	uint frame          (qulonglong,int,uint,uint);
 
 private:
-	void do_boxAll (qulonglong,Image*,int);
-	void do_box    (qulonglong,Image*,int,int,double,double);
-	void do_boxBlur(qulonglong,Image*,int,int,double,double);
+	void do_boxAll  (qulonglong,Image*,int);
+	void do_boxPlain(qulonglong,Image*,int,int);
+	void do_box     (qulonglong,Image*,int,int,double,double);
 
-	void do_frameAll (qulonglong,Image*,int,int);
-	void do_frame    (qulonglong,Image*,int,int,int,double,double);
-	void do_frameBlur(qulonglong,Image*,int,int,int,double,double);
+	void do_frameAll  (qulonglong,Image*,int,int);
+	void do_framePlain(qulonglong,Image*,int,int,int);
+	void do_frame     (qulonglong,Image*,int,int,int,double,double);
 
 	enum
 	{

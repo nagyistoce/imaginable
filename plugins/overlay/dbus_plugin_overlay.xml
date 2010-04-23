@@ -24,15 +24,21 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.copy">
+	<interface name="name.kuzmashapran.imaginable.plugin.overlay">
 
-		<method name="copyTo"><arg type="u" direction="out"/>
-			<arg type="t" name="fromId" direction="in"/>
-			<arg type="t" name="toId" direction="in"/>
+		<method name="difference"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="i" name="sourceColourPlane1" direction="in"/>
+			<arg type="i" name="sourceColourPlane2" direction="in"/>
+			<arg type="i" name="destinationColourPlane" direction="in"/>
 		</method>
 
-		<method name="copyNew"><arg type="t" direction="out"/>
-			<arg type="t" name="fromId" direction="in"/>
+		<method name="alphaBlend"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="i" name="sourceColourPlane1" direction="in"/>
+			<arg type="i" name="sourceColourPlane2" direction="in"/>
+			<arg type="i" name="sourceColourPlane3" direction="in"/>
+			<arg type="i" name="destinationColourPlane" direction="in"/>
 		</method>
 
 		<method name="errorCodeToString"><arg type="s" direction="out"/>

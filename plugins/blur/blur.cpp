@@ -103,7 +103,7 @@ void PluginBlur::do_boxAll(qulonglong Id,Image* img,int size)
 	double step=100./static_cast<double>(img->planesList().size());
 	foreach(int colourPlane,img->planesList())
 	{
-		do_boxBlur(Id,img,colourPlane,size,from,step);
+		do_box(Id,img,colourPlane,size,from,step);
 		from+=step;
 	}
 
@@ -137,7 +137,7 @@ uint PluginBlur::box(qulonglong Id,int colourPlane,uint size)
 	message(LOG_INFO,__FUNCTION__,QString("Applying box blur [%1] to colour plane [%2]").arg(size).arg(colourPlane),Id);
 
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginBlur::do_box,this,Id,img,colourPlane,size,0.,100.)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginBlur::do_boxPlain,this,Id,img,colourPlane,size)));
 
 	return Core::CODE_OK;
 }
@@ -167,21 +167,21 @@ uint PluginBlur::boxPercent(qulonglong Id,int colourPlane,uint size)
 
 	message(LOG_INFO,__FUNCTION__,QString("Applying box blur [%1] to colour plane [%2]").arg(size).arg(colourPlane),Id);
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginBlur::do_box,this,Id,img,colourPlane,size,0.,100.)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginBlur::do_boxPlain,this,Id,img,colourPlane,size)));
 
 	return Core::CODE_OK;
 }
 
-void PluginBlur::do_box(qulonglong Id,Image* img,int colourPlane,int size,double fromPercent,double stepPercent)
+void PluginBlur::do_boxPlain(qulonglong Id,Image* img,int colourPlane,int size)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
-	do_boxBlur(Id,img,colourPlane,size,fromPercent,stepPercent);
+	do_box(Id,img,colourPlane,size,0.,100.);
 
 	disconnect(img,SLOT(setPercent(double)));
 }
 
-void PluginBlur::do_boxBlur(qulonglong Id,Image* img,int colourPlane,int size,double fromPercent,double stepPercent)
+void PluginBlur::do_box(qulonglong Id,Image* img,int colourPlane,int size,double fromPercent,double stepPercent)
 {
 	int width =img->width();
 	int height=img->height();
@@ -305,7 +305,7 @@ void PluginBlur::do_frameAll(qulonglong Id,Image* img,int size,int hole)
 	double step=100./static_cast<double>(img->planesList().size());
 	foreach(int colourPlane,img->planesList())
 	{
-		do_frameBlur(Id,img,colourPlane,size,hole,from,step);
+		do_frame(Id,img,colourPlane,size,hole,from,step);
 		from+=step;
 	}
 
@@ -346,21 +346,21 @@ uint PluginBlur::frame(qulonglong Id,int colourPlane,uint size,uint hole)
 	message(LOG_INFO,__FUNCTION__,QString("Applying frame blur [%1] [%2] to colour plane [%3]").arg(size).arg(hole).arg(colourPlane),Id);
 
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginBlur::do_frame,this,Id,img,colourPlane,size,hole,0.,100.)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginBlur::do_framePlain,this,Id,img,colourPlane,size,hole)));
 
 	return Core::CODE_OK;
 }
 
-void PluginBlur::do_frame(qulonglong Id,Image* img,int colourPlane,int size,int hole,double fromPercent,double stepPercent)
+void PluginBlur::do_framePlain(qulonglong Id,Image* img,int colourPlane,int size,int hole)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
-	do_frameBlur(Id,img,colourPlane,size,hole,fromPercent,stepPercent);
+	do_frame(Id,img,colourPlane,size,hole,0.,100.);
 
 	disconnect(img,SLOT(setPercent(double)));
 }
 
-void PluginBlur::do_frameBlur(qulonglong Id,Image* img,int colourPlane,int size,int hole,double fromPercent,double stepPercent)
+void PluginBlur::do_frame(qulonglong Id,Image* img,int colourPlane,int size,int hole,double fromPercent,double stepPercent)
 {
 	int width =img->width();
 	int height=img->height();

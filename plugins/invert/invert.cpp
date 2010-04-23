@@ -23,31 +23,21 @@
 *************/
 
 
-#include "gamma.hpp"
-#include "dbus_plugin_gamma_adaptor.h"
+#include "invert.hpp"
+#include "dbus_plugin_invert_adaptor.h"
 
 
-Q_EXPORT_PLUGIN2(gamma,PluginGamma)
+Q_EXPORT_PLUGIN2(invert,PluginInvert)
 
 
-PluginGamma::PluginGamma(void)
+PluginInvert::PluginInvert(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
-	new GammaAdaptor(this);
+	new InvertAdaptor(this);
 }
 
-namespace {
-	void gamma_Pixel(Image::Pixel& p,double value)
-	{
-		if(value<0.)
-			p=static_cast<Image::Pixel>(0xffffu*( (exp(-value*(static_cast<double>(p)/65535.))-1.)/(exp(-value)-1.)           ));
-		if(value>0.)
-			p=static_cast<Image::Pixel>(0xffffu*(  log(       (static_cast<double>(p)/65535.)     *(exp( value)-1.)+1.)/value ));
-	}
-}
-
-uint PluginGamma::gammaAll(qulonglong Id,double value)
+uint PluginInvert::invertAll(qulonglong Id)
 {
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
@@ -55,14 +45,14 @@ uint PluginGamma::gammaAll(qulonglong Id,double value)
 		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 
-	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1]").arg(value),Id);
+	message(LOG_INFO,__FUNCTION__,QString("Inverting"),Id);
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginGamma::do_gammaAll,this,Id,img,value)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginInvert::do_invertAll,this,Id,img)));
 
 	return Core::CODE_OK;
 }
 
-void PluginGamma::do_gammaAll(qulonglong Id,Image* img,double value)
+void PluginInvert::do_invertAll(qulonglong Id,Image* img)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
@@ -70,16 +60,16 @@ void PluginGamma::do_gammaAll(qulonglong Id,Image* img,double value)
 	double step=100./static_cast<double>(img->planesList().size());
 	foreach(int colourPlane,img->planesList())
 	{
-		do_gamma(Id,img,colourPlane,value,from,step);
+		do_invert(Id,img,colourPlane,from,step);
 		from+=step;
 	}
 
 	disconnect(img,SLOT(setPercent(double)));
 
-	message(LOG_INFO,"gammaAll",QString("Gamma [%1] applied").arg(value),Id);
+	message(LOG_INFO,"invertAll",QString("Inverted"),Id);
 }
 
-uint PluginGamma::gamma(qulonglong Id,int colourPlane,double value)
+uint PluginInvert::invert(qulonglong Id,int colourPlane)
 {
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
@@ -90,24 +80,24 @@ uint PluginGamma::gamma(qulonglong Id,int colourPlane,double value)
 		return CODE_NO_COLOUR_PLANE;
 
 
-	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1] to colour plane [%2]").arg(value).arg(colourPlane),Id);
+	message(LOG_INFO,__FUNCTION__,QString("Inverting colour plane [%1]").arg(colourPlane),Id);
 
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginGamma::do_gammaPlain,this,Id,img,colourPlane,value)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginInvert::do_invertPlain,this,Id,img,colourPlane)));
 
 	return Core::CODE_OK;
 }
 
-void PluginGamma::do_gammaPlain(qulonglong Id,Image* img,int colourPlane,double value)
+void PluginInvert::do_invertPlain(qulonglong Id,Image* img,int colourPlane)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
-	do_gamma(Id,img,colourPlane,value,0.,100.);
+	do_invert(Id,img,colourPlane,0.,100.);
 
 	disconnect(img,SLOT(setPercent(double)));
 }
 
-void PluginGamma::do_gamma(qulonglong Id,Image* img,int colourPlane,double value,double fromPercent,double stepPercent)
+void PluginInvert::do_invert(qulonglong Id,Image* img,int colourPlane,double fromPercent,double stepPercent)
 {
 	const int& width =img->width();
 	const int& height=img->height();
@@ -120,16 +110,13 @@ void PluginGamma::do_gamma(qulonglong Id,Image* img,int colourPlane,double value
 
 		int yo=y*width;
 		for(int x=0;x<width;++x)
-		{
-			int xyo=yo+x;
-			gamma_Pixel(data[xyo],value);
-		}
+			data[yo+x]^=0xffff;
 	}
 
-	message(LOG_INFO,"gamma",QString("Gamma [%1] applied to colour plane [%2]").arg(value).arg(colourPlane),Id);
+	message(LOG_INFO,"invert",QString("Colour plane [%1] inverted").arg(colourPlane),Id);
 }
 
-QString PluginGamma::errorCodeToString(uint errorCode) const
+QString PluginInvert::errorCodeToString(uint errorCode) const
 {
 	switch(errorCode)
 	{

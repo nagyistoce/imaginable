@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
-#define IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__INVERT__INVERT__INCLUDED
+#define IMAGINABLE__PLUGINS__INVERT__INVERT__INCLUDED
 
 
 #include "version.hpp"
@@ -31,15 +31,15 @@
 #include <plugin_iface.hpp>
 
 
-class PluginGamma : public QObject, PluginInterface
+class PluginInvert : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginGamma(void);
-	~PluginGamma() {}
+	PluginInvert(void);
+	~PluginInvert() {}
 
-	QString name   (void) const { return "gamma"; }
+	QString name   (void) const { return "invert"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -48,13 +48,13 @@ signals:
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
-	uint gammaAll(qulonglong,double);
-	uint gamma(qulonglong,int,double);
+	uint invertAll(qulonglong);
+	uint invert(qulonglong,int);
 
 private:
-	void do_gammaAll(qulonglong,Image*,double);
-	void do_gammaPlain(qulonglong,Image*,int,double);
-	void do_gamma(qulonglong,Image*,int,double,double,double);
+	void do_invertAll(qulonglong,Image*);
+	void do_invertPlain(qulonglong,Image*,int);
+	void do_invert(qulonglong,Image*,int,double,double);
 
 	enum
 	{
@@ -62,4 +62,4 @@ private:
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#endif // IMAGINABLE__PLUGINS__INVERT__INVERT__INCLUDED
