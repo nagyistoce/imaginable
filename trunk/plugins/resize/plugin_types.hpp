@@ -1,9 +1,7 @@
-<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
-	"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-<!-- *********
+/*************
 **
 ** Project:      Imaginable
-** File info:    $Id$
+** File info:    $Id: types.hpp 21 2010-04-21 09:08:38Z Kuzma.Shapran@gmail.com $
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -22,24 +20,17 @@
 **  You should have received a copy of the GNU General Public License
 **  along with Imaginable.  If not, see <http://www.gnu.org/licenses/>.
 **
-********** -->
-<node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.plugin.gamma">
+*************/
 
-		<method name="gammaAll"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="d" name="value" direction="in"/>
-		</method>
+#ifndef IMAGINABLE__PLUGINS__RESIZE__TYPES__INCLUDED
+#define IMAGINABLE__PLUGINS__RESIZE__TYPES__INCLUDED
 
-		<method name="gamma"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="plane" direction="in"/>
-			<arg type="d" name="value" direction="in"/>
-		</method>
 
-		<method name="errorCodeToString"><arg type="s" direction="out"/>
-			<arg type="u" name="errorCode" direction="in"/>
-		</method>
+#include <QtCore/QHash>
 
-	</interface>
-</node>
+
+typedef QHash<int,quint16> QfullPixel;
+Q_DECLARE_METATYPE(QfullPixel)
+
+
+#endif // IMAGINABLE__PLUGINS__RESIZE__TYPES__INCLUDED

@@ -30,6 +30,7 @@
 
 #include <plugin_iface.hpp>
 
+#include "plugin_types.hpp"
 #include "rect.hpp"
 
 

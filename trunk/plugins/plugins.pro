@@ -29,9 +29,8 @@ SUBDIRS = \
 	qt_io \
 	inb_io \
 	planes \
-	gamma \
+	colour_adjust \
 	rotate \
 	resize \
 	blur \
-	invert \
 	overlay

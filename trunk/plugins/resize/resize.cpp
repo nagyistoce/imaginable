@@ -36,6 +36,8 @@ PluginResize::PluginResize(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
+	qDBusRegisterMetaType<QfullPixel>();
+
 	new ResizeAdaptor(this);
 }
 

@@ -22,7 +22,7 @@
 ##
 ##############
 
-TARGET = invert
+TARGET = colour_adjust
 
 TEMPLATE = lib
 CONFIG += plugin
@@ -52,16 +52,17 @@ INCLUDEPATH += \
 
 SOURCES += \
 	version.cpp \
-	invert.cpp
+	colour_adjust.cpp
 
 HEADERS += \
 	version.hpp \
-	invert.hpp
+	colour_adjust.hpp \
+	plugin_types.hpp
 
-QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
+QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp -i plugin_types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_plugin_invert.xml
+	dbus_plugin_colour_adjust.xml
 
 OTHER_FILES += \
 	version-minor.inl \

@@ -22,24 +22,26 @@
 **
 *************/
 
-#ifndef IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
-#define IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__COLOUR_ADJUST__COLOUR_ADJUST__INCLUDED
+#define IMAGINABLE__PLUGINS__COLOUR_ADJUST__COLOUR_ADJUST__INCLUDED
 
 
 #include "version.hpp"
 
 #include <plugin_iface.hpp>
 
+#include "plugin_types.hpp"
 
-class PluginGamma : public QObject, PluginInterface
+
+class PluginColourAdjust : public QObject, PluginInterface
 {
 Q_OBJECT
 Q_INTERFACES(PluginInterface)
 public:
-	PluginGamma(void);
-	~PluginGamma() {}
+	PluginColourAdjust(void);
+	~PluginColourAdjust() {}
 
-	QString name   (void) const { return "gamma"; }
+	QString name   (void) const { return "colour_adjust"; }
 	QString version(void) const { return QString::fromAscii(version::full_string()); }
 
 signals:
@@ -48,13 +50,27 @@ signals:
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
+	uint invertAll(qulonglong);
+	uint invert(qulonglong,int);
+
 	uint gammaAll(qulonglong,double);
 	uint gamma(qulonglong,int,double);
 
+	uint curveAll(qulonglong,QAdjustPoint);
+	uint curve(qulonglong,int,QAdjustPoint);
+
 private:
+	void do_invertAll(qulonglong,Image*);
+	void do_invertPlain(qulonglong,Image*,int);
+	void do_invert(qulonglong,Image*,int,double,double);
+
 	void do_gammaAll(qulonglong,Image*,double);
 	void do_gammaPlain(qulonglong,Image*,int,double);
 	void do_gamma(qulonglong,Image*,int,double,double,double);
+
+	void do_curveAll(qulonglong,Image*,QAdjustPoint);
+	void do_curvePlain(qulonglong,Image*,int,QAdjustPoint);
+	void do_curve(qulonglong,Image*,int,QAdjustPoint,double,double);
 
 	enum
 	{
@@ -62,4 +78,4 @@ private:
 	};
 };
 
-#endif // IMAGINABLE__PLUGINS__GAMMA__GAMMA__INCLUDED
+#endif // IMAGINABLE__PLUGINS__COLOUR_ADJUST__COLOUR_ADJUST__INCLUDED
