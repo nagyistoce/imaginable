@@ -57,9 +57,10 @@ SOURCES += \
 HEADERS += \
 	version.hpp \
 	resize.hpp \
-	rect.hpp
+	rect.hpp \
+	plugin_types.hpp
 
-QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
+QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp -i plugin_types.hpp
 
 DBUS_ADAPTORS += \
 	dbus_plugin_resize.xml
