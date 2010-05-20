@@ -36,7 +36,6 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QPoint>
-#include <QtCore/QSize>
 //#include <QtCore/QThread>
 
 
@@ -109,7 +108,7 @@ protected:
 	typedef QHash<QString,QString> Text;
 
 public:
-	Q_PROPERTY(QSize  size    READ size    WRITE setSize   )
+	Q_PROPERTY(QPoint size    READ size    WRITE setSize   )
 	Q_PROPERTY(int    width   READ width   WRITE setWidth  )
 	Q_PROPERTY(int    height  READ height  WRITE setHeight )
 
@@ -121,13 +120,13 @@ public:
 	Q_PROPERTY(double percent READ percent WRITE setPercent)
 
 public slots:
-	virtual QSize   size  (void) const   { return m_size; }
-	virtual void setSize  (QSize value)  { setWidth(value.width()); setHeight(value.height()); }
+	virtual QPoint  size  (void) const   { return m_size; }
+	virtual void setSize  (QPoint value) { setWidth(value.x()); setHeight(value.y()); }
 
-	virtual int     width (void) const   { return m_size.width();   }
+	virtual int     width (void) const   { return m_size.x();   }
 	virtual void setWidth (int);
 
-	virtual int     height(void) const   { return m_size.height();  }
+	virtual int     height(void) const   { return m_size.y();  }
 	virtual void setHeight(int);
 
 	virtual int    area   (void) const   { return width()*height(); }
@@ -144,7 +143,7 @@ public slots:
 
 
 	/// returns true when image has non-zero dimension even if it does not have any colour plane
-	virtual bool isEmpty(void) const { return ( (!m_size.width()) && (!m_size.height()) ); }
+	virtual bool isEmpty(void) const { return !area(); }
 	/// returns true when image has at least one pixel of data
 	virtual bool hasData(void) const { return ( (!isEmpty()) && (!m_plane.isEmpty()) ); }
 
@@ -192,7 +191,7 @@ public slots:
 
 protected:
 	QPoint m_offset;
-	QSize m_size;
+	QPoint m_size;
 	ColourPlanes m_plane;
 	ColourPlaneNames m_planeName;
 	Text m_text;

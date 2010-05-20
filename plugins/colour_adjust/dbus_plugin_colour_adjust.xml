@@ -26,15 +26,6 @@
 <node name="/name/kuzmashapran/imaginable">
 	<interface name="name.kuzmashapran.imaginable.plugin.colour_adjust">
 
-		<method name="invertAll"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-		</method>
-
-		<method name="invert"><arg type="u" direction="out"/>
-			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="plane" direction="in"/>
-		</method>
-
 		<method name="gammaAll"><arg type="u" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
 			<arg type="d" name="value" direction="in"/>
@@ -42,19 +33,51 @@
 
 		<method name="gamma"><arg type="u" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="plane" direction="in"/>
+			<arg type="ai" name="plane" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QintList"/>
 			<arg type="d" name="value" direction="in"/>
+		</method>
+
+		<method name="invertAll"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+		</method>
+
+		<method name="invert"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="ai" name="plane" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QintList"/>
+		</method>
+
+		<method name="linearAll"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="q" name="p_black" direction="in"/>
+			<arg type="q" name="p_white" direction="in"/>
+		</method>
+
+		<method name="linear"><arg type="u" direction="out"/>
+			<arg type="t" name="Id" direction="in"/>
+			<arg type="ai" name="plane" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QintList"/>
+			<arg type="q" name="p_black" direction="in"/>
+			<arg type="q" name="p_white" direction="in"/>
 		</method>
 
 		<method name="curveAll"><arg type="u" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
-			<arg type="a{qq}" name="value" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QAdjustPoint"/>
+			<arg type="u" name="function" direction="in"/>
+			<arg type="q" name="p_black" direction="in"/>
+			<arg type="q" name="p_white" direction="in"/>
+			<arg type="a{qq}" name="value" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In4" value="QAdjustPoint"/>
 		</method>
 
 		<method name="curve"><arg type="u" direction="out"/>
 			<arg type="t" name="Id" direction="in"/>
-			<arg type="i" name="plane" direction="in"/>
-			<arg type="a{qq}" name="value" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In2" value="QAdjustPoint"/>
+			<arg type="ai" name="plane" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In1" value="QintList"/>
+			<arg type="u" name="function" direction="in"/>
+			<arg type="q" name="p_black" direction="in"/>
+			<arg type="q" name="p_white" direction="in"/>
+			<arg type="a{qq}" name="value" direction="in"/><annotation name="com.trolltech.QtDBus.QtTypeName.In5" value="QAdjustPoint"/>
+		</method>
+
+		<method name="curveFunctions"><arg type="a{us}" direction="out"/>
+			<annotation name="com.trolltech.QtDBus.QtTypeName.Out0" value="QFunctionList"/>
 		</method>
 
 		<method name="errorCodeToString"><arg type="s" direction="out"/>

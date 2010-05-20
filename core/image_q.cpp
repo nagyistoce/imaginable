@@ -24,35 +24,34 @@
 
 
 #include "image_q.hpp"
-#include "dbus_image_q_main_adaptor.h"
-#include "dbus_image_q_busy_adaptor.h"
+#include "image_q_status.hpp"
+#include "dbus_image_q_adaptor.h"
 
 #include <sys/syslog.h> // for log levels
 
 
 Image_Q::Image_Q(QObject* parent)
 	: Image(parent)
+	, m_image_Q_Status(new Image_Q_Status(this))
 {
+	connect(this,SIGNAL(longProcessingStarted()),m_image_Q_Status,SIGNAL(longProcessingStarted()));
+	connect(this,SIGNAL(longProcessingFinished()),m_image_Q_Status,SIGNAL(longProcessingFinished()));
+	connect(this,SIGNAL(percentChanged(double)),m_image_Q_Status,SIGNAL(percentChanged(double)));
+	connect(m_image_Q_Status,SIGNAL(message(int,QString)),this,SIGNAL(message(int,QString)));
 }
 
 Image_Q::~Image_Q()
 {
-	QDBusConnection::sessionBus().unregisterObject(m_DBusIFaceNodeName,QDBusConnection::UnregisterTree);
+	hide_DBus_main();
 }
 
 bool Image_Q::init(QString nodeName)
 {
-	m_DBusIFaceNodeName=nodeName;
-
-	new Image_busyAdaptor(this);
-	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceNodeName,this))
-	{
-		message(LOG_ALERT,"Cannot register D-Bus object interface `busy`");
+	if(!m_image_Q_Status->init(nodeName+"/status"))
 		return false;
-	}
 
-	m_DBusIFaceMain=new Image_mainAdaptor(this);
-	m_DBusIFaceImageNodeName=m_DBusIFaceNodeName+"/image";
+	m_DBusIFaceMain=new ImageAdaptor(this);
+	m_DBusIFaceImageNodeName=nodeName+"/image";
 	return set_DBus_main();
 }
 
@@ -60,7 +59,7 @@ bool Image_Q::set_DBus_main(void)
 {
 	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceImageNodeName,m_DBusIFaceMain,QDBusConnection::ExportAllContents))
 	{
-		message(LOG_ALERT,"Cannot register D-Bus object interface");
+		message(LOG_ALERT,"Cannot register D-Bus object interface `main`");
 		return false;
 	}
 	return true;

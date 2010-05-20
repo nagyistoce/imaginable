@@ -22,21 +22,24 @@
 **
 *************/
 
-#ifndef IMAGINABLE__TYPES__INCLUDED
-#define IMAGINABLE__TYPES__INCLUDED
+
+#include "curve_function.hpp"
 
 
-#include <QtDBus/QDBusArgument>
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+CurveFunction::CurveFunction()
+{
+	memset(m_cached,0,sizeof(bool)*0x10000);
+}
 
+CurveFunction::~CurveFunction()
+{}
 
-typedef QList<int> QintList;
-Q_DECLARE_METATYPE(QintList)
-
-typedef QList<qulonglong> QulonglongList;
-Q_DECLARE_METATYPE(QulonglongList)
-
-
-#endif // IMAGINABLE__TYPES__INCLUDED
+Image::Pixel CurveFunction::get(Image::Pixel x)
+{
+	if(!m_cached[x])
+	{
+		m_cached[x]=true;
+		m_value[x]=this->calc(x);
+	}
+	return m_value[x];
+}

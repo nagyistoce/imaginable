@@ -26,15 +26,38 @@
 #include "colour_adjust.hpp"
 #include "dbus_plugin_colour_adjust_adaptor.h"
 
+#include "linear.hpp"
+#include "cubic_hermite_spline.hpp"
+
+#include <boost/shared_ptr.hpp>
+
 
 Q_EXPORT_PLUGIN2(colour_adjust,PluginColourAdjust)
+
+
+QFunctionList PluginColourAdjust::functionList;
+
+namespace {
+	enum {
+		CURVE_FUNCTION_LINEAR=0,
+		CURVE_FUNCTION_CUBIC_HERMITE_SPLINE
+	};
+}
 
 
 PluginColourAdjust::PluginColourAdjust(void)
 	: QObject(NULL)
 	, PluginInterface()
 {
+	qDBusRegisterMetaType<QintList>();
 	qDBusRegisterMetaType<QAdjustPoint>();
+	qDBusRegisterMetaType<QFunctionList>();
+
+	if(functionList.isEmpty())
+	{
+		functionList[CURVE_FUNCTION_LINEAR]="Linear";
+		functionList[CURVE_FUNCTION_CUBIC_HERMITE_SPLINE]="Cubic Hermite Spline";
+	}
 
 	new Colour_adjustAdaptor(this);
 }
@@ -42,87 +65,67 @@ PluginColourAdjust::PluginColourAdjust(void)
 
 
 
-uint PluginColourAdjust::invertAll(qulonglong Id)
+uint PluginColourAdjust::gammaAll(qulonglong Id,double value)
 {
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
 		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
+	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1] to all colour planes").arg(value),Id);
 
-	message(LOG_INFO,__FUNCTION__,QString("Inverting"),Id);
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_invertAll,this,Id,img)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_gammaAll,this,Id,img,value)));
 
 	return Core::CODE_OK;
 }
 
-void PluginColourAdjust::do_invertAll(qulonglong Id,Image* img)
+void PluginColourAdjust::do_gammaAll(qulonglong Id,Image* img,double value)
+{
+	do_gamma(Id,img,img->planesList(),value);
+}
+
+uint PluginColourAdjust::gamma(qulonglong Id,QintList colourPlanes,double value)
+{
+	bool busy;
+	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if(!img)
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+
+	if(colourPlanes.isEmpty())
+		return CODE_NO_COLOUR_PLANE;
+
+	foreach(int colourPlane,colourPlanes)
+		if(!img->hasPlane(colourPlane))
+			return CODE_NO_COLOUR_PLANE;
+
+
+	QString colourPlanes_str;
+	foreach(int colourPlane,colourPlanes)
+		colourPlanes_str+=QString((colourPlanes_str.isEmpty())?"%1":", %1").arg(colourPlane);
+
+	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1] to colour planes [%2]").arg(value).arg(colourPlanes_str),Id);
+
+
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_gamma,this,Id,img,colourPlanes,value)));
+
+	return Core::CODE_OK;
+}
+
+void PluginColourAdjust::do_gamma(qulonglong Id,Image* img,QintList colourPlanes,double value)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
 	double from=0.;
-	double step=100./static_cast<double>(img->planesList().size());
-	foreach(int colourPlane,img->planesList())
+	double step=100./static_cast<double>(colourPlanes.size());
+	foreach(int colourPlane,colourPlanes)
 	{
-		do_invert(Id,img,colourPlane,from,step);
+		do_gammaPlain(Id,img,colourPlane,value,from,step);
 		from+=step;
 	}
 
 	disconnect(img,SLOT(setPercent(double)));
-
-	message(LOG_INFO,"invertAll",QString("Inverted"),Id);
 }
-
-uint PluginColourAdjust::invert(qulonglong Id,int colourPlane)
-{
-	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
-
-	if(!img->hasPlane(colourPlane))
-		return CODE_NO_COLOUR_PLANE;
-
-
-	message(LOG_INFO,__FUNCTION__,QString("Inverting colour plane [%1]").arg(colourPlane),Id);
-
-
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_invertPlain,this,Id,img,colourPlane)));
-
-	return Core::CODE_OK;
-}
-
-void PluginColourAdjust::do_invertPlain(qulonglong Id,Image* img,int colourPlane)
-{
-	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
-
-	do_invert(Id,img,colourPlane,0.,100.);
-
-	disconnect(img,SLOT(setPercent(double)));
-}
-
-void PluginColourAdjust::do_invert(qulonglong Id,Image* img,int colourPlane,double fromPercent,double stepPercent)
-{
-	const int& width =img->width();
-	const int& height=img->height();
-
-	Image::Pixel* data=img->plane(colourPlane);
-
-	for(int y=0;y<height;++y)
-	{
-		emit setPercent(fromPercent+static_cast<double>(y)*stepPercent/static_cast<double>(height));
-
-		int yo=y*width;
-		for(int x=0;x<width;++x)
-			data[yo+x]^=0xffff;
-	}
-
-	message(LOG_INFO,"invert",QString("Colour plane [%1] inverted").arg(colourPlane),Id);
-}
-
-
-
 
 namespace {
 	void gamma_Pixel(Image::Pixel& p,double value)
@@ -134,67 +137,7 @@ namespace {
 	}
 }
 
-uint PluginColourAdjust::gammaAll(qulonglong Id,double value)
-{
-	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
-
-
-	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1]").arg(value),Id);
-
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_gammaAll,this,Id,img,value)));
-
-	return Core::CODE_OK;
-}
-
-void PluginColourAdjust::do_gammaAll(qulonglong Id,Image* img,double value)
-{
-	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
-
-	double from=0.;
-	double step=100./static_cast<double>(img->planesList().size());
-	foreach(int colourPlane,img->planesList())
-	{
-		do_gamma(Id,img,colourPlane,value,from,step);
-		from+=step;
-	}
-
-	disconnect(img,SLOT(setPercent(double)));
-
-	message(LOG_INFO,"gammaAll",QString("Gamma [%1] applied").arg(value),Id);
-}
-
-uint PluginColourAdjust::gamma(qulonglong Id,int colourPlane,double value)
-{
-	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
-
-	if(!img->hasPlane(colourPlane))
-		return CODE_NO_COLOUR_PLANE;
-
-
-	message(LOG_INFO,__FUNCTION__,QString("Applying gamma [%1] to colour plane [%2]").arg(value).arg(colourPlane),Id);
-
-
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_gammaPlain,this,Id,img,colourPlane,value)));
-
-	return Core::CODE_OK;
-}
-
-void PluginColourAdjust::do_gammaPlain(qulonglong Id,Image* img,int colourPlane,double value)
-{
-	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
-
-	do_gamma(Id,img,colourPlane,value,0.,100.);
-
-	disconnect(img,SLOT(setPercent(double)));
-}
-
-void PluginColourAdjust::do_gamma(qulonglong Id,Image* img,int colourPlane,double value,double fromPercent,double stepPercent)
+void PluginColourAdjust::do_gammaPlain(qulonglong Id,Image* img,int colourPlane,double value,double fromPercent,double stepPercent)
 {
 	const int& width =img->width();
 	const int& height=img->height();
@@ -219,7 +162,7 @@ void PluginColourAdjust::do_gamma(qulonglong Id,Image* img,int colourPlane,doubl
 
 
 
-uint PluginColourAdjust::curveAll(qulonglong Id,QAdjustPoint value)
+uint PluginColourAdjust::invertAll(qulonglong Id)
 {
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
@@ -227,59 +170,225 @@ uint PluginColourAdjust::curveAll(qulonglong Id,QAdjustPoint value)
 		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
 
-	message(LOG_INFO,__FUNCTION__,"Applying custom curve",Id);
+	message(LOG_INFO,__FUNCTION__,QString("Inverting all colour planes"),Id);
 
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_curveAll,this,Id,img,value)));
+
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_invertAll,this,Id,img)));
 
 	return Core::CODE_OK;
 }
 
-void PluginColourAdjust::do_curveAll(qulonglong Id,Image* img,QAdjustPoint value)
+void PluginColourAdjust::do_invertAll(qulonglong Id,Image* img)
+{
+	do_invert(Id,img,img->planesList());
+}
+
+uint PluginColourAdjust::invert(qulonglong Id,QintList colourPlanes)
+{
+	bool busy;
+	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if(!img)
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+
+	if(colourPlanes.isEmpty())
+		return CODE_NO_COLOUR_PLANE;
+
+	foreach(int colourPlane,colourPlanes)
+		if(!img->hasPlane(colourPlane))
+			return CODE_NO_COLOUR_PLANE;
+
+
+	QString colourPlanes_str;
+	foreach(int colourPlane,colourPlanes)
+		colourPlanes_str+=QString((colourPlanes_str.isEmpty())?"%1":", %1").arg(colourPlane);
+
+	message(LOG_INFO,__FUNCTION__,QString("Inverting colour planes [%1]").arg(colourPlanes_str),Id);
+
+
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_invert,this,Id,img,colourPlanes)));
+
+	return Core::CODE_OK;
+}
+
+void PluginColourAdjust::do_invert(qulonglong Id,Image* img,QintList colourPlanes)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
 	double from=0.;
-	double step=100./static_cast<double>(img->planesList().size());
-	foreach(int colourPlane,img->planesList())
+	double step=100./static_cast<double>(colourPlanes.size());
+	foreach(int colourPlane,colourPlanes)
 	{
-		do_curve(Id,img,colourPlane,value,from,step);
+		do_invertPlain(Id,img,colourPlane,from,step);
 		from+=step;
 	}
 
 	disconnect(img,SLOT(setPercent(double)));
-
-	message(LOG_INFO,"curveAll","Custom curve applied",Id);
 }
 
-uint PluginColourAdjust::curve(qulonglong Id,int colourPlane,QAdjustPoint value)
+void PluginColourAdjust::do_invertPlain(qulonglong Id,Image* img,int colourPlane,double fromPercent,double stepPercent)
+{
+	const int& width =img->width();
+	const int& height=img->height();
+
+	Image::Pixel* data=img->plane(colourPlane);
+
+	for(int y=0;y<height;++y)
+	{
+		emit setPercent(fromPercent+static_cast<double>(y)*stepPercent/static_cast<double>(height));
+
+		int yo=y*width;
+		for(int x=0;x<width;++x)
+			data[yo+x]^=0xffff;
+	}
+
+	message(LOG_INFO,"invert",QString("Colour plane [%1] inverted").arg(colourPlane),Id);
+}
+
+
+
+
+uint PluginColourAdjust::linearAll(qulonglong Id,ushort p0,ushort p1)
 {
 	bool busy;
 	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
 	if(!img)
 		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
 
-	if(!img->hasPlane(colourPlane))
-		return CODE_NO_COLOUR_PLANE;
+	message(LOG_INFO,__FUNCTION__,QString("Applying linear adjustment [%1,%2] to all colour planes").arg(p0).arg(p1),Id);
 
 
-	message(LOG_INFO,__FUNCTION__,QString("Applying custom curve to colour plane [%1]").arg(colourPlane),Id);
-
-
-	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_curvePlain,this,Id,img,colourPlane,value)));
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_curveAll,this,Id,img,static_cast<uint>(CURVE_FUNCTION_LINEAR),p0,p1,QAdjustPoint())));
 
 	return Core::CODE_OK;
 }
 
-void PluginColourAdjust::do_curvePlain(qulonglong Id,Image* img,int colourPlane,QAdjustPoint value)
+uint PluginColourAdjust::linear(qulonglong Id,QintList colourPlanes,ushort p0,ushort p1)
+{
+	bool busy;
+	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if(!img)
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+
+	if(colourPlanes.isEmpty())
+		return CODE_NO_COLOUR_PLANE;
+
+	foreach(int colourPlane,colourPlanes)
+		if(!img->hasPlane(colourPlane))
+			return CODE_NO_COLOUR_PLANE;
+
+
+	QString colourPlanes_str;
+	foreach(int colourPlane,colourPlanes)
+		colourPlanes_str+=QString((colourPlanes_str.isEmpty())?"%1":", %1").arg(colourPlane);
+
+	message(LOG_INFO,__FUNCTION__,QString("Applying linear adjustment [%1,%2] to colour planes [%3]").arg(p0).arg(p1).arg(colourPlanes_str),Id);
+
+
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_curve,this,Id,img,colourPlanes,static_cast<uint>(CURVE_FUNCTION_LINEAR),p0,p1,QAdjustPoint())));
+
+	return Core::CODE_OK;
+}
+
+
+
+namespace {
+
+boost::shared_ptr<CurveFunction> initCurveFunction(uint function,ushort p0,ushort p1,QAdjustPoint points)
+{
+	boost::shared_ptr<CurveFunction> curveFunction;
+	switch(function)
+	{
+		case CURVE_FUNCTION_LINEAR:
+			curveFunction.reset(new Linear(p0,p1,points));
+		break;
+		case CURVE_FUNCTION_CUBIC_HERMITE_SPLINE:
+			curveFunction.reset(new CubicHermiteSpline(p0,p1,points));
+		break;
+	}
+
+	return curveFunction;
+}
+
+}
+
+uint PluginColourAdjust::curveAll(qulonglong Id,uint function,ushort p0,ushort p1,QAdjustPoint points)
+{
+	if(functionList.constFind(function)==functionList.constEnd())
+		return CODE_NO_SUCH_FUNCTION;
+
+	bool busy;
+	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if(!img)
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+
+	if(!points.size())
+		return CODE_NO_POINTS;
+
+	message(LOG_INFO,__FUNCTION__,QString("Applying %1 curve").arg(functionList[function]),Id);
+
+
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_curveAll,this,Id,img,function,p0,p1,points)));
+
+	return Core::CODE_OK;
+}
+
+void PluginColourAdjust::do_curveAll(qulonglong Id,Image* img,uint function,ushort p0,ushort p1,QAdjustPoint points)
+{
+	do_curve(Id,img,img->planesList(),function,p0,p1,points);
+}
+
+uint PluginColourAdjust::curve(qulonglong Id,QintList colourPlanes,uint function,ushort p0,ushort p1,QAdjustPoint points)
+{
+	if(functionList.constFind(function)==functionList.constEnd())
+		return CODE_NO_SUCH_FUNCTION;
+
+	bool busy;
+	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if(!img)
+		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+
+	if(colourPlanes.isEmpty())
+		return CODE_NO_COLOUR_PLANE;
+
+	foreach(int colourPlane,colourPlanes)
+		if(!img->hasPlane(colourPlane))
+			return CODE_NO_COLOUR_PLANE;
+
+
+	if(!points.size())
+		return CODE_NO_POINTS;
+
+
+	QString colourPlanes_str;
+	foreach(int colourPlane,colourPlanes)
+		colourPlanes_str+=QString((colourPlanes_str.isEmpty())?"%1":", %1").arg(colourPlane);
+
+	message(LOG_INFO,__FUNCTION__,QString("Applying %1 curve to colour planes [%2]").arg(functionList[function]).arg(colourPlanes_str),Id);
+
+
+	doLongProcessing(img,QtConcurrent::run(boost::bind(&PluginColourAdjust::do_curve,this,Id,img,colourPlanes,function,p0,p1,points)));
+
+	return Core::CODE_OK;
+}
+
+void PluginColourAdjust::do_curve(qulonglong Id,Image* img,QintList colourPlanes,uint function,ushort p0,ushort p1,QAdjustPoint points)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
-	do_curve(Id,img,colourPlane,value,0.,100.);
+	boost::shared_ptr<CurveFunction> curveFunction=initCurveFunction(function,p0,p1,points);
+
+	double from=0.;
+	double step=100./static_cast<double>(colourPlanes.size());
+	foreach(int colourPlane,colourPlanes)
+	{
+		do_curvePlain(Id,img,colourPlane,function,curveFunction.get(),from,step);
+		from+=step;
+	}
 
 	disconnect(img,SLOT(setPercent(double)));
 }
 
-void PluginColourAdjust::do_curve(qulonglong Id,Image* img,int colourPlane,QAdjustPoint value,double fromPercent,double stepPercent)
+void PluginColourAdjust::do_curvePlain(qulonglong Id,Image* img,int colourPlane,uint function,CurveFunction* curveFunction,double fromPercent,double stepPercent)
 {
 	const int& width =img->width();
 	const int& height=img->height();
@@ -294,11 +403,11 @@ void PluginColourAdjust::do_curve(qulonglong Id,Image* img,int colourPlane,QAdju
 		for(int x=0;x<width;++x)
 		{
 			int xyo=yo+x;
-//			curve_Pixel(data[xyo],value);
+			data[xyo]=curveFunction->get(data[xyo]);
 		}
 	}
 
-	message(LOG_INFO,"curve",QString("Custom curve applied to colour plane [%1]").arg(colourPlane),Id);
+	message(LOG_INFO,"curve",QString("%1 curve applied to colour plane [%2]").arg(functionList[function]).arg(colourPlane),Id);
 }
 
 
@@ -309,7 +418,9 @@ QString PluginColourAdjust::errorCodeToString(uint errorCode) const
 	switch(errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
-		CASE(NO_COLOUR_PLANE,"No colour plane")
+		CASE(NO_COLOUR_PLANE, "No colour plane")
+		CASE(NO_SUCH_FUNCTION,"No such function")
+		CASE(NO_POINTS,       "No adjust points")
 		#undef CASE
 	}
 	return m_core->errorCodeToString(errorCode);

@@ -50,12 +50,12 @@ void Wait::init(void)
 
 	foreach(QString Id,program_options().unnamed())
 	{
-		name::kuzmashapran::imaginable::image_busy* image=NULL;
+		name::kuzmashapran::imaginable::image_status* image=NULL;
 		bool ok;
 		qulonglong intId=Id.toULongLong(&ok);
 		if( ok
 		&&  core->hasImage(intId)
-		&&  (image=new name::kuzmashapran::imaginable::image_busy("name.kuzmashapran.imaginable",QString("/%1").arg(Id),QDBusConnection::sessionBus(),this))
+		&&  (image=new name::kuzmashapran::imaginable::image_status("name.kuzmashapran.imaginable",QString("/%1/status").arg(Id),QDBusConnection::sessionBus(),this))
 		&&  image->isValid() )
 		{
 			if(image->busy())

@@ -180,7 +180,7 @@ void Image::setWidth(int width)
 	if(!m_plane.isEmpty())
 		return;
 
-	m_size.setWidth(width);
+	m_size.setX(std::max<int>(0,width));
 }
 
 void Image::setHeight(int height)
@@ -188,13 +188,13 @@ void Image::setHeight(int height)
 	if(!m_plane.isEmpty())
 		return;
 
-	m_size.setHeight(height);
+	m_size.setY(std::max<int>(0,height));
 }
 
 void Image::clear(void)
 {
 	m_offset=QPoint();
-	m_size=QSize();
+	m_size=QPoint();
 	m_plane.clear();
 	m_text.clear();
 }

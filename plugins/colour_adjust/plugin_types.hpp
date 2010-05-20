@@ -26,11 +26,16 @@
 #define IMAGINABLE__PLUGINS__COLOUR_ADJUST__TYPES__INCLUDED
 
 
+#include <QtCore/QMetaType>
 #include <QtCore/QHash>
+#include <QtCore/QString>
 
 
-typedef QHash<quint16,quint16> QAdjustPoint;
-Q_DECLARE_METATYPE(QAdjustPoint)
+typedef QHash<ushort,ushort> QAdjustPoint;
+Q_DECLARE_METATYPE(QAdjustPoint);
+
+typedef QHash<uint,QString> QFunctionList;
+Q_DECLARE_METATYPE(QFunctionList);
 
 
 #endif // IMAGINABLE__PLUGINS__COLOUR_ADJUST__TYPES__INCLUDED

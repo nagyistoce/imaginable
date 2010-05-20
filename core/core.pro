@@ -26,6 +26,7 @@ TARGET = imaginable
 
 TEMPLATE = app
 CONFIG += console
+
 QT += dbus
 QT -= gui
 
@@ -57,6 +58,7 @@ SOURCES += \
 	core_q.cpp \
 	image.cpp \
 	image_q.cpp \
+	image_q_status.cpp \
 	$${PATH_TO_PROJECT_ROOT}/common/options.cpp
 
 HEADERS += \
@@ -64,6 +66,7 @@ HEADERS += \
 	version.hpp \
 	core_q.hpp \
 	image_q.hpp \
+	image_q_status.hpp \
 	$${PATH_TO_PROJECT_ROOT}/common/options.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/core.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/image.hpp \
@@ -75,8 +78,8 @@ QMAKE_QDBUSXML2CPP = \
 
 DBUS_ADAPTORS += \
 	dbus_core_q.xml \
-	dbus_image_q_main.xml \
-	dbus_image_q_busy.xml
+	dbus_image_q.xml \
+	dbus_image_q_status.xml
 
 OTHER_FILES += \
 	version-minor.inl \

@@ -22,21 +22,39 @@
 **
 *************/
 
-#ifndef IMAGINABLE__TYPES__INCLUDED
-#define IMAGINABLE__TYPES__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__COLOUR_ADJUST__LINEAR__INCLUDED
+#define IMAGINABLE__PLUGINS__COLOUR_ADJUST__LINEAR__INCLUDED
 
 
-#include <QtDBus/QDBusArgument>
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include "curve_function.hpp"
+#include "plugin_types.hpp"
+
+#include <QtCore/QMap>
 
 
-typedef QList<int> QintList;
-Q_DECLARE_METATYPE(QintList)
+class Linear : public CurveFunction
+{
+public:
+	Linear(Image::Pixel,Image::Pixel,QAdjustPoint);
+	~Linear();
 
-typedef QList<qulonglong> QulonglongList;
-Q_DECLARE_METATYPE(QulonglongList)
+private:
+	typedef struct point_param
+	{
+		point_param()
+		{}
+		point_param(Image::Pixel syi_)
+			: syi(syi_)
+		{}
+		int     dxi;
+		int syi,dyi;
+		double /*sx,*/dx;
+		double /*sy,*/dy;
+	} point_param;
+	typedef QMap<Image::Pixel,point_param> point_params;
+	point_params m_point;
 
+	Image::Pixel calc(Image::Pixel);
+};
 
-#endif // IMAGINABLE__TYPES__INCLUDED
+#endif // IMAGINABLE__PLUGINS__COLOUR_ADJUST__LINEAR__INCLUDED
