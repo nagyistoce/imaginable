@@ -22,21 +22,31 @@
 **
 *************/
 
-#ifndef IMAGINABLE__TYPES__INCLUDED
-#define IMAGINABLE__TYPES__INCLUDED
+#ifndef IMAGINABLE__CORE__IMAGE_Q_STATUS__INCLUDED
+#define IMAGINABLE__CORE__IMAGE_Q_STATUS__INCLUDED
 
 
-#include <QtDBus/QDBusArgument>
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include <QtCore/QObject>
 
 
-typedef QList<int> QintList;
-Q_DECLARE_METATYPE(QintList)
+class Image_Q_Status : public QObject
+{
+Q_OBJECT
+public:
+	Image_Q_Status(QObject* = NULL);
 
-typedef QList<qulonglong> QulonglongList;
-Q_DECLARE_METATYPE(QulonglongList)
+	bool init(QString);
 
+signals:
+	void longProcessingStarted(void);
+	void percentChanged(double);
+	void longProcessingFinished(void);
 
-#endif // IMAGINABLE__TYPES__INCLUDED
+	void message(int,QString);
+
+public slots:
+	bool    busy   (void) const;
+	double  percent(void) const;
+};
+
+#endif // IMAGINABLE__CORE__IMAGE_Q_STATUS__INCLUDED

@@ -22,21 +22,33 @@
 **
 *************/
 
-#ifndef IMAGINABLE__TYPES__INCLUDED
-#define IMAGINABLE__TYPES__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__COLOUR_ADJUST__CURVE_FUNCTION__INCLUDED
+#define IMAGINABLE__PLUGINS__COLOUR_ADJUST__CURVE_FUNCTION__INCLUDED
 
 
-#include <QtDBus/QDBusArgument>
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include <image.hpp>
 
 
-typedef QList<int> QintList;
-Q_DECLARE_METATYPE(QintList)
-
-typedef QList<qulonglong> QulonglongList;
-Q_DECLARE_METATYPE(QulonglongList)
+template<typename T>
+T clamp(T value,T lower,T upper)
+{ return (value<lower) ? lower : ( (value>upper) ? upper : value ) ; }
 
 
-#endif // IMAGINABLE__TYPES__INCLUDED
+class CurveFunction
+{
+public:
+	CurveFunction(void);
+	virtual ~CurveFunction();
+
+	Image::Pixel get(Image::Pixel);
+	inline Image::Pixel operator() (Image::Pixel x) { return get(x); }
+
+private:
+	bool m_cached[0x10000];
+	Image::Pixel m_value[0x10000];
+
+protected:
+	virtual Image::Pixel calc(Image::Pixel) =0;
+};
+
+#endif // IMAGINABLE__PLUGINS__COLOUR_ADJUST__CURVE_FUNCTION__INCLUDED

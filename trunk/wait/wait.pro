@@ -66,7 +66,7 @@ QMAKE_QDBUSXML2CPP = \
 	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_INTERFACES += \
-	../core/dbus_image_q_busy.xml \
+	../core/dbus_image_q_status.xml \
 	../core/dbus_core_q.xml
 
 OTHER_FILES += \

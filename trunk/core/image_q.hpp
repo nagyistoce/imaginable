@@ -33,7 +33,8 @@
 
 
 class Core_Q;
-class Image_mainAdaptor;
+class ImageAdaptor;
+class Image_Q_Status;
 
 class Image_Q : public Image
 {
@@ -58,9 +59,9 @@ public slots:
 private:
 	friend class Core_Q;
 
-	QString m_DBusIFaceNodeName;
+	Image_Q_Status* m_image_Q_Status;
 	QString m_DBusIFaceImageNodeName;
-	Image_mainAdaptor* m_DBusIFaceMain;
+	ImageAdaptor* m_DBusIFaceMain;
 
 	bool set_DBus_main(void);
 	void hide_DBus_main(void);

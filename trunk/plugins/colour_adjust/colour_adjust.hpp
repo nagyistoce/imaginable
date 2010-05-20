@@ -33,6 +33,8 @@
 #include "plugin_types.hpp"
 
 
+class CurveFunction;
+
 class PluginColourAdjust : public QObject, PluginInterface
 {
 Q_OBJECT
@@ -50,31 +52,40 @@ signals:
 public slots:
 	QString errorCodeToString(uint errorCode) const;
 
+	uint gammaAll (qulonglong,         double);
+	uint gamma    (qulonglong,QintList,double);
+
 	uint invertAll(qulonglong);
-	uint invert(qulonglong,int);
+	uint invert   (qulonglong,QintList);
 
-	uint gammaAll(qulonglong,double);
-	uint gamma(qulonglong,int,double);
+	uint linearAll(qulonglong,         ushort,ushort);
+	uint linear   (qulonglong,QintList,ushort,ushort);
 
-	uint curveAll(qulonglong,QAdjustPoint);
-	uint curve(qulonglong,int,QAdjustPoint);
+	uint curveAll (qulonglong,         uint,ushort,ushort,QAdjustPoint);
+	uint curve    (qulonglong,QintList,uint,ushort,ushort,QAdjustPoint);
+
+	static inline QFunctionList curveFunctions(void) { return functionList; }
 
 private:
-	void do_invertAll(qulonglong,Image*);
-	void do_invertPlain(qulonglong,Image*,int);
-	void do_invert(qulonglong,Image*,int,double,double);
+	void do_gammaAll   (qulonglong,Image*,         double);
+	void do_gamma      (qulonglong,Image*,QintList,double);
+	void do_gammaPlain (qulonglong,Image*,int     ,double,double,double);
 
-	void do_gammaAll(qulonglong,Image*,double);
-	void do_gammaPlain(qulonglong,Image*,int,double);
-	void do_gamma(qulonglong,Image*,int,double,double,double);
+	void do_invertAll  (qulonglong,Image*);
+	void do_invert     (qulonglong,Image*,QintList);
+	void do_invertPlain(qulonglong,Image*,int     ,double,double);
 
-	void do_curveAll(qulonglong,Image*,QAdjustPoint);
-	void do_curvePlain(qulonglong,Image*,int,QAdjustPoint);
-	void do_curve(qulonglong,Image*,int,QAdjustPoint,double,double);
+	void do_curveAll   (qulonglong,Image*,         uint,ushort,ushort,QAdjustPoint);
+	void do_curve      (qulonglong,Image*,QintList,uint,ushort,ushort,QAdjustPoint);
+	void do_curvePlain (qulonglong,Image*,int     ,uint,CurveFunction*,double,double);
+
+	static QFunctionList functionList;
 
 	enum
 	{
 		/**/CODE_NO_COLOUR_PLANE = Core::CODE__CUSTOM
+		,   CODE_NO_SUCH_FUNCTION
+		,   CODE_NO_POINTS
 	};
 };
 

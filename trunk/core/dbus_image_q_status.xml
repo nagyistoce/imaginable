@@ -24,7 +24,7 @@
 **
 ********** -->
 <node name="/name/kuzmashapran/imaginable">
-	<interface name="name.kuzmashapran.imaginable.image_busy">
+	<interface name="name.kuzmashapran.imaginable.image_status">
 
 		<method name="busy"><arg type="b" direction="out"/></method>
 		<method name="percent"><arg type="d" direction="out"/></method>

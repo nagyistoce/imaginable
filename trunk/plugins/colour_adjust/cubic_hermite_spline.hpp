@@ -22,37 +22,47 @@
 **
 *************/
 
-#ifndef IMAGINABLE__WAIT__WAIT__INCLUDED
-#define IMAGINABLE__WAIT__WAIT__INCLUDED
+#ifndef IMAGINABLE__PLUGINS__COLOUR_ADJUST__CUBIC_HERMITE_SPLINE__INCLUDED
+#define IMAGINABLE__PLUGINS__COLOUR_ADJUST__CUBIC_HERMITE_SPLINE__INCLUDED
 
 
-#include "dbus_image_q_status_interface.h"
+#include "curve_function.hpp"
+#include "plugin_types.hpp"
 
-#include <QtCore/QObject>
 #include <QtCore/QMap>
 
 
-class QTimer;
-
-class Wait : public QObject
+class CubicHermiteSpline : public CurveFunction
 {
-Q_OBJECT
 public:
-	Wait(QObject* parent=NULL);
-
-public slots:
-	void finished(void);
-	void timeout(void);
-
-private slots:
-	void init(void);
+	CubicHermiteSpline(Image::Pixel,Image::Pixel,QAdjustPoint);
+	~CubicHermiteSpline();
 
 private:
-	int m_rest;
+	typedef struct point_param
+	{
+		point_param()
+		{}
+		point_param(Image::Pixel syi_)
+			: syi(syi_)
+		{}
+		int     dxi;
+		int syi,dyi;
+		double sx,dx;
+		double sy,dy;
+		double st,et;
+		double p[2],m[2];
+	} point_param;
+	typedef QMap<Image::Pixel,point_param> point_params;
+	point_params m_point;
 
-	QTimer* m_timer;
+	static bool h_cached[0x10000];
+	static double h[2][2][0x10000];
+	static double k[2][2][4];
 
-	QMap<qulonglong,name::kuzmashapran::imaginable::image_status*> m_images;
+	void calc_h(Image::Pixel);
+
+	Image::Pixel calc(Image::Pixel);
 };
 
-#endif // IMAGINABLE__WAIT__WAIT__INCLUDED
+#endif // IMAGINABLE__PLUGINS__COLOUR_ADJUST__CUBIC_HERMITE_SPLINE__INCLUDED

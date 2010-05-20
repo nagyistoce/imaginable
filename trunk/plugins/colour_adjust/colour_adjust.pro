@@ -52,11 +52,17 @@ INCLUDEPATH += \
 
 SOURCES += \
 	version.cpp \
-	colour_adjust.cpp
+	colour_adjust.cpp \
+	curve_function.cpp \
+	linear.cpp \
+	cubic_hermite_spline.cpp
 
 HEADERS += \
 	version.hpp \
 	colour_adjust.hpp \
+	curve_function.hpp \
+	linear.hpp \
+	cubic_hermite_spline.hpp \
 	plugin_types.hpp
 
 QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp -i plugin_types.hpp

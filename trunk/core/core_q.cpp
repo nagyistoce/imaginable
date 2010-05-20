@@ -26,7 +26,6 @@
 #include "core_q.hpp"
 #include "dbus_core_q_adaptor.h"
 #include "main.hpp"
-#include "image_q.hpp"
 #include "plugin_iface.hpp"
 
 #include <QtCore/QCoreApplication>
@@ -270,10 +269,23 @@ uint Core_Q::loadPlugin(QString fileName)
 			break;
 		}
 
-		if( (plugin->name().isEmpty())
-		||  (plugin->name().contains('/')) )
+		if(plugin->name().isEmpty())
 		{
-			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name").arg(fileName);
+			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name (empty name)").arg(fileName);
+			ret=CODE_INVALID_PLUGIN_NAME;
+			break;
+		}
+
+		if(plugin->name().contains('/'))
+		{
+			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name (contains '/')").arg(fileName);
+			ret=CODE_INVALID_PLUGIN_NAME;
+			break;
+		}
+
+		if(plugin->name()==(QString("%1").arg(plugin->name().toULongLong())))//is number
+		{
+			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name (is digit)").arg(fileName);
 			ret=CODE_INVALID_PLUGIN_NAME;
 			break;
 		}

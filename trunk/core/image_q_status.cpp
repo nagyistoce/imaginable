@@ -22,21 +22,37 @@
 **
 *************/
 
-#ifndef IMAGINABLE__TYPES__INCLUDED
-#define IMAGINABLE__TYPES__INCLUDED
+
+#include "image_q_status.hpp"
+#include "dbus_image_q_status_adaptor.h"
+
+#include <sys/syslog.h> // for log levels
+
+#include <QtCore/QVariant>
 
 
-#include <QtDBus/QDBusArgument>
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+Image_Q_Status::Image_Q_Status(QObject* parent)
+	: QObject(parent)
+{
+}
 
+bool Image_Q_Status::init(QString nodeName)
+{
+	new Image_statusAdaptor(this);
+	if(!QDBusConnection::sessionBus().registerObject(nodeName,this))
+	{
+		message(LOG_ALERT,"Cannot register D-Bus object interface `status`");
+		return false;
+	}
+	return true;
+}
 
-typedef QList<int> QintList;
-Q_DECLARE_METATYPE(QintList)
+bool Image_Q_Status::busy(void) const
+{
+	return qvariant_cast<bool>(parent()->property("busy"));
+}
 
-typedef QList<qulonglong> QulonglongList;
-Q_DECLARE_METATYPE(QulonglongList)
-
-
-#endif // IMAGINABLE__TYPES__INCLUDED
+double Image_Q_Status::percent(void) const
+{
+	return qvariant_cast<double>(parent()->property("percent"));
+}
