@@ -115,17 +115,20 @@ int main(int argc,char* argv[])
 	}
 
 
-	if(!options.flag("--no-hello"))
-		say_hello();
-
 	if(options.flag("--version"))
 	{
+		say_hello();
 		show_version();
 		return EXIT_SUCCESS;
 	}
 
-	show_version();
+	if(!options.flag("--no-hello"))
+		say_hello();
+
+
+#ifdef _DEBUG
 	QTextStream(stderr)<<"PID="<<QCoreApplication::applicationPid()<<"\n";
+#endif
 
 
 	if(!QDBusConnection::sessionBus().registerService(dbus_service_name))
