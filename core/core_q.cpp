@@ -23,12 +23,13 @@
 *************/
 
 
+#include <QtCore/QCoreApplication>
+
 #include "core_q.hpp"
-#include "dbus_core_q_adaptor.h"
 #include "main.hpp"
 #include "plugin_iface.hpp"
 
-#include <QtCore/QCoreApplication>
+#include "dbus_core_q_adaptor.h"
 
 
 
@@ -36,7 +37,7 @@ namespace {
 	const char dbus_object_name[]="/";
 }
 
-Core_Q::Core_Q(QObject* parent)
+Core_Q::Core_Q(QObject *parent)
 	: QObject(parent)
 	, Core()
 {
@@ -51,7 +52,7 @@ Core_Q::Core_Q(QObject* parent)
 bool Core_Q::init(void)
 {
 	new CoreAdaptor(this);
-	if(!QDBusConnection::sessionBus().registerObject(dbus_object_name,this))
+	if (!QDBusConnection::sessionBus().registerObject(dbus_object_name,this))
 	{
 		message(LOG_ALERT,"Cannot register D-Bus object interface");
 		return false;
@@ -84,12 +85,12 @@ void Core_Q::setAutoCloseTime(unsigned value)
 
 void Core_Q::restartAutoCloser(void)
 {
-	if( m_autoCloseTimer.isActive() )
+	if (m_autoCloseTimer.isActive())
 	{
 		m_autoCloseTimer.stop();
 		message(LOG_INFO,"Autoclosing cancelled");
 	}
-	if( m_autoCloseTimer.interval() && m_images.isEmpty() )
+	if (m_autoCloseTimer.interval() && m_images.isEmpty())
 	{
 		{
 			unsigned m=(m_autoCloseTimer.interval()/1000/60) %60;
@@ -105,8 +106,8 @@ qulonglong Core_Q::createImage(void)
 {
 	qulonglong Id=nextIndex();
 
-	Image_Q* newImage=new Image_Q(this);
-	if(newImage->init(QString("/%1").arg(Id)))
+	Image_Q *newImage=new Image_Q(this);
+	if (newImage->init(QString("/%1").arg(Id)))
 	{
 		m_images[Id]=newImage;
 
@@ -123,13 +124,13 @@ qulonglong Core_Q::createImage(void)
 uint Core_Q::deleteImage(qulonglong Id)
 {
 	Images::Iterator I=m_images.find(Id);
-	if(I==m_images.end())
+	if (I == m_images.end())
 	{
 		message(LOG_ERR,"Image is not found for deletion",Id);
 		return CODE_NO_IMAGE;
 	}
 
-	if(I.value()->busy())
+	if (I.value()->busy())
 	{
 		message(LOG_WARNING,"Image is busy",Id);
 		return CODE_IMAGE_BUSY;
@@ -149,7 +150,7 @@ uint Core_Q::deleteImage(qulonglong Id)
 
 qulonglong Core_Q::nextIndex(void)
 {
-	if(m_images.isEmpty())
+	if (m_images.isEmpty())
 		return 1;
 	Images::const_iterator I=m_images.constEnd();
 	--I;
@@ -161,22 +162,22 @@ bool Core_Q::hasImage(qulonglong Id) const
 	return m_images.constFind(Id)!=m_images.constEnd();
 }
 
-Image* Core_Q::image(qulonglong Id)
+Image *Core_Q::image(qulonglong Id)
 {
 	Images::iterator I=m_images.find(Id);
-	if(I!=m_images.end())
+	if (I != m_images.end())
 		return I.value();
 	return NULL;
 }
 
-Image* Core_Q::image(qulonglong Id,bool& busy)
+Image *Core_Q::image(qulonglong Id,bool &busy)
 {
-	Image* ret=image(Id);
+	Image *ret=image(Id);
 	busy=false;
-	if(ret)
+	if (ret)
 	{
 		busy=ret->busy();
-		if(busy)
+		if (busy)
 			ret=NULL;
 	}
 	return ret;
@@ -192,7 +193,7 @@ namespace {
 
 QString messageLevelToString(int level)
 {
-	switch(level)
+	switch (level)
 	{
 		case LOG_EMERG:   return "Emergency";
 		case LOG_ALERT:   return "Alert";
@@ -210,9 +211,9 @@ QString messageLevelToString(int level)
 void Core_Q::message(int level,QString text,QString source,qulonglong Id) const
 {
 	QDateTime now(QDateTime::currentDateTime());
-	QTextStream(stdout)<<(Id?
-		(QString("%1 [%2] %3: Image [%4]: %5\n").arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")).arg(messageLevelToString(level),-9).arg(source).arg(Id).arg(text)):
-		(QString("%1 [%2] %3: %4\n")            .arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")).arg(messageLevelToString(level),-9).arg(source)        .arg(text)));
+	QTextStream(stdout) << (Id ?
+		(QString("%1 [%2] %3: Image [%4]: %5\n").arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")).arg(messageLevelToString(level),-9).arg(source).arg(Id).arg(text)) :
+		(QString("%1 [%2] %3: %4\n")            .arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")).arg(messageLevelToString(level),-9).arg(source)        .arg(text)) );
 }
 
 uint Core_Q::loadPlugin(QString fileName)
@@ -222,39 +223,42 @@ uint Core_Q::loadPlugin(QString fileName)
 
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
-	do{
-		if(isPluginLoaded(fileName))
+	do
+	{
+		if (isPluginLoaded(fileName))
 		{
 			msg=QString("Plugin [%1] cannot be loaded: already loaded").arg(fileName);
 			ret=CODE_DUPLICATE_PLUGIN;
 			break;
 		}
 
-		if(!QFileInfo(fileName).isFile())
+		if (!QFileInfo(fileName).isFile())
 		{
 			msg=QString("Plugin [%1] cannot be loaded: file does not exist").arg(fileName);
 			ret=CODE_NO_PLUGIN_FILE;
 			break;
 		}
-	}while(false);
-	if(ret)
+	}
+	while (false);
+	if (ret)
 	{
 		message(LOG_ERR,msg);
 		return ret;
 	}
 
-	QPluginLoader* pluginLoader=new QPluginLoader(fileName,this);
-	PluginInterface* plugin;
-	do{
-		if(!pluginLoader->load())
+	QPluginLoader *pluginLoader=new QPluginLoader(fileName,this);
+	PluginInterface *plugin;
+	do
+	{
+		if (!pluginLoader->load())
 		{
 			msg=QString("Plugin [%1] cannot be loaded: load() failed: %2").arg(fileName).arg(pluginLoader->errorString());
 			ret=CODE_PLUGINLOADER_FAILURE;
 			break;
 		}
 
-		QObject* instance=pluginLoader->instance();
-		if(!instance)
+		QObject *instance=pluginLoader->instance();
+		if (!instance)
 		{
 			msg=QString("Plugin [%1] cannot be loaded: instance() failed: %2").arg(fileName).arg(pluginLoader->errorString());
 			ret=CODE_PLUGINLOADER_FAILURE;
@@ -262,28 +266,28 @@ uint Core_Q::loadPlugin(QString fileName)
 		}
 
 		plugin=qobject_cast<PluginInterface*>(instance);
-		if(!plugin)
+		if (!plugin)
 		{
 			msg=QString("Plugin [%1] cannot be loaded: not an Imaginable plugin").arg(fileName);
 			ret=CODE_INVALID_PLUGIN;
 			break;
 		}
 
-		if(plugin->name().isEmpty())
+		if (plugin->name().isEmpty())
 		{
 			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name (empty name)").arg(fileName);
 			ret=CODE_INVALID_PLUGIN_NAME;
 			break;
 		}
 
-		if(plugin->name().contains('/'))
+		if (plugin->name().contains('/'))
 		{
 			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name (contains '/')").arg(fileName);
 			ret=CODE_INVALID_PLUGIN_NAME;
 			break;
 		}
 
-		if(plugin->name()==(QString("%1").arg(plugin->name().toULongLong())))//is number
+		if (plugin->name() == (QString("%1").arg(plugin->name().toULongLong()))) // is number
 		{
 			msg=QString("Plugin [%1] cannot be loaded: invalid plugin name (is digit)").arg(fileName);
 			ret=CODE_INVALID_PLUGIN_NAME;
@@ -291,15 +295,15 @@ uint Core_Q::loadPlugin(QString fileName)
 		}
 
 		plugin->init(this);
-		if(!QDBusConnection::sessionBus().registerObject(QString("/")+plugin->name(),instance))
+		if (!QDBusConnection::sessionBus().registerObject(QString("/")+plugin->name(),instance))
 		{
 			msg=QString("Plugin [%1] cannot be loaded: init() failed").arg(fileName);
 			ret=CODE_PLUGIN_DBUS_REGISTRATION;
 			break;
 		}
 	}
-	while(false);
-	if(ret)
+	while (false);
+	if (ret)
 	{
 		delete pluginLoader;
 		message(LOG_CRIT,msg);
@@ -315,16 +319,16 @@ QStringList Core_Q::loadAllPlugins(QString dirName)
 {
 	QStringList ret;
 	QDir pluginsDir(dirName);
-	if(!pluginsDir.exists())
+	if (!pluginsDir.exists())
 	{
 		message(LOG_ERR,QString("Plugins [%1] cannot be loaded: directory does not exist").arg(dirName));
 		return ret;
 	}
-	foreach(QString fileName,pluginsDir.entryList(QDir::Files))
+	foreach (QString fileName,pluginsDir.entryList(QDir::Files))
 	{
 		QString fullPath(QFileInfo(pluginsDir.filePath(fileName)).absoluteFilePath());
-		if(!loadPlugin(fullPath))
-			ret<<fullPath;
+		if (!loadPlugin(fullPath))
+			ret << fullPath;
 	}
 	return ret;
 }
@@ -332,16 +336,16 @@ QStringList Core_Q::loadAllPlugins(QString dirName)
 QStringList Core_Q::autoLoadPlugins(QStringList names)
 {
 	QStringList ret;
-	foreach(QString name,names)
+	foreach (QString name,names)
 	{
-		if(QFileInfo(name).isFile())
+		if (QFileInfo(name).isFile())
 		{
-			if(!loadPlugin(name))
-				ret<<name;
+			if (!loadPlugin(name))
+				ret << name;
 		}
-		else if(QFileInfo(name).isDir())
+		else if (QFileInfo(name).isDir())
 		{
-			ret<<loadAllPlugins(name);
+			ret << loadAllPlugins(name);
 		}
 	}
 	return ret;
@@ -355,7 +359,7 @@ bool Core_Q::isPluginLoaded(QString fileName) const
 QString Core_Q::pluginName(QString fileName) const
 {
 	Plugins::ConstIterator I=m_plugins.constFind(fileName);
-	if(I==m_plugins.constEnd())
+	if (I == m_plugins.constEnd())
 		return QString();
 
 	return qobject_cast<PluginInterface*>(I.value()->instance())->name();
@@ -364,7 +368,7 @@ QString Core_Q::pluginName(QString fileName) const
 QString Core_Q::pluginVersion(QString fileName) const
 {
 	Plugins::ConstIterator I=m_plugins.constFind(fileName);
-	if(I==m_plugins.constEnd())
+	if (I == m_plugins.constEnd())
 		return QString();
 
 	return qobject_cast<PluginInterface*>(I.value()->instance())->version();
@@ -378,7 +382,7 @@ QStringList Core_Q::pluginsList(void) const
 uint Core_Q::unloadPlugin(QString fileName)
 {
 	Plugins::iterator I=m_plugins.find(fileName);
-	if(I==m_plugins.end())
+	if (I == m_plugins.end())
 	{
 		message(LOG_ERR,QString("Plugin [%1] cannot be unloaded: not loaded").arg(fileName));
 		return CODE_NO_PLUGIN_LOADED;
@@ -388,7 +392,7 @@ uint Core_Q::unloadPlugin(QString fileName)
 	I.value()->deleteLater();
 	m_plugins.erase(I);
 
-	if(ok)
+	if (ok)
 		message(LOG_NOTICE,QString("Plugin [%1] unloaded").arg(fileName));
 	else
 		message(LOG_CRIT,QString("Plugin [%1] cannot be unloaded: unload() failed").arg(fileName));
@@ -400,7 +404,7 @@ uint Core_Q::unloadPlugin(QString fileName)
 
 QString Core_Q::errorCodeToString(uint errorCode) const
 {
-	switch(errorCode)
+	switch (errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
 		CASE(OK,"OK")

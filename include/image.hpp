@@ -26,8 +26,6 @@
 #define IMAGINABLE__IMAGE__INCLUDED
 
 
-#include <types.hpp>
-
 #include <boost/shared_array.hpp>
 
 #include <QtCore/QSet>
@@ -36,17 +34,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QPoint>
-//#include <QtCore/QThread>
 
-
-
-//class ThreadSleep: public QThread
-//{
-//public:
-//	static void  sleep(unsigned long v) { QThread:: sleep(v); }
-//	static void msleep(unsigned long v) { QThread::msleep(v); }
-//	static void usleep(unsigned long v) { QThread::usleep(v); }
-//};
+#include "types.hpp"
 
 
 class QObject;
@@ -55,7 +44,7 @@ class Image : public QObject
 {
 Q_OBJECT
 public:
-	Image(QObject* = NULL);
+	Image(QObject * =NULL);
 	~Image();
 
 public:
@@ -98,8 +87,8 @@ public:
 	typedef quint16 Pixel;
 	typedef QSet<QString> TextKeys;
 
-	static Pixel scaleUp  (const uchar& value) { return static_cast<Pixel>(value)*0x0101 ; }
-	static uchar scaleDown(const Pixel& value) { return static_cast<uchar>(value>>8); }
+	static Pixel scaleUp  (const uchar &value) { return static_cast<Pixel>(value)*0x0101 ; }
+	static uchar scaleDown(const Pixel &value) { return static_cast<uchar>(value>>8); }
 
 protected:
 	typedef boost::shared_array<Image::Pixel> Plane;
@@ -167,8 +156,8 @@ public slots:
 	virtual bool        setPlaneName   (int/*ColourPlane*/,QString);
 	virtual bool      erasePlaneName   (int/*ColourPlane*/);
 
-	virtual const Pixel*   plane       (int/*ColourPlane*/) const;
-	virtual       Pixel*   plane       (int/*ColourPlane*/);
+	virtual const Pixel *  plane       (int/*ColourPlane*/) const;
+	virtual       Pixel *  plane       (int/*ColourPlane*/);
 
 
 	virtual bool     hasText        (QString key) const { return m_text.find(key)!=m_text.end(); }

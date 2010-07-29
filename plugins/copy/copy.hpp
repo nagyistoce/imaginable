@@ -26,9 +26,9 @@
 #define IMAGINABLE__PLUGINS__COPY_COPY__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
+
+#include "version.hpp"
 
 
 class PluginCopy : public QObject, PluginInterface

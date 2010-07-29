@@ -48,37 +48,37 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/include
+    $${PATH_TO_PROJECT_ROOT}/include
 
 SOURCES += \
-	version.cpp \
-	colour_adjust.cpp \
-	curve_function.cpp \
-	linear.cpp \
-	cubic_hermite_spline.cpp
+    version.cpp \
+    colour_adjust.cpp \
+    curve_function.cpp \
+    linear.cpp \
+    cubic_hermite_spline.cpp
 
 HEADERS += \
-	version.hpp \
-	colour_adjust.hpp \
-	curve_function.hpp \
-	linear.hpp \
-	cubic_hermite_spline.hpp \
-	plugin_types.hpp
+    version.hpp \
+    colour_adjust.hpp \
+    curve_function.hpp \
+    linear.hpp \
+    cubic_hermite_spline.hpp \
+    plugin_types.hpp
 
 QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp -i plugin_types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_plugin_colour_adjust.xml
+    dbus_plugin_colour_adjust.xml
 
 OTHER_FILES += \
-	version-minor.inl \
-	version-major.inl \
-	version-label.inl \
-	$${DBUS_ADAPTORS}
+    version-minor.inl \
+    version-major.inl \
+    version-label.inl \
+    $${DBUS_ADAPTORS}
 
 
 autoversioning.target = version.cpp
-autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh"
+autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh"
 autoversioning.depends = autoversioning2
 
 autoversioning2.commands = "@echo Autoversioning ..."

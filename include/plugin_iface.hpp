@@ -26,14 +26,14 @@
 #define IMAGINABLE__PLUGIN_INTERFACE__INCLUDED
 
 
-#include <image.hpp>
-#include <core.hpp>
+#include <boost/bind.hpp>
 
 #include <QtCore/QtPlugin>
 #include <QtCore/QtConcurrentRun>
 #include <QtCore/QFutureWatcher>
 
-#include <boost/bind.hpp>
+#include "image.hpp"
+#include "core.hpp"
 
 
 class PluginInterface
@@ -45,29 +45,29 @@ public:
 	virtual ~PluginInterface()
 	{}
 
-	void init(Core* core)
-	{ if(!m_core) m_core=core; }
+	void init(Core *core)
+	{ if (!m_core) m_core=core; }
 
-	virtual QString name(void) const =0;
-	virtual QString version(void) const =0;
+	virtual QString name             (void) const =0;
+	virtual QString version          (void) const =0;
 	virtual QString errorCodeToString(uint) const =0;
 
 
 protected:
-	Core* m_core;
+	Core *m_core;
 
-	void message(int level,const char* function,QString text,qulonglong Id=0ULL) const
+	void message(int level,const char *function,QString text,qulonglong Id=0ULL) const
 	{ m_core->message(level,QString("%1() %2").arg(function).arg(text),name(),Id); }
 
-	void complain(int level,const char* function,QString text,qulonglong Id=0ULL) const
+	void complain(int level,const char *function,QString text,qulonglong Id=0ULL) const
 	{ m_core->message(level,QString("%1() failed: %2").arg(function).arg(text),name(),Id); }
 
-	Image* getOrComplain(const char* function,QString prefix,qulonglong Id,bool& busy) const
+	Image *getOrComplain(const char *function,QString prefix,qulonglong Id,bool &busy) const
 	{
-		Image* image=m_core->image(Id,busy);
-		if(!image)
+		Image *image=m_core->image(Id,busy);
+		if (!image)
 		{
-			if(busy)
+			if (busy)
 				complain(LOG_ERR,function,prefix+" is busy",Id);
 			else
 				complain(LOG_CRIT,function,prefix+" does not exist",Id);
@@ -80,10 +80,10 @@ protected:
 
 	typedef QFutureWatcher<void> futureWatcher_t;
 
-	futureWatcher_t* doLongProcessing(QList<Image*> images,QFuture<void> future)
+	futureWatcher_t *doLongProcessing(QList<Image*> images,QFuture<void> future)
 	{
-		futureWatcher_t* futureWatcher=new futureWatcher_t;
-		foreach(Image* image,images)
+		futureWatcher_t *futureWatcher=new futureWatcher_t;
+		foreach (Image *image,images)
 		{
 			QObject::connect(futureWatcher,SIGNAL(started()), image,SLOT(startLongProcessing()));
 			QObject::connect(futureWatcher,SIGNAL(finished()),image,SLOT(finishLongProcessing()));
@@ -93,9 +93,9 @@ protected:
 		return futureWatcher;
 	}
 
-	futureWatcher_t* doLongProcessing(Image* image,QFuture<void> future)
+	futureWatcher_t *doLongProcessing(Image *image,QFuture<void> future)
 	{
-		return doLongProcessing(QList<Image*>()<<image,future);
+		return doLongProcessing(QList<Image*>() << image,future);
 	}
 };
 

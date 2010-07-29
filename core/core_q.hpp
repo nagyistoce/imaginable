@@ -26,13 +26,13 @@
 #define IMAGINABLE__CORE__CORE_Q__INCLUDED
 
 
-#include "core.hpp"
-#include "image_q.hpp"
-
 #include <QtCore/QObject>
 #include <QtCore/QMap>
 #include <QtCore/QTimer>
 #include <QtCore/QPluginLoader>
+
+#include "core.hpp"
+#include "image_q.hpp"
 
 
 class Image;
@@ -41,7 +41,7 @@ class Core_Q : public QObject, public Core
 {
 Q_OBJECT
 public:
-	Core_Q(QObject* parent=NULL);
+	Core_Q(QObject *parent=NULL);
 
 	bool init(void);
 
@@ -51,16 +51,16 @@ signals:
 
 public:
 	Q_PROPERTY(unsigned autoCloseTime READ autoCloseTime WRITE setAutoCloseTime)
-	unsigned    autoCloseTime(void) const { return m_autoCloseTimer.interval()/(60*1000); }
-	void     setAutoCloseTime(unsigned);
+	unsigned    autoCloseTime (void) const { return m_autoCloseTimer.interval()/(60*1000); }
+	void     setAutoCloseTime (unsigned);
 	void restartAutoCloseTimer(void) { setAutoCloseTime(autoCloseTime()); }
 
 public slots:
 	QString version(void) const;
 
 	qulonglong createImage(void);
-	Image*           image(qulonglong);
-	Image*           image(qulonglong,bool&);
+	Image *          image(qulonglong);
+	Image *          image(qulonglong,bool&);
 	bool          hasImage(qulonglong) const;
 	uint       deleteImage(qulonglong);
 	QulonglongList   imagesList(void) const;

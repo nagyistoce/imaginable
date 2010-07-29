@@ -26,10 +26,10 @@
 #define IMAGINABLE__PLUGINS__COLOUR_ADJUST__LINEAR__INCLUDED
 
 
+#include <QtCore/QMap>
+
 #include "curve_function.hpp"
 #include "plugin_types.hpp"
-
-#include <QtCore/QMap>
 
 
 class Linear : public CurveFunction

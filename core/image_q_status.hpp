@@ -33,7 +33,7 @@ class Image_Q_Status : public QObject
 {
 Q_OBJECT
 public:
-	Image_Q_Status(QObject* = NULL);
+	Image_Q_Status(QObject * =NULL);
 
 	bool init(QString);
 

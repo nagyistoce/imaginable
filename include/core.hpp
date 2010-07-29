@@ -26,9 +26,9 @@
 #define IMAGINABLE__CORE__INCLUDED
 
 
-#include <QtCore/QtGlobal>
-
 #include <sys/syslog.h> // for log levels
+
+#include <QtCore/QtGlobal>
 
 
 class Image;
@@ -40,13 +40,13 @@ public:
 	virtual ~Core() {}
 
 	virtual qulonglong createImage(void)                   =0;
-	virtual Image*           image(qulonglong)             =0;
-	virtual Image*           image(qulonglong,bool&)       =0;
+	virtual Image *          image(qulonglong)             =0;
+	virtual Image *          image(qulonglong,bool&)       =0;
 	virtual bool          hasImage(qulonglong)       const =0;
 	virtual uint       deleteImage(qulonglong)             =0;
 
 	virtual QString errorCodeToString(uint) const =0;
-	
+
 	virtual void message(int level,QString message,QString source,qulonglong Id=0ULL) const =0;
 
 	enum

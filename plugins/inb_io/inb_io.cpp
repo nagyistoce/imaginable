@@ -23,14 +23,15 @@
 *************/
 
 
-#include "inb_io.hpp"
-#include "dbus_plugin_inb_io_adaptor.h"
-
 #include <boost/scoped_array.hpp>
 
 #include <QtCore/QFile>
 #include <QtCore/QProcess>
 #include <QtCore/QBuffer>
+
+#include "inb_io.hpp"
+#include "dbus_plugin_inb_io_adaptor.h"
+
 
 Q_EXPORT_PLUGIN2(inb_io,PluginINB_IO)
 
@@ -44,16 +45,16 @@ PluginINB_IO::PluginINB_IO(void)
 
 uint PluginINB_IO::load(QString fileName,qulonglong Id)
 {
-	if(!QFileInfo(fileName).isFile())
+	if (!QFileInfo(fileName).isFile())
 	{
 		complain(LOG_WARNING,"load",QString("Source image [\"%1\"] is not a file").arg(fileName));
 		return CODE_NO_SRC_FILE;
 	}
 
 	bool busy;
-	Image* dst=getOrComplain("load","destination image",Id,busy);
-	if(!dst)
-		return busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
+	Image *dst=getOrComplain("load","destination image",Id,busy);
+	if (!dst)
+		return busy ? (Core::CODE_DST_IMAGE_BUSY) : (Core::CODE_NO_DST_IMAGE);
 
 
 	message(LOG_INFO,"load",QString("Loading from file [%1]").arg(fileName),Id);
@@ -63,10 +64,10 @@ uint PluginINB_IO::load(QString fileName,qulonglong Id)
 	return Core::CODE_OK;
 }
 
-void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
+void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image *dst)
 {
 	QFile src(fileName);
-	if(!src.open(QIODevice::ReadOnly))
+	if (!src.open(QIODevice::ReadOnly))
 	{
 		complain(LOG_WARNING,"load",QString("Cannot open source image [\"%1\"]").arg(fileName));
 		m_lastErrorCodes[Id]=CODE_ERROR_SRC_FILE;
@@ -82,11 +83,11 @@ void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
 	archives["bz2"]=qMakePair<QString,QStringList>("bzip2",QStringList() << "--stdout" << "--decompress");
 
 	QMap<QString,QPair<QString,QStringList> >::ConstIterator A=archives.constFind(QFileInfo(fileName).suffix());
-	if(A!=archives.constEnd())
+	if (A != archives.constEnd())
 	{
 		QProcess arch;
 		arch.start(A.value().first,A.value().second);
-		if(!arch.waitForStarted())
+		if (!arch.waitForStarted())
 		{
 			complain(LOG_WARNING,"load",QString("Cannot unpack image [\"%1\"]").arg(fileName));
 			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
@@ -96,7 +97,7 @@ void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
 		arch.write(src.readAll());
 		arch.closeWriteChannel();
 
-		if(!arch.waitForFinished())
+		if (!arch.waitForFinished())
 		{
 			complain(LOG_WARNING,"load",QString("Cannot unpack image [\"%1\"]").arg(fileName));
 			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
@@ -116,7 +117,7 @@ void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
 	{
 		quint32 magic;
 		in >> magic;
-		if(magic != 0x494e4200)
+		if (magic != 0x494e4200)
 		{
 			complain(LOG_WARNING,"load",QString("Image file [\"%1\"] has invalid signature [%2]").arg(fileName).arg(magic,8,0x10,QChar('0')));
 			m_lastErrorCodes[Id]=CODE_INVALID_SRC_FILE;
@@ -126,7 +127,7 @@ void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
 	{
 		quint32 version;
 		in >> version;
-		if(version > 1)
+		if (version > 1)
 		{
 			complain(LOG_WARNING,"load",QString("Image file [\"%1\"] has unsupported version [%2]").arg(fileName).arg(version));
 			m_lastErrorCodes[Id]=CODE_SRC_FILE_UNSUPPORTED_VERSION;
@@ -143,17 +144,17 @@ void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
 	{
 		QSize size;
 		in >> size;
-		dst->setSize(size);
+		dst->setSize(QPoint(size.width(),size.height()));
 	}
 	{
 		quint32 textCount;
 		in >> textCount;
-		for(quint32 i=0;i<textCount;++i)
+		for (quint32 i=0; i<textCount; ++i)
 		{
 			QString textKey;
 			QString textValue;
 			in >> textKey >> textValue;
-			if(!dst->setText(textKey,textValue))
+			if (!dst->setText(textKey,textValue))
 				message(LOG_WARNING,"load",QString("Cannot set text [\"%1\" => \"%2\"]").arg(textKey).arg(textValue),Id);
 		}
 	}
@@ -161,24 +162,24 @@ void PluginINB_IO::do_load(QString fileName,qulonglong Id,Image* dst)
 		boost::scoped_array<Image::Pixel> planeData(new Image::Pixel[dst->area()]);
 		quint32 planeCount;
 		in >> planeCount;
-		for(quint32 i=0;i<planeCount;++i)
+		for (quint32 i=0; i<planeCount; ++i)
 		{
 			qint32 colourPlane;
 			bool hasName;
 			in >> colourPlane >> hasName;
-			if(hasName)
+			if (hasName)
 			{
 				QString name;
 				in >> name;
 				dst->setPlaneName(colourPlane,name);
 			}
 			in.readRawData(reinterpret_cast<char*>(planeData.get()),dst->area()*sizeof(Image::Pixel));
-			
-			if(!dst->addPlane(colourPlane))
+
+			if (!dst->addPlane(colourPlane))
 				message(LOG_WARNING,"load",QString("Cannot add colour plane [%1]").arg(colourPlane),Id);
 			else
 			{
-				if(QSysInfo::ByteOrder == QSysInfo::LittleEndian)
+				if (QSysInfo::ByteOrder == QSysInfo::LittleEndian)
 					swab  (planeData.get(),dst->plane(colourPlane),dst->area()*sizeof(Image::Pixel));
 				else
 					memcpy(dst->plane(colourPlane),planeData.get(),dst->area()*sizeof(Image::Pixel));
@@ -197,13 +198,13 @@ qulonglong PluginINB_IO::loadNew(QString fileName)
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
 	qulonglong Id=m_core->createImage();
-	if(!Id)
+	if (!Id)
 	{
 		complain(LOG_CRIT,"load","Cannot create destination image",Id);
 		return 0ULL;
 	}
 
-	if(load(fileName,Id))
+	if (load(fileName,Id))
 	{
 		m_core->deleteImage(Id);
 		return 0ULL;
@@ -217,11 +218,11 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 	fileName=QFileInfo(fileName).absoluteFilePath();
 
 	bool busy;
-	Image* src=getOrComplain("save","source image",Id,busy);
-	if(!src)
+	Image *src=getOrComplain("save","source image",Id,busy);
+	if (!src)
 		return busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
 
-	if(QFileInfo(fileName).exists())
+	if (QFileInfo(fileName).exists())
 	{
 		complain(LOG_WARNING,"save",QString("Destination image file [\"%1\"] already exists").arg(fileName));
 		return CODE_DST_FILE_EXIST;
@@ -235,7 +236,7 @@ uint PluginINB_IO::save(qulonglong Id,QString fileName)
 	return Core::CODE_OK;
 }
 
-void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
+void PluginINB_IO::do_save(qulonglong Id,Image *src,QString fileName)
 {
 	QByteArray uncompressed;
 	QDataStream out(&uncompressed,QIODevice::WriteOnly);
@@ -253,20 +254,20 @@ void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
 	out << src->size();
 	{
 		out << static_cast<quint32>(src->textKeysList().size());
-		foreach(QString textKey,src->textKeysList())
+		foreach (QString textKey,src->textKeysList())
 			out << textKey << src->text(textKey);
 	}
 	{
 		boost::scoped_array<Image::Pixel> planeData(new Image::Pixel[src->area()]);
 
 		out << static_cast<quint32>(src->planesCount());
-		foreach(int colourPlane,src->planesList())
+		foreach (int colourPlane,src->planesList())
 		{
 			out << colourPlane << src->planeHasName(colourPlane);
-			if(src->planeHasName(colourPlane))
+			if (src->planeHasName(colourPlane))
 				out << src->planeName(colourPlane);
 
-			if(QSysInfo::ByteOrder == QSysInfo::LittleEndian)
+			if (QSysInfo::ByteOrder == QSysInfo::LittleEndian)
 				swab  (src->plane(colourPlane),planeData.get(),src->area()*sizeof(Image::Pixel));
 			else
 				memcpy(planeData.get(),src->plane(colourPlane),src->area()*sizeof(Image::Pixel));
@@ -283,11 +284,11 @@ void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
 	QByteArray output;
 
 	QMap<QString,QPair<QString,QStringList> >::ConstIterator A=archives.constFind(QFileInfo(fileName).suffix());
-	if(A!=archives.constEnd())
+	if (A != archives.constEnd())
 	{
 		QProcess arch;
 		arch.start(A.value().first,A.value().second);
-		if(!arch.waitForStarted())
+		if (!arch.waitForStarted())
 		{
 			complain(LOG_WARNING,"save",QString("Cannot pack image [\"%1\"]").arg(fileName));
 			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
@@ -297,7 +298,7 @@ void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
 		arch.write(uncompressed);
 		arch.closeWriteChannel();
 
-		if(!arch.waitForFinished())
+		if (!arch.waitForFinished())
 		{
 			complain(LOG_WARNING,"save",QString("Cannot pack image [\"%1\"]").arg(fileName));
 			m_lastErrorCodes[Id]=CODE_ARCHIVE_ERROR;
@@ -311,7 +312,7 @@ void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
 
 
 	QFile dst(fileName);
-	if(!dst.open(QIODevice::WriteOnly))
+	if (!dst.open(QIODevice::WriteOnly))
 	{
 		complain(LOG_WARNING,"save",QString("Cannot open destination image [\"%1\"]").arg(fileName));
 		m_lastErrorCodes[Id]=CODE_INVALID_DST_FILE;
@@ -328,14 +329,14 @@ void PluginINB_IO::do_save(qulonglong Id,Image* src,QString fileName)
 uint PluginINB_IO::lastErrorCode(qulonglong image)
 {
 	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
-	if(I==m_lastErrorCodes.constEnd())
+	if (I == m_lastErrorCodes.constEnd())
 		return Core::CODE_OK;
 	return I.value();
 }
 
 QString PluginINB_IO::errorCodeToString(uint errorCode) const
 {
-	switch(errorCode)
+	switch (errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
 		CASE(NO_SRC_FILE     ,"No source file")

@@ -26,10 +26,9 @@
 #define IMAGINABLE__PLUGINS__RESIZE__RESIZE__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
 
+#include "version.hpp"
 #include "plugin_types.hpp"
 #include "rect.hpp"
 

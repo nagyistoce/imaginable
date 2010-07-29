@@ -24,6 +24,7 @@
 
 
 #include "overlay.hpp"
+
 #include "dbus_plugin_overlay_adaptor.h"
 
 
@@ -40,17 +41,17 @@ PluginOverlay::PluginOverlay(void)
 uint PluginOverlay::difference(qulonglong Id,int srcColourPlane1,int srcColourPlane2,int dstColourPlane)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(!img->hasPlane(srcColourPlane1))
+	if (!img->hasPlane(srcColourPlane1))
 		return CODE_NO_SRC_COLOUR_PLANE_1;
 
-	if(!img->hasPlane(srcColourPlane2))
+	if (!img->hasPlane(srcColourPlane2))
 		return CODE_NO_SRC_COLOUR_PLANE_2;
 
-	if(img->hasPlane(dstColourPlane))
+	if (img->hasPlane(dstColourPlane))
 		return CODE_DST_COLOUR_PLANE_EXISTS;
 
 
@@ -62,25 +63,25 @@ uint PluginOverlay::difference(qulonglong Id,int srcColourPlane1,int srcColourPl
 	return Core::CODE_OK;
 }
 
-void PluginOverlay::do_difference(qulonglong Id,Image* img,int srcColourPlane1,int srcColourPlane2,int dstColourPlane)
+void PluginOverlay::do_difference(qulonglong Id,Image *img,int srcColourPlane1,int srcColourPlane2,int dstColourPlane)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
-	const int& width =img->width();
-	const int& height=img->height();
+	const int &width =img->width();
+	const int &height=img->height();
 
 	img->addPlane(dstColourPlane);
 
-	const Image::Pixel* src1=img->plane(srcColourPlane1);
-	const Image::Pixel* src2=img->plane(srcColourPlane2);
-	/* */ Image::Pixel* dst =img->plane(dstColourPlane);
+	const Image::Pixel *src1=img->plane(srcColourPlane1);
+	const Image::Pixel *src2=img->plane(srcColourPlane2);
+	/* */ Image::Pixel *dst =img->plane(dstColourPlane);
 
-	for(int y=0;y<height;++y)
+	for (int y=0; y<height; ++y)
 	{
 		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
 
 		int yo=y*width;
-		for(int x=0;x<width;++x)
+		for (int x=0; x<width; ++x)
 		{
 			int yxo=yo+x;
 			dst[yxo]=static_cast<Image::Pixel>(abs(static_cast<int>(src1[yxo])-static_cast<int>(src2[yxo])));
@@ -95,20 +96,20 @@ void PluginOverlay::do_difference(qulonglong Id,Image* img,int srcColourPlane1,i
 uint PluginOverlay::alphaBlend(qulonglong Id,int srcColourPlane1,int srcColourPlane2,int srcColourPlane3,int dstColourPlane)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(!img->hasPlane(srcColourPlane1))
+	if (!img->hasPlane(srcColourPlane1))
 		return CODE_NO_SRC_COLOUR_PLANE_1;
 
-	if(!img->hasPlane(srcColourPlane2))
+	if (!img->hasPlane(srcColourPlane2))
 		return CODE_NO_SRC_COLOUR_PLANE_2;
 
-	if(!img->hasPlane(srcColourPlane3))
+	if (!img->hasPlane(srcColourPlane3))
 		return CODE_NO_SRC_COLOUR_PLANE_3;
 
-	if(img->hasPlane(dstColourPlane))
+	if (img->hasPlane(dstColourPlane))
 		return CODE_DST_COLOUR_PLANE_EXISTS;
 
 
@@ -120,26 +121,26 @@ uint PluginOverlay::alphaBlend(qulonglong Id,int srcColourPlane1,int srcColourPl
 	return Core::CODE_OK;
 }
 
-void PluginOverlay::do_alphaBlend(qulonglong Id,Image* img,int srcColourPlane1,int srcColourPlane2,int srcColourPlane3,int dstColourPlane)
+void PluginOverlay::do_alphaBlend(qulonglong Id,Image *img,int srcColourPlane1,int srcColourPlane2,int srcColourPlane3,int dstColourPlane)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
-	const int& width =img->width();
-	const int& height=img->height();
+	const int &width =img->width();
+	const int &height=img->height();
 
 	img->addPlane(dstColourPlane);
 
-	const Image::Pixel* src1=img->plane(srcColourPlane1);
-	const Image::Pixel* src2=img->plane(srcColourPlane2);
-	const Image::Pixel* src3=img->plane(srcColourPlane3);
-	/* */ Image::Pixel* dst =img->plane(dstColourPlane);
+	const Image::Pixel *src1=img->plane(srcColourPlane1);
+	const Image::Pixel *src2=img->plane(srcColourPlane2);
+	const Image::Pixel *src3=img->plane(srcColourPlane3);
+	/* */ Image::Pixel *dst =img->plane(dstColourPlane);
 
-	for(int y=0;y<height;++y)
+	for (int y=0; y<height; ++y)
 	{
 		emit setPercent(static_cast<double>(y)*100./static_cast<double>(height));
 
 		int yo=y*width;
-		for(int x=0;x<width;++x)
+		for (int x=0; x<width; ++x)
 		{
 			int yxo=yo+x;
 			unsigned alpha=static_cast<unsigned>(src3[yxo]);
@@ -156,7 +157,7 @@ void PluginOverlay::do_alphaBlend(qulonglong Id,Image* img,int srcColourPlane1,i
 
 QString PluginOverlay::errorCodeToString(uint errorCode) const
 {
-	switch(errorCode)
+	switch (errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
 		CASE(NO_SRC_COLOUR_PLANE_1  ,"No source colour plane #1")

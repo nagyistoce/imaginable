@@ -31,24 +31,24 @@
 
 namespace version {
 
-	extern const unsigned major;
-	extern const unsigned minor;
-	extern const char* revision;
-	extern const unsigned number;
-	extern const char* label;
+	unsigned    major      (void);
+	unsigned    minor      (void);
+	const char* revision   (void);
+	unsigned    number     (void);
+	const char* label      (void);
 
-	extern const char* full_string(void);
+	const char* full_string(void);
 
-	extern const time_t time;
+	time_t      time       (void);
 
-	inline unsigned year  (void) { return localtime(&time)->tm_year+1900; }
-	inline unsigned month (void) { return localtime(&time)->tm_mon+1; }
-	inline unsigned day   (void) { return localtime(&time)->tm_mday; }
-	inline unsigned hour  (void) { return localtime(&time)->tm_hour; }
-	inline unsigned minute(void) { return localtime(&time)->tm_min; }
-	inline unsigned second(void) { return localtime(&time)->tm_sec; }
+	inline unsigned year   (void) { return localtime(&time)->tm_year+1900; }
+	inline unsigned month  (void) { return localtime(&time)->tm_mon+1; }
+	inline unsigned day    (void) { return localtime(&time)->tm_mday; }
+	inline unsigned hour   (void) { return localtime(&time)->tm_hour; }
+	inline unsigned minute (void) { return localtime(&time)->tm_min; }
+	inline unsigned second (void) { return localtime(&time)->tm_sec; }
 
-	extern const char* ubuntu_style_string(void);
+	const char*   ubuntu_style_string(void);
 	inline double ubuntu_style(void)
 	{
 		const struct tm* _tm=localtime(&time);

@@ -23,10 +23,11 @@
 *************/
 
 
-#include "resize.hpp"
-#include "dbus_plugin_resize_adaptor.h"
-
 #include <boost/scoped_array.hpp>
+
+#include "resize.hpp"
+
+#include "dbus_plugin_resize_adaptor.h"
 
 
 Q_EXPORT_PLUGIN2(resize,PluginResize)
@@ -41,18 +42,18 @@ PluginResize::PluginResize(void)
 	new ResizeAdaptor(this);
 }
 
-qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSizePolicy_t newSizePolicy,newColourPolicy_t newColourPolicy,rect newSize,QfullPixel newColour,quint16 value)
+qulonglong PluginResize::resizeCommon(const char *function,qulonglong Id,newSizePolicy_t newSizePolicy,newColourPolicy_t newColourPolicy,rect newSize,QfullPixel newColour,quint16 value)
 {
-	if(newSizePolicy!=NEWSIZE_AUTOCROP)
+	if (newSizePolicy != NEWSIZE_AUTOCROP)
 	{
-		if(newSize.width()<=0)
+		if (newSize.width() <= 0)
 		{
 			complain(LOG_ERR,__FUNCTION__,"Incorrect width",Id);
 			m_lastErrorCodes[Id]=CODE_INCORrect_WIDTH;
 			return 0ULL;
 		}
 
-		if(newSize.height()<=0)
+		if (newSize.height() <= 0)
 		{
 			complain(LOG_ERR,__FUNCTION__,"Incorrect height",Id);
 			m_lastErrorCodes[Id]=CODE_INCORrect_HEIGHT;
@@ -62,8 +63,8 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 
 
 	bool busy;
-	Image* src=getOrComplain(function,"source image",Id,busy);
-	if(!src)
+	Image *src=getOrComplain(function,"source image",Id,busy);
+	if (!src)
 	{
 		complain(LOG_ERR,__FUNCTION__,"Cannot get source image",Id);
 		m_lastErrorCodes[Id]=busy?(Core::CODE_SRC_IMAGE_BUSY):(Core::CODE_NO_SRC_IMAGE);
@@ -71,101 +72,101 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 	}
 
 
-	switch(newColourPolicy)
+	switch (newColourPolicy)
 	{
-		case NEWCOLOUR_FULL:
-			if( (newSize.left()  <=0)
-			||  (newSize.top()   <=0)
-			||  (newSize.right() >src->width ())
-			||  (newSize.bottom()>src->height()) )
+	case NEWCOLOUR_FULL:
+		if ( (newSize.left()   <= 0)
+		||   (newSize.top()    <= 0)
+		||   (newSize.right()  >  src->width ())
+		||   (newSize.bottom() >  src->height()) )
+		{
+			if (newColour.keys() != src->planesList())
 			{
-				if(newColour.keys()!=src->planesList())
-				{
-					complain(LOG_ERR,__FUNCTION__,"Incorrect new colour",Id);
-					m_lastErrorCodes[Id]=CODE_INCORrect_NEWCOLOUR;
-					return 0ULL;
-				}
+				complain(LOG_ERR,__FUNCTION__,"Incorrect new colour",Id);
+				m_lastErrorCodes[Id]=CODE_INCORrect_NEWCOLOUR;
+				return 0ULL;
 			}
-			else
-			{
-				if(!newColour.isEmpty())
-					complain(LOG_WARNING,function,"New colour is not empty",Id);
-			}
+		}
+		else
+		{
+			if (!newColour.isEmpty())
+				complain(LOG_WARNING,function,"New colour is not empty",Id);
+		}
 		break;
-		case NEWCOLOUR_PLAIN:
-			foreach(int colourPlane,src->planes())
-				newColour[colourPlane]=value;
+	case NEWCOLOUR_PLAIN:
+		foreach (int colourPlane,src->planes())
+			newColour[colourPlane]=value;
 		break;
-		case NEWCOLOUR_IGNORE:
+	case NEWCOLOUR_IGNORE:
 		break;
 	}
 
-	switch(newSizePolicy)
+	switch (newSizePolicy)
 	{
-		case NEWSIZE_RESIZE:
+	case NEWSIZE_RESIZE:
 		break;
-		case NEWSIZE_CROP:
-			if(newSize.left()<=0)
-			{
-				complain(LOG_WARNING,__FUNCTION__,"Shifting left side",Id);
-				newSize.setLeft(0);
-			}
-			if(newSize.top() <=0)
-			{
-				complain(LOG_WARNING,__FUNCTION__,"Shifting top side",Id);
-				newSize.setTop(0);
-			}
-			if(newSize.right() >src->width ())
-			{
-				complain(LOG_WARNING,__FUNCTION__,"Shifting right side",Id);
-				newSize.setRight(src->width());
-			}
-			if(newSize.bottom()>src->height())
-			{
-				complain(LOG_WARNING,__FUNCTION__,"Shifting bottom side",Id);
-				newSize.setBottom(src->height());
-			}
-		break;
-		case NEWSIZE_AUTOCROP:
+	case NEWSIZE_CROP:
+		if (newSize.left() <= 0)
 		{
-			if(!src->hasAlpha())
-			{
-				complain(LOG_ERR,__FUNCTION__,"Source image does not have alpha channel",Id);
-				m_lastErrorCodes[Id]=CODE_NO_ALPHA;
-				return 0ULL;
-			}
-			const Image::Pixel* src_alpha=src->plane(Image::PLANE_ALPHA);
-			const int& src_area=src->area();
-			bool ok=false;
-			for(int p=0;p<src_area;++p)
-				if(src_alpha[p])
-				{
-					ok=true;
-					break;
-				}
-			if(!ok)
-			{
-				complain(LOG_ERR,__FUNCTION__,"Source image completely transparent",Id);
-				m_lastErrorCodes[Id]=CODE_TRANSPARENT_SRC_IMAGE;
-				return 0ULL;
-			}
-
-			newSize=rect(0,0,src->width(),src->height());
+			complain(LOG_WARNING,__FUNCTION__,"Shifting left side",Id);
+			newSize.setLeft(0);
 		}
+		if (newSize.top()  <= 0)
+		{
+			complain(LOG_WARNING,__FUNCTION__,"Shifting top side",Id);
+			newSize.setTop(0);
+		}
+		if (newSize.right()  > src->width ())
+		{
+			complain(LOG_WARNING,__FUNCTION__,"Shifting right side",Id);
+			newSize.setRight(src->width());
+		}
+		if (newSize.bottom() > src->height())
+		{
+			complain(LOG_WARNING,__FUNCTION__,"Shifting bottom side",Id);
+			newSize.setBottom(src->height());
+		}
+		break;
+	case NEWSIZE_AUTOCROP:
+	{
+		if (!src->hasAlpha())
+		{
+			complain(LOG_ERR,__FUNCTION__,"Source image does not have alpha channel",Id);
+			m_lastErrorCodes[Id]=CODE_NO_ALPHA;
+			return 0ULL;
+		}
+		const Image::Pixel *src_alpha=src->plane(Image::PLANE_ALPHA);
+		const int &src_area=src->area();
+		bool ok=false;
+		for (	int p=0; p<src_area; ++p)
+			if (src_alpha[p])
+			{
+				ok=true;
+				break;
+			}
+		if (!ok)
+		{
+			complain(LOG_ERR,__FUNCTION__,"Source image completely transparent",Id);
+			m_lastErrorCodes[Id]=CODE_TRANSPARENT_SRC_IMAGE;
+			return 0ULL;
+		}
+
+		newSize=rect(0,0,src->width(),src->height());
+	}
 		break;
 	}
 
 
 	qulonglong ret=m_core->createImage();
-	if(!ret)
+	if (!ret)
 	{
 		complain(LOG_CRIT,function,"Cannot create destination image",ret);
 		m_lastErrorCodes[Id]=Core::CODE_NO_DST_IMAGE;
 		return 0ULL;
 	}
 
-	Image* dst=getOrComplain(function,"destination image",ret,busy);
-	if(!dst)
+	Image *dst=getOrComplain(function,"destination image",ret,busy);
+	if (!dst)
 	{
 		complain(LOG_ERR,__FUNCTION__,"Cannot get destination image",Id);
 		m_lastErrorCodes[Id]=busy?(Core::CODE_DST_IMAGE_BUSY):(Core::CODE_NO_DST_IMAGE);
@@ -175,7 +176,7 @@ qulonglong PluginResize::resizeCommon(const char* function,qulonglong Id,newSize
 
 	message(LOG_INFO,function,QString("Resizing to [%1] to [%2,%3 %4x%5]").arg(ret).arg(newSize.left()).arg(newSize.top()).arg(newSize.width()).arg(newSize.height()),Id);
 
-	doLongProcessing(QList<Image*>()<<src<<dst,QtConcurrent::run(boost::bind(&PluginResize::do_resize,this,function,Id,src,ret,dst,newSize,newColour,newSizePolicy==NEWSIZE_AUTOCROP)));
+	doLongProcessing(QList<Image*>() << src << dst,QtConcurrent::run(boost::bind(&PluginResize::do_resize,this,function,Id,src,ret,dst,newSize,newColour,newSizePolicy==NEWSIZE_AUTOCROP)));
 
 	m_lastErrorCodes.remove(Id);
 	return ret;
@@ -211,12 +212,12 @@ namespace {
 	typedef struct planePair
 	{
 		int id;
-		Image::Pixel* src;
-		Image::Pixel* dst;
+		Image::Pixel *src;
+		Image::Pixel *dst;
 	} planePair;
 }
 
-void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qulonglong dstId,Image* dst,rect newSize,QfullPixel newColour,bool autoCrop)
+void PluginResize::do_resize(const char *function,qulonglong srcId,Image *src,qulonglong dstId,Image *dst,rect newSize,QfullPixel newColour,bool autoCrop)
 {
 	connect(this,SIGNAL(setPercent(double)),src,SLOT(setPercent(double)));
 	connect(this,SIGNAL(setPercent(double)),dst,SLOT(setPercent(double)));
@@ -226,69 +227,69 @@ void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qu
 	int src_height=src->height();
 
 
-	if(autoCrop)
+	if (autoCrop)
 	{
-		const Image::Pixel* src_alpha=src->plane(Image::PLANE_ALPHA);
-		for(bool ok=true;ok;)
+		const Image::Pixel *src_alpha=src->plane(Image::PLANE_ALPHA);
+		for (bool ok=true; ok; )
 		{
 			int yo=newSize.top()*src_width;
-			for(int x=0;x<src_width;++x)
-				if(src_alpha[yo+x])
+			for (int x=0; x<src_width; ++x)
+				if (src_alpha[yo+x])
 				{
 					ok=false;
 					break;
 				}
-			if(ok)
+			if (ok)
 				newSize.moveTop(1);
 		}
-		for(bool ok=true;ok;)
+		for (bool ok=true; ok; )
 		{
 			int yo=(newSize.bottom()-1)*src_width;
-			for(int x=0;x<src_width;++x)
-				if(src_alpha[yo+x])
+			for (int x=0; x<src_width; ++x)
+				if (src_alpha[yo+x])
 				{
 					ok=false;
 					break;
 				}
-			if(ok)
+			if (ok)
 				newSize.moveBottom(-1);
 		}
-		for(bool ok=true;ok;)
+		for (bool ok=true; ok; )
 		{
 			int xo=newSize.left();
-			for(int y=newSize.top();y<newSize.bottom();++y)
-				if(src_alpha[xo+y*src_width])
+			for (int y=newSize.top(); y<newSize.bottom(); ++y)
+				if (src_alpha[xo+y*src_width])
 				{
 					ok=false;
 					break;
 				}
-			if(ok)
+			if (ok)
 				newSize.moveLeft(1);
 		}
-		for(bool ok=true;ok;)
+		for (bool ok=true; ok; )
 		{
 			int xo=newSize.right()-1;
-			for(int y=newSize.top();y<newSize.bottom();++y)
-				if(src_alpha[xo+y*src_width])
+			for (int y=newSize.top(); y<newSize.bottom(); ++y)
+				if (src_alpha[xo+y*src_width])
 				{
 					ok=false;
 					break;
 				}
-			if(ok)
+			if (ok)
 				newSize.moveRight(-1);
 		}
 	}
 
 	dst->setOffset(src->offset()+QPoint(newSize.left(),newSize.top()));
-	dst->setSize(QSize(newSize.width(),newSize.height()));
+	dst->setSize(QPoint(newSize.width(),newSize.height()));
 
 	int planesCount=src->planesCount();
 	boost::scoped_array<planePair> planePairs_s(new planePair[planesCount]);
-	planePair* planePairs=planePairs_s.get();
+	planePair *planePairs=planePairs_s.get();
 
 	{
 		int i=0;
-		foreach(int colourPlane,src->planesList())
+		foreach (int colourPlane,src->planesList())
 		{
 			dst->addPlane(colourPlane);
 			planePairs[i].id=colourPlane;
@@ -313,38 +314,38 @@ void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qu
 	int dst_width =newSize.width ();
 	int dst_height=newSize.height();
 
-	if(overlap_d.y()>0)
+	if (overlap_d.y() > 0)
 	{
-		for(int p=0;p<planesCount;++p)
+		for (int p=0; p<planesCount; ++p)
 		{
 			Image::Pixel v=newColour[planePairs[p].id];
 			int to_y=overlap_d.y();
-			for(int y=0;y<to_y;++y)
+			for (int y=0; y<to_y; ++y)
 			{
 				int yo=y*dst_width;
-				for(int x=0;x<dst_width;++x)
+				for (int x=0; x<dst_width; ++x)
 					planePairs[p].dst[yo+x]=v;
 			}
 		}
 	}
-	if(dst_height>overlap_d.y()+delta_overlap.y())
+	if (dst_height>overlap_d.y()+delta_overlap.y())
 	{
-		for(int p=0;p<planesCount;++p)
+		for (int p=0; p<planesCount; ++p)
 		{
 			Image::Pixel v=newColour[planePairs[p].id];
 			int from_y=overlap_d.y()+delta_overlap.y();
-			for(int y=from_y;y<dst_height;++y)
+			for (int y=from_y; y<dst_height; ++y)
 			{
 				int yo=y*dst_width;
-				for(int x=0;x<dst_width;++x)
+				for (int x=0; x<dst_width; ++x)
 					planePairs[p].dst[yo+x]=v;
 			}
 		}
 	}
 
-	if( (!newSize.left())
-	&&  (dst_width==src_width) )
-		for(int p=0;p<planesCount;++p)
+	if ( (!newSize.left())
+	&&   (dst_width == src_width) )
+		for (int p=0; p<planesCount; ++p)
 			memcpy(
 				planePairs[p].dst+overlap_d.y()*dst_width,
 				planePairs[p].src+overlap_s.y()*src_width,
@@ -355,25 +356,25 @@ void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qu
 		int rs_x=overlap_d.x()+delta_overlap.x();
 		int to_y=delta_overlap.y();
 
-		if( (overlap_d.x()>0)
-		||  (dst_width>overlap_d.x()+delta_overlap.x()) )
+		if ( (overlap_d.x() > 0)
+		||   (dst_width>overlap_d.x()+delta_overlap.x()) )
 		{
-			for(int p=0;p<planesCount;++p)
+			for (int p=0; p<planesCount; ++p)
 			{
 				Image::Pixel v=newColour[planePairs[p].id];
-				for(int y=0;y<to_y;++y)
+				for (int y=0; y<to_y; ++y)
 				{
 					int yo=(y+overlap_d.y())*dst_width;
-					for(int x=0;x<ls_x;++x)
+					for (int x=0; x<ls_x; ++x)
 						planePairs[p].dst[yo+x]=v;
-					for(int x=rs_x;x<dst_width;++x)
+					for (int x=rs_x; x<dst_width; ++x)
 						planePairs[p].dst[yo+x]=v;
 				}
 			}
 		}
-		for(int y=0;y<to_y;++y)
+		for (int y=0; y<to_y; ++y)
 		{
-			for(int p=0;p<planesCount;++p)
+			for (int p=0; p<planesCount; ++p)
 				memcpy(
 					planePairs[p].dst+(overlap_d.y()+y)*dst_width+overlap_d.x(),
 					planePairs[p].src+(overlap_s.y()+y)*src_width+overlap_s.x(),
@@ -384,7 +385,7 @@ void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qu
 	planePairs_s.reset();
 
 
-	foreach(QString key,src->textKeysList())
+	foreach (QString key,src->textKeysList())
 		dst->setText(key,src->text(key));
 
 
@@ -397,14 +398,14 @@ void PluginResize::do_resize(const char* function,qulonglong srcId,Image* src,qu
 uint PluginResize::lastErrorCode(qulonglong image)
 {
 	lastErrorCodes_t::ConstIterator I=m_lastErrorCodes.constFind(image);
-	if(I==m_lastErrorCodes.constEnd())
+	if (I == m_lastErrorCodes.constEnd())
 		return Core::CODE_OK;
 	return I.value();
 }
 
 QString PluginResize::errorCodeToString(uint errorCode) const
 {
-	switch(errorCode)
+	switch (errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
 		CASE(INCORrect_WIDTH      ,"New width should be greater than zero")

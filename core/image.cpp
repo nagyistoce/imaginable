@@ -40,39 +40,39 @@ Image::~Image()
 
 int Image::colourSpace(void) const
 {
-	if( m_plane.isEmpty() )
+	if (m_plane.isEmpty())
 		return Image::SPACE__EMPTY;
 
-	if( (m_plane.size()==1) && (m_plane.constFind(Image::PLANE_ALPHA)!=m_plane.constEnd()) )
+	if ((m_plane.size()==1) && (m_plane.constFind(Image::PLANE_ALPHA)!=m_plane.constEnd()))
 		return Image::SPACE_ALPHA;
 
 	Image::ColourPlaneSet planeSet=planes();
 	planeSet.remove(Image::PLANE_ALPHA);
 
-	switch(planeSet.size())
+	switch (planeSet.size())
 	{
-		case 1:
-			if( planeSet.constFind(Image::PLANE_LIGHTNESS) !=planeSet.constEnd() )
-				return Image::SPACE_LIGHTNESS;
+	case 1:
+		if ( planeSet.constFind(Image::PLANE_LIGHTNESS) !=planeSet.constEnd())
+			return Image::SPACE_LIGHTNESS;
 		break;
-		case 3:
-			if( planeSet.constFind(Image::PLANE_RED)       !=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_GREEN)     !=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_BLUE)      !=planeSet.constEnd() )
-				return Image::SPACE_RGB;
+	case 3:
+		if ( planeSet.constFind(Image::PLANE_RED)       !=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_GREEN)     !=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_BLUE)      !=planeSet.constEnd() )
+			return Image::SPACE_RGB;
 		break;
-		case 4:
-			if( planeSet.constFind(Image::PLANE_HUE_SECTOR)!=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_HUE)       !=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_SATURATION)!=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_HSV_VALUE) !=planeSet.constEnd() )
-				return Image::SPACE_HSV;
+	case 4:
+		if ( planeSet.constFind(Image::PLANE_HUE_SECTOR)!=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_HUE)       !=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_SATURATION)!=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_HSV_VALUE) !=planeSet.constEnd() )
+			return Image::SPACE_HSV;
 
-			if( planeSet.constFind(Image::PLANE_HUE_SECTOR)!=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_HUE)       !=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_SATURATION)!=planeSet.constEnd()
-			&&  planeSet.constFind(Image::PLANE_LIGHTNESS) !=planeSet.constEnd() )
-				return Image::SPACE_HSL;
+		if ( planeSet.constFind(Image::PLANE_HUE_SECTOR)!=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_HUE)       !=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_SATURATION)!=planeSet.constEnd()
+		&&   planeSet.constFind(Image::PLANE_LIGHTNESS) !=planeSet.constEnd() )
+			return Image::SPACE_HSL;
 		break;
 	}
 	return Image::SPACE__CUSTOM;
@@ -80,14 +80,14 @@ int Image::colourSpace(void) const
 
 bool Image::addPlane(Image::ColourPlane planeName)
 {
-	if(isEmpty())
+	if (isEmpty())
 		return false;
 
 	ColourPlanes::ConstIterator I=m_plane.find(planeName);
-	if(I!=m_plane.end())
+	if (I != m_plane.end())
 		return false;
 
-	const int& square=area();
+	const int &square=area();
 	Plane new_plane(new Image::Pixel[square]);
 	memset(new_plane.get(),0,square*sizeof(Image::Pixel));
 	m_plane[planeName]=new_plane;
@@ -98,7 +98,7 @@ bool Image::addPlane(Image::ColourPlane planeName)
 bool Image::removePlane(Image::ColourPlane planeName)
 {
 	ColourPlanes::Iterator I=m_plane.find(planeName);
-	if(I==m_plane.end())
+	if (I == m_plane.end())
 		return false;
 
 	m_plane.erase(I);
@@ -107,15 +107,15 @@ bool Image::removePlane(Image::ColourPlane planeName)
 
 bool Image::movePlane(Image::ColourPlane from,Image::ColourPlane to)
 {
-	if(isEmpty())
+	if (isEmpty())
 		return false;
 
 	ColourPlanes::Iterator F=m_plane.find(from);
-	if(F==m_plane.end())
+	if (F == m_plane.end())
 		return false;
 
 	ColourPlanes::Iterator T=m_plane.find(to);
-	if(T!=m_plane.end())
+	if (T != m_plane.end())
 		return false;
 
 	m_plane[to]=F.value();
@@ -131,16 +131,16 @@ bool Image::planeHasName(Image::ColourPlane planeName) const
 QString Image::planeName(Image::ColourPlane planeName) const
 {
 	ColourPlaneNames::ConstIterator I=m_planeName.find(planeName);
-	return (I==m_planeName.end()) ? QString() : I.value();
+	return (I == m_planeName.end()) ? QString() : I.value();
 }
 
 bool Image::setPlaneName(Image::ColourPlane planeName,QString value)
 {
-	if(value.isEmpty())
+	if (value.isEmpty())
 		return erasePlaneName(planeName);
 
 	ColourPlaneNames::Iterator I=m_planeName.find(planeName);
-	if(I!=m_planeName.end())
+	if (I != m_planeName.end())
 	{
 		*I=value;
 		return false;
@@ -154,30 +154,30 @@ bool Image::erasePlaneName(Image::ColourPlane planeName)
 {
 	ColourPlaneNames::Iterator I=m_planeName.find(planeName);
 
-	if(I==m_planeName.end())
+	if (I == m_planeName.end())
 		return false;
 
 	m_planeName.erase(I);
 	return true;
 }
 
-const Image::Pixel* Image::plane(Image::ColourPlane planeName) const
+const Image::Pixel *Image::plane(Image::ColourPlane planeName) const
 {
 	ColourPlanes::ConstIterator I=m_plane.find(planeName);
 
-	return (I==m_plane.end()) ? NULL : I.value().get();
+	return (I == m_plane.end()) ? NULL : I.value().get();
 }
 
-Image::Pixel* Image::plane(Image::ColourPlane planeName)
+Image::Pixel *Image::plane(Image::ColourPlane planeName)
 {
 	ColourPlanes::Iterator I=m_plane.find(planeName);
 
-	return (I==m_plane.end()) ? NULL : I.value().get();
+	return (I == m_plane.end()) ? NULL : I.value().get();
 }
 
 void Image::setWidth(int width)
 {
-	if(!m_plane.isEmpty())
+	if (!m_plane.isEmpty())
 		return;
 
 	m_size.setX(std::max<int>(0,width));
@@ -185,7 +185,7 @@ void Image::setWidth(int width)
 
 void Image::setHeight(int height)
 {
-	if(!m_plane.isEmpty())
+	if (!m_plane.isEmpty())
 		return;
 
 	m_size.setY(std::max<int>(0,height));
@@ -194,25 +194,25 @@ void Image::setHeight(int height)
 void Image::clear(void)
 {
 	m_offset=QPoint();
-	m_size=QPoint();
-	m_plane.clear();
-	m_text.clear();
+	m_size  =QPoint();
+	m_plane .clear();
+	m_text  .clear();
 }
 
 QString Image::text(QString key) const
 {
 	Text::ConstIterator I=m_text.find(key);
 
-	return (I==m_text.end()) ? QString() : I.value();
+	return (I == m_text.end()) ? QString() : I.value();
 }
 
 bool Image::setText(QString key,QString value)
 {
-	if(value.isEmpty())
+	if (value.isEmpty())
 		return eraseText(key);
 
 	Text::Iterator I=m_text.find(key);
-	if(I!=m_text.end())
+	if (I != m_text.end())
 	{
 		*I=value;
 		return false;
@@ -226,7 +226,7 @@ bool Image::eraseText(QString key)
 {
 	Text::Iterator I=m_text.find(key);
 
-	if(I==m_text.end())
+	if (I == m_text.end())
 		return false;
 
 	m_text.erase(I);
@@ -243,7 +243,7 @@ void Image::setBusy(bool value)
 
 void Image::setPercent(double value)
 {
-	if(!m_busy)
+	if (!m_busy)
 		return;
 
 	m_percent=std::min(100.,std::max(0.,value));

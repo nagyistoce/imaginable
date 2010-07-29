@@ -26,9 +26,10 @@
 #define IMAGINABLE__PLUGINS__QT_IO__QT_IO__INCLUDED
 
 
+#include <plugin_iface.hpp>
+
 #include "version.hpp"
 
-#include <plugin_iface.hpp>
 
 class PluginQT_IO : public QObject, PluginInterface
 {

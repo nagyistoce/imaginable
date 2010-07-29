@@ -26,11 +26,11 @@
 #define IMAGINABLE__PLUGINS__INB_IO__INB_IO__INCLUDED
 
 
-#include "version.hpp"
+#include <QtCore/QMap>
 
 #include <plugin_iface.hpp>
 
-#include <QtCore/QMap>
+#include "version.hpp"
 
 
 class PluginINB_IO : public QObject, PluginInterface

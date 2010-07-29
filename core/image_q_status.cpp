@@ -23,15 +23,16 @@
 *************/
 
 
-#include "image_q_status.hpp"
-#include "dbus_image_q_status_adaptor.h"
-
 #include <sys/syslog.h> // for log levels
 
 #include <QtCore/QVariant>
 
+#include "image_q_status.hpp"
 
-Image_Q_Status::Image_Q_Status(QObject* parent)
+#include "dbus_image_q_status_adaptor.h"
+
+
+Image_Q_Status::Image_Q_Status(QObject *parent)
 	: QObject(parent)
 {
 }
@@ -39,7 +40,7 @@ Image_Q_Status::Image_Q_Status(QObject* parent)
 bool Image_Q_Status::init(QString nodeName)
 {
 	new Image_statusAdaptor(this);
-	if(!QDBusConnection::sessionBus().registerObject(nodeName,this))
+	if (!QDBusConnection::sessionBus().registerObject(nodeName,this))
 	{
 		message(LOG_ALERT,"Cannot register D-Bus object interface `status`");
 		return false;

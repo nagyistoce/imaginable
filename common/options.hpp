@@ -36,9 +36,9 @@ class Options : public QObject
 	Q_OBJECT
 
 public:
-	Options(QObject* =NULL);
+	Options(QObject * =NULL);
 
-	void setFlag(const char* name) { setProperty(name,QVariant(false)); }
+	void setFlag(const char *name) { setProperty(name,QVariant(false)); }
 
 	void setAlias(QString alias,QString option);
 
@@ -51,7 +51,7 @@ public:
 	QString info(void) const { makeInfo(); return m_info; }
 
 
-	bool flag(const char* name) const { return property(name).toBool(); }
+	bool flag(const char *name) const { return property(name).toBool(); }
 
 	QStringList unnamed(void) const
 	{ return m_optionUnnamed; }

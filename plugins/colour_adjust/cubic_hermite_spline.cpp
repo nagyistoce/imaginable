@@ -42,7 +42,7 @@ CubicHermiteSpline::CubicHermiteSpline(Image::Pixel p0,Image::Pixel p1,QAdjustPo
 {
 	memset(h_cached,0,sizeof(bool)*0x10000);
 
-	foreach(ushort x,points.keys())
+	foreach (ushort x,points.keys())
 		m_point[clamp<ushort>(x,0,0xffff)]=point_param(clamp<ushort>(points[x],0,0xffff));
 	m_point[0]=point_param(clamp<ushort>(p0,0,0xffff));
 	m_point.remove(0xffff);
@@ -51,13 +51,13 @@ CubicHermiteSpline::CubicHermiteSpline(Image::Pixel p0,Image::Pixel p1,QAdjustPo
 
 	omega.syi=clamp<ushort>(p1,0,0xffff);
 
-	for(point_params::Iterator I=m_point.begin();I!=m_point.end();++I)
+	for (point_params::Iterator I=m_point.begin(); I!=m_point.end(); ++I)
 	{
 		point_params::Iterator N=I;
 		++N;
 		Image::Pixel next_x=(N==m_point.end())?0xffff:(N.key());
-		point_param& next=(N==m_point.end())?omega:(N.value());
-		point_param& cur=I.value();
+		point_param &next=(N==m_point.end())?omega:(N.value());
+		point_param &cur=I.value();
 
 		cur.dxi=next_x-I.key();
 		cur.dyi=next.syi-cur.syi;
@@ -74,7 +74,7 @@ CubicHermiteSpline::CubicHermiteSpline(Image::Pixel p0,Image::Pixel p1,QAdjustPo
 		++N;
 
 		alpha.dxi=2*I.value().dxi-N.value().dxi;
-		if(alpha.dxi<=0)
+		if (alpha.dxi <= 0)
 			alpha.dxi=I.value().dxi;
 		alpha.dyi=2*I.value().dyi-N.value().dyi;
 
@@ -88,7 +88,7 @@ CubicHermiteSpline::CubicHermiteSpline(Image::Pixel p0,Image::Pixel p1,QAdjustPo
 		--P;
 
 		omega.dxi=2*I.value().dxi-P.value().dxi;
-		if(omega.dxi<=0)
+		if (omega.dxi <= 0)
 			omega.dxi=I.value().dxi;
 		omega.dyi=2*I.value().dyi-P.value().dyi;
 
@@ -101,15 +101,15 @@ CubicHermiteSpline::CubicHermiteSpline(Image::Pixel p0,Image::Pixel p1,QAdjustPo
 		alpha.et=(I.value().dy/I.value().dx+alpha.dy/alpha.dx)/2.;
 	}
 
-	for(point_params::Iterator I=m_point.begin();I!=m_point.end();++I)
+	for (point_params::Iterator I=m_point.begin(); I!=m_point.end(); ++I)
 	{
 		point_params::Iterator P=I;
 		--P;
 		point_params::Iterator N=I;
 		++N;
-		point_param& prev=(I==m_point.begin())?alpha:(P.value());
-		point_param& next=(N==m_point.end()  )?omega:(N.value());
-		point_param& cur=I.value();
+		point_param &prev=(I==m_point.begin())?alpha:(P.value());
+		point_param &next=(N==m_point.end()  )?omega:(N.value());
+		point_param &cur=I.value();
 
 		double finite=(next.dy/next.dx+cur.dy/cur.dx)/2.; ;
 		double c_m=cur.dx*(next.dy-prev.dy)/2.;
@@ -121,9 +121,9 @@ CubicHermiteSpline::CubicHermiteSpline(Image::Pixel p0,Image::Pixel p1,QAdjustPo
 
 	m_point[0xffff]=omega;
 
-	for(point_params::Iterator I=m_point.begin();I!=m_point.end();++I)
+	for (point_params::Iterator I=m_point.begin(); I!=m_point.end(); ++I)
 	{
-		point_param& cur=I.value();
+		point_param &cur=I.value();
 
 		cur.p[0]=cur.sy;
 		cur.p[1]=cur.sy+cur.dy;
@@ -139,20 +139,20 @@ Image::Pixel CubicHermiteSpline::calc(Image::Pixel x)
 {
 	point_params::Iterator U=m_point.lowerBound(x);
 
-	if(U.key()==x)//node;
+	if (U.key() == x)//node;
 		return U.value().syi;
 
 	point_params::Iterator L=U;
 	--L;
 
-	point_param& cur=L.value();
+	point_param &cur=L.value();
 
 	Image::Pixel ti=static_cast<Image::Pixel>( ( static_cast<double>(x-L.key()) ) / cur.dx );
 
 	calc_h(ti);
 
 	double y=0.;
-	for(int i=0;i<2;++i)
+	for (int i=0; i<2; ++i)
 		y+=h[0][i][ti]*cur.p[i]+h[1][i][ti]*cur.m[i];
 
 	Image::Pixel ret=static_cast<Image::Pixel>(clamp(y,0.,1.)*65535.);
@@ -161,7 +161,7 @@ Image::Pixel CubicHermiteSpline::calc(Image::Pixel x)
 
 void CubicHermiteSpline::calc_h(Image::Pixel x)
 {
-	if(h_cached[x])
+	if (h_cached[x])
 		return;
 
 	h_cached[x]=true;
@@ -170,7 +170,7 @@ void CubicHermiteSpline::calc_h(Image::Pixel x)
 	double t2=t*t;
 	double t3=t2*t;
 
-	for(int i2=0;i2<2;++i2)
-		for(int i3=0;i3<2;++i3)
+	for (int i2=0; i2<2; ++i2)
+		for (int i3=0; i3<2; ++i3)
 			h[i3][i2][x]=k[i3][i2][3]*t3+k[i3][i2][2]*t2+k[i3][i2][1]*t+k[i3][i2][0];
 }

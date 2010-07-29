@@ -59,15 +59,15 @@ public:
 	{}
 
 
-	point& to_polar(void);
-	point& to_rect (void);
+	point &to_polar(void);
+	point &to_rect (void);
 
 	point polar(void) const { return point(*this).to_polar(); }
 	point rect (void) const { return point(*this).to_rect (); }
 
 
 	#define OPERATOR(OP) \
-	point& operator OP (const point& rs) \
+	point & operator OP (const point &rs) \
 	{ \
 		x OP rs.x; \
 		y OP rs.y; \
@@ -81,7 +81,7 @@ public:
 
 	#define OPERATOR(OP) \
 	template<typename T> \
-	point& operator OP (T value) \
+	point & operator OP (T value) \
 	{ \
 		return ( *this OP point(value,value) ); \
 	}
@@ -92,7 +92,7 @@ public:
 	#undef OPERATOR
 
 	#define OPERATOR(OP) \
-	point operator OP (const point& rs) \
+	point operator OP (const point &rs) \
 	{ \
 		point ret(*this); \
 		ret OP ## = rs; \

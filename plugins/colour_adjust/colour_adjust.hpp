@@ -26,9 +26,9 @@
 #define IMAGINABLE__PLUGINS__COLOUR_ADJUST__COLOUR_ADJUST__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
+
+#include "version.hpp"
 
 #include "plugin_types.hpp"
 
