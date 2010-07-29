@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: version.cpp 14 2010-04-08 09:31:32Z Kuzma.Shapran@gmail.com $
+** File info:    $Id$
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -23,74 +23,92 @@
 *************/
 
 
-#include "version.hpp"
-
 #include <cstdio>
 #include <cstdlib>
 
 #include <string>
 
+#include "version.hpp"
+
 
 namespace version {
 
-const unsigned major =
+unsigned major(void)
+{
+	return
 #include "version-major.inl"
-;
+	;
+}
 
-const unsigned minor =
+unsigned minor(void)
+{
+	return
 #include "version-minor.inl"
-;
+	;
+}
 
-const char* revision =
+const char* revision(void)
+{
+	return
 #include "version-revision.auto.inl"
-;
+	;
+}
 
-const char* label =
-"-"
+unsigned number(void)
+{
+	return
+#include "version-number.auto.inl"
+	;
+}
+
+const char* label(void)
+{
+	return
 #include "version-label.inl"
 #ifdef _DEBUG
 "-debug"
 #endif
-;
+	;
+}
 
-const unsigned number =
-#include "version-number.auto.inl"
-;
-
-const time_t time =
+time_t time(void)
+{
+	return
 #include "version-time.auto.inl"
-;
+	;
+}
 
-std::string full_str;
+static std::string full_str;
 
 const char* full_string(void)
 {
-	if(full_str.empty())
+	if (full_str.empty())
 	{
 		char* c_str;
-		if(asprintf(&c_str,"%d.%d.%s.%d%s",
+		if (asprintf(&c_str,"%d.%d.%s.%d%s%s",
 			major,
 			minor,
 			revision,
 			number,
+			(*label && (label[0]!='-')) ? "-" : "",
 			label )>0)
 		{
 			full_str=std::string(c_str);
-		free(static_cast<void*>(c_str));
+			free(static_cast<void*>(c_str));
 		}
 	}
 	return full_str.c_str();
 }
 
-std::string ubuntu_style_str;
+static std::string ubuntu_style_str;
 
 const char* ubuntu_style_string(void)
 {
-	if(ubuntu_style_str.empty())
+	if (ubuntu_style_str.empty())
 	{
 		const struct tm* _tm=localtime(&time);
 		char* c_str;
-		if(asprintf(&c_str,"%02d.%02d",
+		if (asprintf(&c_str,"%02d.%02d",
 			_tm->tm_year-100,
 			_tm->tm_mon+1 )>0)
 		{

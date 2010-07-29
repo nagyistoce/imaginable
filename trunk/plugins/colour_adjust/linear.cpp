@@ -29,7 +29,7 @@
 Linear::Linear(Image::Pixel p0,Image::Pixel p1,QAdjustPoint points)
 	: CurveFunction()
 {
-	foreach(ushort x,points.keys())
+	foreach (ushort x,points.keys())
 		m_point[clamp<ushort>(x,0,0xffff)]=point_param(clamp<ushort>(points[x],0,0xffff));
 	m_point[0]=point_param(clamp<ushort>(p0,0,0xffff));
 	m_point.remove(0xffff);
@@ -38,13 +38,13 @@ Linear::Linear(Image::Pixel p0,Image::Pixel p1,QAdjustPoint points)
 
 	omega.syi=clamp<ushort>(p1,0,0xffff);
 
-	for(point_params::Iterator I=m_point.begin();I!=m_point.end();++I)
+	for (point_params::Iterator I=m_point.begin(); I!=m_point.end(); ++I)
 	{
 		point_params::Iterator N=I;
 		++N;
 		Image::Pixel next_x=(N==m_point.end())?0xffff:(N.key());
-		point_param& next=(N==m_point.end())?omega:(N.value());
-		point_param& cur=I.value();
+		point_param &next=(N==m_point.end())?omega:(N.value());
+		point_param &cur=I.value();
 
 		cur.dxi=next_x-I.key();
 		cur.dyi=next.syi-cur.syi;
@@ -65,13 +65,13 @@ Image::Pixel Linear::calc(Image::Pixel x)
 {
 	point_params::Iterator U=m_point.lowerBound(x);
 
-	if(U.key()==x)//node;
+	if (U.key() == x)//node;
 		return U.value().syi;
 
 	point_params::Iterator L=U;
 	--L;
 
-	point_param& cur=L.value();
+	point_param &cur=L.value();
 
 	return static_cast<Image::Pixel>( ( ( static_cast<double>(x-L.key()) ) / cur.dx ) * cur.dy ) + L.value().syi;
 }

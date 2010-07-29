@@ -28,7 +28,7 @@
 #include <cmath>
 
 
-point& point::to_polar(void)
+point &point::to_polar(void)
 {
 	double x_=x;
 	double y_=y;
@@ -37,7 +37,7 @@ point& point::to_polar(void)
 	return *this;
 }
 
-point& point::to_rect(void)
+point &point::to_rect(void)
 {
 	double r_=r;
 	double f_=f;

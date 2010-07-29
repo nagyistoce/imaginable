@@ -48,37 +48,36 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/common
+    $${PATH_TO_PROJECT_ROOT}/common
 
 SOURCES += \
-	main.cpp \
-	version.cpp \
-	../common/options.cpp \
-	wait.cpp
+    main.cpp \
+    version.cpp \
+    ../common/options.cpp \
+    wait.cpp
 
 HEADERS += \
-	main.hpp \
-	version.hpp \
-	../common/options.hpp \
-	wait.hpp
+    main.hpp \
+    version.hpp \
+    ../common/options.hpp \
+    wait.hpp
 
 QMAKE_QDBUSXML2CPP = \
-	$$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
+    $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_INTERFACES += \
-	../core/dbus_image_q_status.xml \
-	../core/dbus_core_q.xml
+    ../core/dbus_image_q_status.xml \
+    ../core/dbus_core_q.xml
 
 OTHER_FILES += \
-	version-minor.inl \
-	version-major.inl \
-	version-label.inl \
-	$${DBUS_INTERFACES} \
-	$${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh
+    version-minor.inl \
+    version-major.inl \
+    version-label.inl \
+    $${DBUS_INTERFACES}
 
 
 autoversioning.target = version.cpp
-autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh"
+autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh"
 autoversioning.depends = autoversioning2
 
 autoversioning2.commands = "@echo Autoversioning ..."

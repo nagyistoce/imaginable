@@ -26,9 +26,9 @@
 #define IMAGINABLE__PLUGINS__BLUR__BLUR__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
+
+#include "version.hpp"
 
 
 class PluginBlur : public QObject, PluginInterface

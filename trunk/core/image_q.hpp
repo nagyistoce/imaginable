@@ -26,10 +26,10 @@
 #define IMAGINABLE__CORE__IMAGE_Q__INCLUDED
 
 
-#include "image.hpp"
-
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
+
+#include "image.hpp"
 
 
 class Core_Q;
@@ -40,7 +40,7 @@ class Image_Q : public Image
 {
 Q_OBJECT
 public:
-	Image_Q(QObject* = NULL);
+	Image_Q(QObject * =NULL);
 	~Image_Q();
 
 	bool init(QString);
@@ -59,9 +59,9 @@ public slots:
 private:
 	friend class Core_Q;
 
-	Image_Q_Status* m_image_Q_Status;
+	Image_Q_Status *m_image_Q_Status;
 	QString m_DBusIFaceImageNodeName;
-	ImageAdaptor* m_DBusIFaceMain;
+	ImageAdaptor *m_DBusIFaceMain;
 
 	bool set_DBus_main(void);
 	void hide_DBus_main(void);

@@ -26,9 +26,9 @@
 #define IMAGINABLE__PLUGINS__OVERLAY__OVERLAY__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
+
+#include "version.hpp"
 
 
 class PluginOverlay : public QObject, PluginInterface

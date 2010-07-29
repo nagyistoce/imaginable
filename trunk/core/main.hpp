@@ -29,6 +29,6 @@
 #include "options.hpp"
 
 
-extern const Options& program_options(void);
+extern const Options &program_options(void);
 
 #endif // IMAGINABLE__CORE__MAIN__INCLUDED

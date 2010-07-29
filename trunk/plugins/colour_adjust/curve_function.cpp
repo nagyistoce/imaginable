@@ -36,7 +36,7 @@ CurveFunction::~CurveFunction()
 
 Image::Pixel CurveFunction::get(Image::Pixel x)
 {
-	if(!m_cached[x])
+	if (!m_cached[x])
 	{
 		m_cached[x]=true;
 		m_value[x]=this->calc(x);

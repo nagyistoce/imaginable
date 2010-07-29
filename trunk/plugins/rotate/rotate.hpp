@@ -26,9 +26,9 @@
 #define IMAGINABLE__PLUGINS__ROTATE__ROTATE__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
+
+#include "version.hpp"
 
 
 class PluginRotate : public QObject, PluginInterface

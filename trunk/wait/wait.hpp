@@ -26,10 +26,10 @@
 #define IMAGINABLE__WAIT__WAIT__INCLUDED
 
 
-#include "dbus_image_q_status_interface.h"
-
 #include <QtCore/QObject>
 #include <QtCore/QMap>
+
+#include "dbus_image_q_status_interface.h"
 
 
 class QTimer;
@@ -38,7 +38,7 @@ class Wait : public QObject
 {
 Q_OBJECT
 public:
-	Wait(QObject* parent=NULL);
+	Wait(QObject * =NULL);
 
 public slots:
 	void finished(void);
@@ -50,7 +50,7 @@ private slots:
 private:
 	int m_rest;
 
-	QTimer* m_timer;
+	QTimer *m_timer;
 
 	QMap<qulonglong,name::kuzmashapran::imaginable::image_status*> m_images;
 };

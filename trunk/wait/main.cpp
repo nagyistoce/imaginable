@@ -23,10 +23,6 @@
 *************/
 
 
-#include "version.hpp"
-#include "options.hpp"
-#include "wait.hpp"
-
 #include <cerrno>
 #include <cstdlib>
 #include <iostream>
@@ -38,11 +34,16 @@
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMetaType>
 
+#include "version.hpp"
+#include "options.hpp"
+#include "wait.hpp"
+
+
 namespace {
 
 void say_hello(void)
 {
-	QTextStream(stderr)<<qPrintable(QString(
+	QTextStream(stderr) << qPrintable(QString(
 		"%1\n"
 		"Copyright (C) 2009,%2 %3 <Kuzma.Shapran@gmail.com>\n"
 		"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
@@ -59,7 +60,7 @@ void say_hello(void)
 
 void show_version(void)
 {
-	QTextStream(stderr)<<qPrintable(QString(
+	QTextStream(stderr) << qPrintable(QString(
 		"Version %1 (built %2-%3-%4 %5:%6:%7)\n"
 		"\n"
 		)
@@ -73,16 +74,16 @@ void show_version(void)
 		);
 }
 
-Options* s_program_options;
+Options *s_program_options;
 
 }
 
-const Options& program_options(void)
+const Options &program_options(void)
 {
 	return *s_program_options;
 }
 
-int main(int argc,char* argv[])
+int main(int argc,char *argv[])
 {
 	QCoreApplication app(argc,argv);
 	app.setOrganizationName("Kuzma Shapran");
@@ -90,35 +91,39 @@ int main(int argc,char* argv[])
 	app.setApplicationVersion(QString::fromAscii(version::full_string()));
 
 	Options options;
-	options.setFlag("--help");
-	options.setFlag("--no-hello");
-	options.setFlag("--version");
+
+	options.setFlag (     "--help");
 	options.setAlias("-h","--help");
 	options.setAlias("-?","--help");
+	options.setInfo (     "--help"    ,"show this help and exit");
+
+	options.setFlag (     "--no-hello");
 	options.setAlias("-q","--no-hello");
+	options.setInfo (     "--no-hello","do not show start message");
+
+	options.setFlag (     "--version");
 	options.setAlias("-V","--version");
-	options.setInfo("--help","show this help and exit");
-	options.setInfo("--version","show version and exit");
-	options.setInfo("--no-hello","do not show start message");
+	options.setInfo (     "--version" ,"show version and exit");
+
 	s_program_options=&options;
 
 	options.parse(QCoreApplication::arguments());
 
 
-	if(options.flag("--help"))
+	if (options.flag("--help"))
 	{
 		say_hello();
-		QTextStream(stderr)<<"Possible options are:\n"<<options.info()
-			<<"\n"
-			<<QString("Usage:\n%1 [Id] ...\n").arg(QFileInfo(QCoreApplication::argv()[0]).fileName());
+		QTextStream(stderr) << "Possible options are:\n" << options.info()
+			<< "\n"
+			<< QString("Usage:\n%1 [Id] ...\n").arg(QFileInfo(QCoreApplication::argv()[0]).fileName());
 		return EXIT_SUCCESS;
 	}
 
 
-	if(!options.flag("--no-hello"))
+	if (!options.flag("--no-hello"))
 		say_hello();
 
-	if(options.flag("--version"))
+	if (options.flag("--version"))
 	{
 		show_version();
 		return EXIT_SUCCESS;

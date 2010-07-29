@@ -79,12 +79,12 @@ public:
 
 	void normalise(void)
 	{
-		if(m_w<0)
+		if (m_w<0)
 		{
 			m_x+=m_w;
 			m_w=-m_w;
 		}
-		if(m_h<0)
+		if (m_h<0)
 		{
 			m_y+=m_h;
 			m_h=-m_h;

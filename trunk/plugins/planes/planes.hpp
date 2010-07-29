@@ -26,9 +26,9 @@
 #define IMAGINABLE__PLUGINS__PLANES__PLANES__INCLUDED
 
 
-#include "version.hpp"
-
 #include <plugin_iface.hpp>
+
+#include "version.hpp"
 
 
 class PluginPlanes : public QObject, PluginInterface

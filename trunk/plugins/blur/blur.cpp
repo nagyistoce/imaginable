@@ -23,10 +23,10 @@
 *************/
 
 
+#include <boost/scoped_array.hpp>
+
 #include "blur.hpp"
 #include "dbus_plugin_blur_adaptor.h"
-
-#include <boost/scoped_array.hpp>
 
 
 Q_EXPORT_PLUGIN2(blur,PluginBlur)
@@ -45,16 +45,16 @@ PluginBlur::PluginBlur(void)
 uint PluginBlur::boxAll(qulonglong Id,uint size)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(img->isEmpty())
+	if (img->isEmpty())
 		return CODE_IMAGE_IS_EMPTY;
 
 
-	if( (size>static_cast<uint>(img->width ()))
-	&&  (size>static_cast<uint>(img->height())) )
+	if ( (size > static_cast<uint>(img->width ()))
+	&&   (size > static_cast<uint>(img->height())) )
 	{
 		uint new_size=std::max(img->width(),img->height());
 		message(LOG_WARNING,__FUNCTION__,QString("Box blur value [%1] is too high, reducing to [%2]").arg(size).arg(new_size),Id);
@@ -71,14 +71,14 @@ uint PluginBlur::boxAll(qulonglong Id,uint size)
 uint PluginBlur::boxAllPercent(qulonglong Id,uint size)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(img->isEmpty())
+	if (img->isEmpty())
 		return CODE_IMAGE_IS_EMPTY;
 
-	if(size>100)
+	if (size>100)
 	{
 		message(LOG_WARNING,__FUNCTION__,QString("Box blur value [%1\%] is too high, reducing to [100%]").arg(size),Id);
 		size=100;
@@ -95,13 +95,13 @@ uint PluginBlur::boxAllPercent(qulonglong Id,uint size)
 	return Core::CODE_OK;
 }
 
-void PluginBlur::do_boxAll(qulonglong Id,Image* img,int size)
+void PluginBlur::do_boxAll(qulonglong Id,Image *img,int size)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
 	double from=0.;
 	double step=100./static_cast<double>(img->planesList().size());
-	foreach(int colourPlane,img->planesList())
+	foreach (int colourPlane,img->planesList())
 	{
 		do_box(Id,img,colourPlane,size,from,step);
 		from+=step;
@@ -115,19 +115,19 @@ void PluginBlur::do_boxAll(qulonglong Id,Image* img,int size)
 uint PluginBlur::box(qulonglong Id,int colourPlane,uint size)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy  ?  (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(img->isEmpty())
+	if (img->isEmpty())
 		return CODE_IMAGE_IS_EMPTY;
 
-	if(!img->hasPlane(colourPlane))
+	if (!img->hasPlane(colourPlane))
 		return CODE_NO_COLOUR_PLANE;
 
 
-	if( (size>static_cast<uint>(img->width ()))
-	&&  (size>static_cast<uint>(img->height())) )
+	if ( (size > static_cast<uint>(img->width ()))
+	&&   (size > static_cast<uint>(img->height())) )
 	{
 		uint new_size=std::max(img->width(),img->height());
 		message(LOG_WARNING,__FUNCTION__,QString("Box blur value [%1] is too high, reducing [%2]").arg(size).arg(new_size),Id);
@@ -145,17 +145,17 @@ uint PluginBlur::box(qulonglong Id,int colourPlane,uint size)
 uint PluginBlur::boxPercent(qulonglong Id,int colourPlane,uint size)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(img->isEmpty())
+	if (img->isEmpty())
 		return CODE_IMAGE_IS_EMPTY;
 
-	if(!img->hasPlane(colourPlane))
+	if (!img->hasPlane(colourPlane))
 		return CODE_NO_COLOUR_PLANE;
 
-	if(size>100)
+	if (size>100)
 	{
 		message(LOG_WARNING,__FUNCTION__,QString("Box blur value [%1\%] is too high, reducing to [100%]").arg(size),Id);
 		size=100;
@@ -172,7 +172,7 @@ uint PluginBlur::boxPercent(qulonglong Id,int colourPlane,uint size)
 	return Core::CODE_OK;
 }
 
-void PluginBlur::do_boxPlain(qulonglong Id,Image* img,int colourPlane,int size)
+void PluginBlur::do_boxPlain(qulonglong Id,Image *img,int colourPlane,int size)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
@@ -181,40 +181,40 @@ void PluginBlur::do_boxPlain(qulonglong Id,Image* img,int colourPlane,int size)
 	disconnect(img,SLOT(setPercent(double)));
 }
 
-void PluginBlur::do_box(qulonglong Id,Image* img,int colourPlane,int size,double fromPercent,double stepPercent)
+void PluginBlur::do_box(qulonglong Id,Image *img,int colourPlane,int size,double fromPercent,double stepPercent)
 {
 	int width =img->width();
 	int height=img->height();
 
-	Image::Pixel* data=img->plane(colourPlane);
+	Image::Pixel *data=img->plane(colourPlane);
 
 	{
 		int sz=std::min(size,width);
 		int fullSz=sz*2+1;
 		boost::scoped_array<Image::Pixel> mem_s(new Image::Pixel[fullSz]);
-		Image::Pixel* mem=mem_s.get();
+		Image::Pixel *mem=mem_s.get();
 
-		for(int y=0;y<height;++y)
+		for (int y=0; y<height; ++y)
 		{
 			emit setPercent(fromPercent+static_cast<double>(y)*stepPercent/static_cast<double>(2*height));
 
 			unsigned acc=0;
 			int c=0;
 			int yo=y*width;
-			for(int x=-sz;x<width;++x)
+			for (int x=-sz; x<width; ++x)
 			{
 				int x_d=x-sz-1;
 				int x_a=x+sz;
-				bool d=(x>=sz+1);
-				bool p=(x>=0);
-				bool a=(x<width-sz);
-				if(d!=a)
-					c+=a?1:-1;
-				if(a)
+				bool d=(x >= sz+1);
+				bool p=(x >= 0);
+				bool a=(x <  width-sz);
+				if (d != a)
+					c+=a ? 1 : -1;
+				if (a)
 					acc+=static_cast<unsigned>(data[yo+x_a]);
-				if(d)
+				if (d)
 					acc-=static_cast<unsigned>(mem[x_d%fullSz]);
-				if(p)
+				if (p)
 				{
 					mem[x%fullSz]=data[yo+x];
 					data[yo+x]=static_cast<Image::Pixel>(acc/c);
@@ -228,28 +228,28 @@ void PluginBlur::do_box(qulonglong Id,Image* img,int colourPlane,int size,double
 		int fullSz=sz*2+1;
 		int sz_yo=sz*width;
 		boost::scoped_array<Image::Pixel> mem_s(new Image::Pixel[fullSz]);
-		Image::Pixel* mem=mem_s.get();
+		Image::Pixel *mem=mem_s.get();
 
-		for(int x=0;x<width;++x)
+		for (int x=0;x<width;++x)
 		{
 			emit setPercent(fromPercent+static_cast<double>(width+x)*stepPercent/static_cast<double>(2*width));
 
 			unsigned acc=0;
 			int c=0;
-			for(int y=-sz,yw=-sz_yo;y<height;yw+=width,++y)
+			for (int y=-sz,yw=-sz_yo;y<height;yw+=width,++y)
 			{
 				int y_d=y-sz-1;
 				int y_a=yw+sz_yo;
-				bool d=(y>=sz+1);
-				bool p=(y>=0);
-				bool a=(y<height-sz);
-				if(d!=a)
-					c+=a?1:-1;
-				if(a)
+				bool d=(y >= sz+1);
+				bool p=(y >= 0);
+				bool a=(y <  height-sz);
+				if (d != a)
+					c+=a ? 1 : -1;
+				if (a)
 					acc+=static_cast<unsigned>(data[y_a+x]);
-				if(d)
+				if (d)
 					acc-=static_cast<unsigned>(mem[y_d%fullSz]);
-				if(p)
+				if (p)
 				{
 					mem[y%fullSz]=data[yw+x];
 					data[yw+x]=static_cast<Image::Pixel>(acc/c);
@@ -267,23 +267,23 @@ void PluginBlur::do_box(qulonglong Id,Image* img,int colourPlane,int size,double
 uint PluginBlur::frameAll(qulonglong Id,uint size,uint hole)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(img->isEmpty())
+	if (img->isEmpty())
 		return CODE_IMAGE_IS_EMPTY;
 
 
-	if( (size>static_cast<uint>(img->width ()))
-	&&  (size>static_cast<uint>(img->height())) )
+	if ( (size>static_cast<uint>(img->width ()))
+	&&   (size>static_cast<uint>(img->height())) )
 	{
 		uint new_size=std::max(img->width(),img->height());
 		message(LOG_WARNING,__FUNCTION__,QString("Frame blur size value [%1] is too high, reducing to [%2]").arg(size).arg(new_size),Id);
 		size=new_size;
 	}
 
-	if(hole>=size)
+	if (hole>=size)
 	{
 		uint new_hole=size-1;
 		message(LOG_WARNING,__FUNCTION__,QString("Frame blur hole value [%1] is too high, reducing to [%2]").arg(hole).arg(new_hole),Id);
@@ -297,13 +297,13 @@ uint PluginBlur::frameAll(qulonglong Id,uint size,uint hole)
 	return Core::CODE_OK;
 }
 
-void PluginBlur::do_frameAll(qulonglong Id,Image* img,int size,int hole)
+void PluginBlur::do_frameAll(qulonglong Id,Image *img,int size,int hole)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
 	double from=0.;
 	double step=100./static_cast<double>(img->planesList().size());
-	foreach(int colourPlane,img->planesList())
+	foreach (int colourPlane,img->planesList())
 	{
 		do_frame(Id,img,colourPlane,size,hole,from,step);
 		from+=step;
@@ -317,26 +317,26 @@ void PluginBlur::do_frameAll(qulonglong Id,Image* img,int size,int hole)
 uint PluginBlur::frame(qulonglong Id,int colourPlane,uint size,uint hole)
 {
 	bool busy;
-	Image* img=getOrComplain(__FUNCTION__,"image",Id,busy);
-	if(!img)
-		return busy?(Core::CODE_IMAGE_BUSY):(Core::CODE_NO_IMAGE);
+	Image *img=getOrComplain(__FUNCTION__,"image",Id,busy);
+	if (!img)
+		return busy ? (Core::CODE_IMAGE_BUSY) : (Core::CODE_NO_IMAGE);
 
-	if(img->isEmpty())
+	if (img->isEmpty())
 		return CODE_IMAGE_IS_EMPTY;
 
-	if(!img->hasPlane(colourPlane))
+	if (!img->hasPlane(colourPlane))
 		return CODE_NO_COLOUR_PLANE;
 
 
-	if( (size>static_cast<uint>(img->width ()))
-	&&  (size>static_cast<uint>(img->height())) )
+	if ( (size>static_cast<uint>(img->width ()))
+	&&   (size>static_cast<uint>(img->height())) )
 	{
 		uint new_size=std::max(img->width(),img->height());
 		message(LOG_WARNING,__FUNCTION__,QString("Frame blur size value [%1] is too high, reducing [%2]").arg(size).arg(new_size),Id);
 		size=new_size;
 	}
 
-	if(hole>=size)
+	if (hole>=size)
 	{
 		uint new_hole=size-1;
 		message(LOG_WARNING,__FUNCTION__,QString("Frame blur hole value [%1] is too high, reducing to [%2]").arg(hole).arg(new_hole),Id);
@@ -351,7 +351,7 @@ uint PluginBlur::frame(qulonglong Id,int colourPlane,uint size,uint hole)
 	return Core::CODE_OK;
 }
 
-void PluginBlur::do_framePlain(qulonglong Id,Image* img,int colourPlane,int size,int hole)
+void PluginBlur::do_framePlain(qulonglong Id,Image *img,int colourPlane,int size,int hole)
 {
 	connect(this,SIGNAL(setPercent(double)),img,SLOT(setPercent(double)));
 
@@ -360,18 +360,18 @@ void PluginBlur::do_framePlain(qulonglong Id,Image* img,int colourPlane,int size
 	disconnect(img,SLOT(setPercent(double)));
 }
 
-void PluginBlur::do_frame(qulonglong Id,Image* img,int colourPlane,int size,int hole,double fromPercent,double stepPercent)
+void PluginBlur::do_frame(qulonglong Id,Image *img,int colourPlane,int size,int hole,double fromPercent,double stepPercent)
 {
 	int width =img->width();
 	int height=img->height();
 
-	Image::Pixel* data=img->plane(colourPlane);
+	Image::Pixel *data=img->plane(colourPlane);
 
-	if(!img->hasPlane(Image::PLANE__INTERNAL))
+	if (!img->hasPlane(Image::PLANE__INTERNAL))
 		img->addPlane(Image::PLANE__INTERNAL);
-	Image::Pixel* dst=img->plane(Image::PLANE__INTERNAL);
+	Image::Pixel *dst=img->plane(Image::PLANE__INTERNAL);
 
-	for(int x=-size;x<width;++x)
+	for (int x=-size; x<width; ++x)
 	{
 		emit setPercent(fromPercent+static_cast<double>(x)*stepPercent/static_cast<double>(width));
 
@@ -383,53 +383,53 @@ void PluginBlur::do_frame(qulonglong Id,Image* img,int colourPlane,int size,int 
 
 		unsigned acc=0;
 		int c=0;
-		for(int y=-size;y<height;++y)
+		for (int y=-size; y<height; ++y)
 		{
 			int ys_d=y-size-1;
 			int ys_a=y+size;
-			bool ys_df=(y>=size+1);
-			bool ys_af=(y<height-size);
+			bool ys_df=(y >= size+1);
+			bool ys_af=(y <  height-size);
 
 			int yh_d=y+hole;
 			int yh_a=y-hole-1;
-			bool yh_df=(yh_d>=0) && (yh_d<height);
-			bool yh_af=(yh_a>=0) && (yh_a<height);
+			bool yh_df=(yh_d >= 0) && (yh_d < height);
+			bool yh_af=(yh_a >= 0) && (yh_a < height);
 
-			bool p=(y>=0)&&(x>=0);
+			bool p=(y >= 0) && (x >= 0);
 
-			if(ys_af)
+			if (ys_af)
 			{
 				c+=xs_r-xs_l;
 
 				int ysoa=ys_a*width;
-				for(int a=xs_l;a<xs_r;++a)
+				for (int a=xs_l; a<xs_r; ++a)
 					acc+=static_cast<unsigned>(data[ysoa+a]);
 			}
-			if(yh_af)
+			if (yh_af)
 			{
 				c+=xh_r-xh_l;
 
 				int yhoa=yh_a*width;
-				for(int a=xh_l;a<xh_r;++a)
+				for (int a=xh_l; a<xh_r; ++a)
 					acc+=static_cast<unsigned>(data[yhoa+a]);
 			}
-			if(ys_df)
+			if (ys_df)
 			{
 				c-=xs_r-xs_l;
 
 				int ysod=ys_d*width;
-				for(int a=xs_l;a<xs_r;++a)
+				for (int a=xs_l; a<xs_r; ++a)
 					acc-=static_cast<unsigned>(data[ysod+a]);
 			}
-			if(yh_df)
+			if (yh_df)
 			{
 				c-=xh_r-xh_l;
 
 				int yhod=yh_d*width;
-				for(int a=xh_l;a<xh_r;++a)
+				for (int a=xh_l; a<xh_r; ++a)
 					acc-=static_cast<unsigned>(data[yhod+a]);
 			}
-			if(p)
+			if (p)
 				dst[y*width+x]=static_cast<Image::Pixel>(acc/c);
 		}
 	}
@@ -444,7 +444,7 @@ void PluginBlur::do_frame(qulonglong Id,Image* img,int colourPlane,int size,int 
 
 QString PluginBlur::errorCodeToString(uint errorCode) const
 {
-	switch(errorCode)
+	switch (errorCode)
 	{
 		#define CASE(ERR,STR) case CODE_##ERR: return STR ;
 		CASE(NO_COLOUR_PLANE,"No colour plane")

@@ -48,32 +48,32 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/include
+    $${PATH_TO_PROJECT_ROOT}/include
 
 SOURCES += \
-	version.cpp \
-	rotate.cpp \
-	point.cpp
+    version.cpp \
+    rotate.cpp \
+    point.cpp
 
 HEADERS += \
-	version.hpp \
-	rotate.hpp \
-	point.hpp
+    version.hpp \
+    rotate.hpp \
+    point.hpp
 
 QMAKE_QDBUSXML2CPP = $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
 
 DBUS_ADAPTORS += \
-	dbus_plugin_rotate.xml
+    dbus_plugin_rotate.xml
 
 OTHER_FILES += \
-	version-minor.inl \
-	version-major.inl \
-	version-label.inl \
-	$${DBUS_ADAPTORS}
+    version-minor.inl \
+    version-major.inl \
+    version-label.inl \
+    $${DBUS_ADAPTORS}
 
 
 autoversioning.target = version.cpp
-autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversioning.sh"
+autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh"
 autoversioning.depends = autoversioning2
 
 autoversioning2.commands = "@echo Autoversioning ..."

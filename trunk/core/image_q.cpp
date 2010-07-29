@@ -23,14 +23,15 @@
 *************/
 
 
-#include "image_q.hpp"
-#include "image_q_status.hpp"
-#include "dbus_image_q_adaptor.h"
-
 #include <sys/syslog.h> // for log levels
 
+#include "image_q.hpp"
+#include "image_q_status.hpp"
 
-Image_Q::Image_Q(QObject* parent)
+#include "dbus_image_q_adaptor.h"
+
+
+Image_Q::Image_Q(QObject *parent)
 	: Image(parent)
 	, m_image_Q_Status(new Image_Q_Status(this))
 {
@@ -47,7 +48,7 @@ Image_Q::~Image_Q()
 
 bool Image_Q::init(QString nodeName)
 {
-	if(!m_image_Q_Status->init(nodeName+"/status"))
+	if (!m_image_Q_Status->init(nodeName+"/status"))
 		return false;
 
 	m_DBusIFaceMain=new ImageAdaptor(this);
@@ -57,7 +58,7 @@ bool Image_Q::init(QString nodeName)
 
 bool Image_Q::set_DBus_main(void)
 {
-	if(!QDBusConnection::sessionBus().registerObject(m_DBusIFaceImageNodeName,m_DBusIFaceMain,QDBusConnection::ExportAllContents))
+	if (!QDBusConnection::sessionBus().registerObject(m_DBusIFaceImageNodeName,m_DBusIFaceMain,QDBusConnection::ExportAllContents))
 	{
 		message(LOG_ALERT,"Cannot register D-Bus object interface `main`");
 		return false;
@@ -72,7 +73,7 @@ void Image_Q::hide_DBus_main(void)
 
 QString Image_Q::colourSpaceToString(int colourSpace)
 {
-	switch(colourSpace)
+	switch (colourSpace)
 	{
 		#define CASE(SPACE,NAME) case Image::SPACE_ ## SPACE:  return #NAME ;
 		CASE(_CUSTOM,Custom)
@@ -89,7 +90,7 @@ QString Image_Q::colourSpaceToString(int colourSpace)
 
 QString Image_Q::colourPlaneToString(int plane)
 {
-	switch(plane)
+	switch (plane)
 	{
 		#define CASE(PLANE,NAME) case Image::PLANE_ ## PLANE:  return #NAME ;
 		CASE(ALPHA,Alpha)
@@ -108,7 +109,7 @@ QString Image_Q::colourPlaneToString(int plane)
 
 void Image_Q::onSetBusy(void)
 {
-	if(m_busy)
+	if (m_busy)
 	{
 		emit longProcessingStarted();
 		hide_DBus_main();

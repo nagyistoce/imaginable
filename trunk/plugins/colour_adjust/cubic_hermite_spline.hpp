@@ -26,10 +26,10 @@
 #define IMAGINABLE__PLUGINS__COLOUR_ADJUST__CUBIC_HERMITE_SPLINE__INCLUDED
 
 
+#include <QtCore/QMap>
+
 #include "curve_function.hpp"
 #include "plugin_types.hpp"
-
-#include <QtCore/QMap>
 
 
 class CubicHermiteSpline : public CurveFunction
