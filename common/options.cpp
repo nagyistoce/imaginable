@@ -32,18 +32,18 @@ Options::Options(QObject *parent_)
 {
 }
 
-void Options::setAlias(QString alias,QString option)
+void Options::setAlias(const char *option,const char *alias)
 {
-	m_optionAlias[alias]=option;
-	if (property(qPrintable(option)).type() == QVariant::Invalid)
-		setProperty(qPrintable(option),QVariant(false));
+	m_optionAlias[QString(alias)]=option;
+	if (!property(option).isValid())
+		setProperty(option,QVariant(false));
 }
 
-void Options::setInfo(QString option,QString info)
+void Options::setInfo(const char *option,QString info)
 {
-	m_optionInfo[option]=info;
-	if (property(qPrintable(option)).type() == QVariant::Invalid)
-		setProperty(qPrintable(option),QVariant(false));
+	m_optionInfo[QString(option)]=info;
+	if (!property(option).isValid())
+		setProperty(option,QVariant(false));
 }
 
 bool Options::parse(QStringList arguments)

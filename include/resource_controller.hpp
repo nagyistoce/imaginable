@@ -22,50 +22,27 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__OPTIONS__INCLUDED
-#define IMAGINABLE__CORE__OPTIONS__INCLUDED
+#ifndef IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
+#define IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
 
 
-#include <QtCore/QMap>
-#include <QtCore/QStringList>
-#include <QtCore/QVariant>
+#include <QtCore/QtPlugin>
+#include <QtCore/QSettings>
+#include <options.hpp>
 
 
-class Options : public QObject
+class ResourceController
 {
-	Q_OBJECT
-
 public:
-	Options(QObject * =NULL);
+	ResourceController(void)
+	{}
+	virtual ~ResourceController()
+	{}
 
-	void setFlag(const char *name) { setProperty(name,QVariant(false)); }
+	virtual int init(const Options&, const QSettings &) =0;
 
-	void setAlias(QString alias,QString option);
-
-	void setInfo(QString option,QString info);
-
-
-	bool parse(QStringList);
-	bool parsed(void) const { return m_parsed; }
-
-	QString info(void) const { makeInfo(); return m_info; }
-
-
-	bool flag(const char *name) const { return property(name).toBool(); }
-
-	QStringList unnamed(void) const
-	{ return m_optionUnnamed; }
-
-protected:
-	QMap<QString,QString> m_optionAlias;
-	QMap<QString,QString> m_optionInfo;
-
-	void makeInfo(void) const;
-	mutable QString m_info;
-
-	QStringList m_optionUnnamed;
-
-	bool m_parsed;
 };
 
-#endif // IMAGINABLE__CORE__OPTIONS__INCLUDED
+Q_DECLARE_INTERFACE(ResourceController,"imaginable.ResourceController/1.0")
+
+#endif // IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED

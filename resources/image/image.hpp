@@ -22,34 +22,24 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__VERSION__INCLUDED
-#define IMAGINABLE__CORE__VERSION__INCLUDED
+#ifndef IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED
+#define IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED
 
 
-#include <ctime>
+#include <resource_controller.hpp>
+
+#include "version.hpp"
 
 
-namespace version {
+class ResourceImage : public QObject, ResourceController
+{
+Q_OBJECT
+Q_INTERFACES(ResourceController)
+public:
+	ResourceImage(void);
+	~ResourceImage() {}
 
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
+	int init(const Options&, const QSettings &);
+};
 
-	const char* full_string(void);
-
-	time_t      time       (void);
-
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
-}
-
-#endif // IMAGINABLE__CORE__VERSION__INCLUDED
+#endif // IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED

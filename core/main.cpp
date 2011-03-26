@@ -33,8 +33,8 @@
 #include <QtDBus/QDBusConnection>
 #include <QtDBus/QDBusMetaType>
 
+#include <options.hpp>
 #include "version.hpp"
-#include "options.hpp"
 #include "core_q.hpp"
 #include "types.hpp"
 
@@ -94,18 +94,18 @@ int main(int argc,char *argv[])
 
 	Options options;
 
-	options.setFlag (     "--help");
-	options.setAlias("-h","--help");
-	options.setAlias("-?","--help");
-	options.setInfo (     "--help"    ,"show this help and exit");
+	options.setFlag ("--help");
+	options.setAlias("--help","-h");
+	options.setAlias("--help","-?");
+	options.setInfo ("--help","show this help and exit");
 
-	options.setFlag (     "--no-hello");
-	options.setAlias("-q","--no-hello");
-	options.setInfo (     "--no-hello","do not show start message");
+	options.setFlag ("--no-hello");
+	options.setAlias("--no-hello","-q");
+	options.setInfo ("--no-hello","do not show start message");
 
-	options.setFlag (     "--version");
-	options.setAlias("-V","--version");
-	options.setInfo (     "--version" ,"show version and exit");
+	options.setFlag ("--version");
+	options.setAlias("--version","-V");
+	options.setInfo ("--version","show version and exit");
 
 	s_program_options=&options;
 
