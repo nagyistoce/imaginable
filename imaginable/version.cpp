@@ -83,13 +83,16 @@ namespace version {
 	const char* full_string(void)
 	{
 		if (!full_string_)
-			asprintf(&full_string_,"%d.%d.%s.%d%s%s",
+			if (asprintf(&full_string_,"%d.%d.%s.%d%s%s",
 				major_,
 				minor_,
 				revision_,
 				number_,
 				(label_[0] != '-') ? "-" : "",
-				label_ );
+				label_ ) < 0)
+			{
+				full_string_ = NULL;
+			}
 		return full_string_;
 	}
 
@@ -109,9 +112,8 @@ namespace version {
 		if (!ubuntu_style_string_)
 		{
 			init_stm();
-			asprintf(&ubuntu_style_string_,"%02d.%02d",
-				stm.tm_year-100,
-				stm.tm_mon+1 );
+			if (asprintf(&ubuntu_style_string_,"%02d.%02d",stm.tm_year-100,stm.tm_mon+1) < 0)
+				full_string_ = NULL;
 		}
 		return ubuntu_style_string_;
 	}
