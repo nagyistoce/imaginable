@@ -1,7 +1,7 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id$
+** File info:    $Id: version.hpp 31 2010-07-29 19:59:27Z Kuzma.Shapran $
 ** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
@@ -22,8 +22,8 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__VERSION__INCLUDED
-#define IMAGINABLE__CORE__VERSION__INCLUDED
+#ifndef IMAGINABLE__IMAGINABLE__VERSION__INCLUDED
+#define IMAGINABLE__IMAGINABLE__VERSION__INCLUDED
 
 
 #include <ctime>
@@ -52,4 +52,4 @@ namespace version {
 	double      ubuntu_style(void);
 }
 
-#endif // IMAGINABLE__CORE__VERSION__INCLUDED
+#endif // IMAGINABLE__IMAGINABLE__VERSION__INCLUDED

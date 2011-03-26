@@ -1,7 +1,7 @@
 ##############
 ##
 ## Project:      Imaginable
-## File info:    $Id$
+## File info:    $Id: core.pro 31 2010-07-29 19:59:27Z Kuzma.Shapran $
 ## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
@@ -49,44 +49,25 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-    $${PATH_TO_PROJECT_ROOT}/include \
-    $${PATH_TO_PROJECT_ROOT}/common
+	$${PATH_TO_PROJECT_ROOT}/include \
+	$${PATH_TO_PROJECT_ROOT}/common
 
 SOURCES += \
-    main.cpp \
-    version.cpp \
-    core_q.cpp \
-    image.cpp \
-    image_q.cpp \
-    image_q_status.cpp \
-    $${PATH_TO_PROJECT_ROOT}/common/options.cpp
+	main.cpp \
+	version.cpp \
+	$${PATH_TO_PROJECT_ROOT}/common/options.cpp
 
 HEADERS += \
-    main.hpp \
-    version.hpp \
-    core_q.hpp \
-    image_q.hpp \
-    image_q_status.hpp \
+	main.hpp \
+	version.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/options.hpp \
-    $${PATH_TO_PROJECT_ROOT}/include/core.hpp \
-    $${PATH_TO_PROJECT_ROOT}/include/image.hpp \
-    $${PATH_TO_PROJECT_ROOT}/include/types.hpp \
-    $${PATH_TO_PROJECT_ROOT}/include/plugin_iface.hpp
-
-QMAKE_QDBUSXML2CPP = $${PATH_TO_PROJECT_ROOT}/core/qdbusxml2cpp \
-    $$[QT_INSTALL_BINS]/qdbusxml2cpp -i $${PATH_TO_PROJECT_ROOT}/include/types.hpp
-
-DBUS_ADAPTORS += \
-    dbus_core_q.xml \
-    dbus_image_q.xml \
-    dbus_image_q_status.xml
+	$${PATH_TO_PROJECT_ROOT}/include/resource_controller.hpp
 
 OTHER_FILES += \
-    version-minor.inl \
-    version-major.inl \
-    version-label.inl \
-    $${DBUS_ADAPTORS} \
-    $${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh
+	version-minor.inl \
+	version-major.inl \
+	version-label.inl \
+	$${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh
 
 
 autoversioning.target = version.cpp

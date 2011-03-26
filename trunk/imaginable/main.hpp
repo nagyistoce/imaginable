@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -22,34 +22,19 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__VERSION__INCLUDED
-#define IMAGINABLE__CORE__VERSION__INCLUDED
+#ifndef IMAGINABLE__IMAGINABLE__MAIN__INCLUDED
+#define IMAGINABLE__IMAGINABLE__MAIN__INCLUDED
 
 
-#include <ctime>
+#include <QtCore/QString>
+
+#include "options.hpp"
 
 
-namespace version {
-
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
-
-	const char* full_string(void);
-
-	time_t      time       (void);
-
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+namespace app {
+	extern const Options &program_options;
+	extern const QString &resource_name;
 }
 
-#endif // IMAGINABLE__CORE__VERSION__INCLUDED
+
+#endif // IMAGINABLE__IMAGINABLE__MAIN__INCLUDED

@@ -22,34 +22,18 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__VERSION__INCLUDED
-#define IMAGINABLE__CORE__VERSION__INCLUDED
+
+#include "image.hpp"
 
 
-#include <ctime>
+Q_EXPORT_PLUGIN2(image,ResourceImage)
 
 
-namespace version {
-
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
-
-	const char* full_string(void);
-
-	time_t      time       (void);
-
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+ResourceImage::ResourceImage(void)
+{
 }
 
-#endif // IMAGINABLE__CORE__VERSION__INCLUDED
+int ResourceImage::init(const Options&, const QSettings &)
+{
+	return 0;
+}
