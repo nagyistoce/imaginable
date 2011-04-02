@@ -58,6 +58,9 @@ public:
 
 	bool hasProperty(const char *name) const { return property(name).isValid(); }
 
+	QStringList allPublicOptions(void) const
+	{ return m_optionInfo.keys(); }
+
 protected:
 	QMap<QString,QString> m_optionAlias;
 	QMap<QString,QString> m_optionInfo;

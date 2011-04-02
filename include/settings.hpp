@@ -22,29 +22,24 @@
 **
 *************/
 
-#ifndef IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
-#define IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
+#ifndef IMAGINABLE__CORE__SETTINGS__INCLUDED
+#define IMAGINABLE__CORE__SETTINGS__INCLUDED
 
 
-#include <QtCore/QtPlugin>
+#include <QtCore/QHash>
+#include <QtCore/QString>
+#include <QtCore/QVariant>
 
-#include <settings.hpp>
 
-
-class ResourceController
+class Settings : public QVariantHash
 {
 public:
-	ResourceController(void)
-	{}
-	virtual ~ResourceController()
-	{}
+	Settings();
+	~Settings();
 
-	virtual int init(const Settings &) =0;
+	QVariant& operator [] (const QString &key);
 
-	virtual QString type(void) const =0;
-
+	const QVariant operator [] (const QString &key) const;
 };
 
-Q_DECLARE_INTERFACE(ResourceController,"imaginable.ResourceController/1.0")
-
-#endif // IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
+#endif // IMAGINABLE__CORE__SETTINGS__INCLUDED
