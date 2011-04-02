@@ -27,7 +27,7 @@ TARGET = imaginable
 TEMPLATE = app
 CONFIG += console
 
-QT += dbus
+QT += network
 QT -= gui
 
 BIN_DIR = bin
@@ -55,13 +55,16 @@ INCLUDEPATH += \
 SOURCES += \
 	main.cpp \
 	version.cpp \
-	$${PATH_TO_PROJECT_ROOT}/common/options.cpp
+	$${PATH_TO_PROJECT_ROOT}/common/options.cpp \
+	$${PATH_TO_PROJECT_ROOT}/common/settings.cpp
 
 HEADERS += \
 	main.hpp \
 	version.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/options.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/resource_controller.hpp
+	$${PATH_TO_PROJECT_ROOT}/include/settings.hpp \
+	$${PATH_TO_PROJECT_ROOT}/include/resource_controller.hpp \
+	$${PATH_TO_PROJECT_ROOT}/include/module.hpp
 
 OTHER_FILES += \
 	version-minor.inl \
