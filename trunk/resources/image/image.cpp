@@ -29,11 +29,19 @@
 Q_EXPORT_PLUGIN2(image,ResourceImage)
 
 
+static const char RESOURCE_TYPE[] = "image";
+
+
 ResourceImage::ResourceImage(void)
 {
 }
 
-int ResourceImage::init(const Options&, const QSettings &)
+int ResourceImage::init(const Settings &)
 {
 	return 0;
+}
+
+QString ResourceImage::type(void) const
+{
+	return RESOURCE_TYPE;
 }
