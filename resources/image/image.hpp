@@ -39,7 +39,10 @@ public:
 	ResourceImage(void);
 	~ResourceImage() {}
 
-	int init(const Options&, const QSettings &);
+	int init(const Settings &);
+
+	QString type(void) const;
+
 };
 
 #endif // IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED
