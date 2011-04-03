@@ -27,8 +27,10 @@
 
 
 #include <QtCore/QtPlugin>
+#include <QtCore/QSet>
 
 #include <settings.hpp>
+#include <function.hpp>
 
 
 class ResourceController
@@ -39,9 +41,13 @@ public:
 	virtual ~ResourceController()
 	{}
 
-	virtual int init(const Settings &) =0;
+	virtual int init (const Settings &) =0;
 
-	virtual QString type(void) const =0;
+	virtual QString type (void) const =0;
+
+	virtual QSet<FunctionDescription> provides (void) const =0;
+
+	virtual QSharedPointer<CallResult> call (QString name,const Arguments &input,Arguments &output) =0;
 
 };
 

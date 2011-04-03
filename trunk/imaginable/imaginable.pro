@@ -49,22 +49,23 @@ OUT_PWD = $${OBJECTS_DIR}
 !exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
 
 INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/include \
-	$${PATH_TO_PROJECT_ROOT}/common
+	$${PATH_TO_PROJECT_ROOT}/include
 
 SOURCES += \
-	main.cpp \
 	version.cpp \
 	$${PATH_TO_PROJECT_ROOT}/common/options.cpp \
-	$${PATH_TO_PROJECT_ROOT}/common/settings.cpp
+	$${PATH_TO_PROJECT_ROOT}/common/settings.cpp \
+	$${PATH_TO_PROJECT_ROOT}/common/function.cpp \
+	main.cpp
 
 HEADERS += \
-	main.hpp \
 	version.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/options.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/settings.hpp \
 	$${PATH_TO_PROJECT_ROOT}/include/resource_controller.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/module.hpp
+	$${PATH_TO_PROJECT_ROOT}/include/function.hpp \
+	$${PATH_TO_PROJECT_ROOT}/include/module.hpp \
+	main.hpp
 
 OTHER_FILES += \
 	version-minor.inl \

@@ -36,36 +36,36 @@ class Options : public QObject
 	Q_OBJECT
 
 public:
-	Options(QObject * =NULL);
+	Options (QObject * =NULL);
 
-	void setFlag(const char *name) { setProperty(name,QVariant(false)); }
+	void setFlag  (const char *name) { setProperty(name,QVariant(false)); }
 
-	void setAlias(const char *option,const char *alias);
+	void setAlias (const char *name,const char *alias);
 
-	void setInfo(const char *option,QString info);
-
-
-	bool parse(QStringList);
-	bool parsed(void) const { return m_parsed; }
-
-	QString info(void) const { makeInfo(); return m_info; }
+	void setInfo  (const char *name,QString info);
 
 
-	bool flag(const char *name) const { return property(name).toBool(); }
+	bool parse  (QStringList);
+	bool parsed (void) const { return m_parsed; }
 
-	QStringList unnamed(void) const
+	QString info (void) const { makeInfo(); return m_info; }
+
+
+	bool flag (const char *name) const { return property(name).toBool(); }
+
+	QStringList unnamed (void) const
 	{ return m_optionUnnamed; }
 
-	bool hasProperty(const char *name) const { return property(name).isValid(); }
+	bool hasProperty (const char *name) const { return property(name).isValid(); }
 
-	QStringList allPublicOptions(void) const
+	QStringList allPublicOptions (void) const
 	{ return m_optionInfo.keys(); }
 
 protected:
 	QMap<QString,QString> m_optionAlias;
 	QMap<QString,QString> m_optionInfo;
 
-	void makeInfo(void) const;
+	void makeInfo (void) const;
 	mutable QString m_info;
 
 	QStringList m_optionUnnamed;

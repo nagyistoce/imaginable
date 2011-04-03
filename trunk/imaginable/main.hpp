@@ -44,13 +44,13 @@ class Dispatcher : public QObject
 	Q_OBJECT
 
 public:
-	Dispatcher(QObject * =NULL);
-	~Dispatcher();
+	Dispatcher (QObject * =NULL);
+	~Dispatcher ();
 
-	int main(int argc, char *argv[]);
+	int main (int argc, char *argv[]);
 
 public slots:
-	void newConnection(void);
+	void newConnection (void);
 
 private:
 	QString config_name;
@@ -70,11 +70,10 @@ private:
 	QLocalServer *server;
 
 
-	static void say_hello(void);
-	static void show_version(void);
-	static bool id_is_ok(QString);
-	static bool function_description_is_ok(const FunctionDescription&);
-	void try_load_module(QString);
+	static void say_hello (void);
+	static void show_version (void);
+
+	void try_load_module (QString);
 };
 
 
