@@ -36,12 +36,19 @@ class ResourceImage : public QObject, ResourceController
 Q_OBJECT
 Q_INTERFACES(ResourceController)
 public:
-	ResourceImage(void);
-	~ResourceImage() {}
+	ResourceImage (void);
+	~ResourceImage ();
 
-	int init(const Settings &);
+	int init (const Settings &);
 
-	QString type(void) const;
+	QString type (void) const;
+
+	QSet<FunctionDescription> provides (void) const;
+
+	QSharedPointer<CallResult> call (QString name,const Arguments &input,Arguments &output);
+
+private:
+	QSharedPointer<CallResult> create (uint width, uint height,Arguments &output);
 
 };
 
