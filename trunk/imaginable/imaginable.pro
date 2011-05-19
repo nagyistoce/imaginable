@@ -1,8 +1,8 @@
 ##############
 ##
 ## Project:      Imaginable
-## File info:    $Id: core.pro 31 2010-07-29 19:59:27Z Kuzma.Shapran $
-## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+## File info:    $Id$
+## Author:       Copyright (C) 2009-2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
 ##  This file is part of Imaginable.
@@ -22,62 +22,52 @@
 ##
 ##############
 
+
 TARGET = imaginable
 
-TEMPLATE = app
-CONFIG += console
-
-QT += network
-QT -= gui
-
-BIN_DIR = bin
-CONFIG(debug,debug|release):BUILD_DIR = /debug
-else:BUILD_DIR = /release
-
-CONFIG(debug,debug|release):DEFINES += _DEBUG
-
-PATH_TO_PROJECT_ROOT = ..
-
-MAIN_DIR = $${PATH_TO_PROJECT_ROOT}/$${BIN_DIR}$${BUILD_DIR}
-DESTDIR = $${MAIN_DIR}/$${TEMPLATE}
-OBJECTS_DIR = $${MAIN_DIR}/obj/$${TEMPLATE}/$${TARGET}
-MOC_DIR = $${OBJECTS_DIR}
-RCC_DIR = $${OBJECTS_DIR}
-OUT_PWD = $${OBJECTS_DIR}
-
-!exists(DESTDIR):system(mkdir -p $${DESTDIR})
-!exists(OBJECTS_DIR):system(mkdir -p $${OBJECTS_DIR})
-
-INCLUDEPATH += \
-	$${PATH_TO_PROJECT_ROOT}/include
+TEMPLATE = lib
 
 SOURCES += \
+	image.cpp \
+	point.cpp \
 	version.cpp \
-	$${PATH_TO_PROJECT_ROOT}/common/options.cpp \
-	$${PATH_TO_PROJECT_ROOT}/common/settings.cpp \
-	$${PATH_TO_PROJECT_ROOT}/common/function.cpp \
-	main.cpp
-
-HEADERS += \
-	version.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/options.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/settings.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/resource_controller.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/function.hpp \
-	$${PATH_TO_PROJECT_ROOT}/include/module.hpp \
-	main.hpp
+	io_pnm_loader.cpp \
+	io_pam_saver.cpp \
+	io_qt.cpp \
+	tools_maximum.cpp \
+	tools_gamma.cpp \
+	tools_rotate.cpp \
+	tools_crop.cpp \
+	tools_colourspace.cpp \
+	tools_blur.cpp \
+	tools_tonemap.cpp
 
 OTHER_FILES += \
-	version-minor.inl \
 	version-major.inl \
-	version-label.inl \
-	$${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh
+	version-minor.inl \
+	version-label.inl
 
+HEADERS += \
+	image.hpp \
+	point.hpp \
+	version.hpp \
+	io_pnm_loader.hpp \
+	io_pam_saver.hpp \
+	io_qt.hpp \
+	tools.hpp \
+	tools_maximum.hpp \
+	tools_gamma.hpp \
+	tools_rotate.hpp \
+	tools_crop.hpp \
+	tools_colourspace.hpp \
+	tools_blur.hpp \
+	tools_tonemap.hpp
 
-autoversioning.target = version.cpp
-autoversioning.commands = "@bash $${PATH_TO_PROJECT_ROOT}/tools/autoversion-svn.sh"
+autoversioning.target = ../imaginable/version.cpp
+autoversioning.commands = "@bash ../autoversion-svn.sh ../imaginable"
 autoversioning.depends = autoversioning2
 
 autoversioning2.commands = "@echo Autoversioning ..."
+autoversioning2.depends = FORCE
 
 QMAKE_EXTRA_TARGETS += autoversioning autoversioning2

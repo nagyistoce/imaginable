@@ -4,7 +4,7 @@
 ##
 ## Project:      Imaginable
 ## File info:    $Id$
-## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+## Author:       Copyright (C) 2009-2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
 ##  This file is part of Imaginable.
@@ -30,6 +30,9 @@ NUMBER_FILE="version-number.auto.inl"
 OLD_NUMBER_FILE="version-number.old.inl"
 TIME_FILE="version-time.auto.inl"
 
+WD="$(pwd)"
+cd "$1"
+
 OLD_REVISION="$(cat "${REVISION_FILE}")"
 NEW_REVISION="\"$(svnversion)\""
 echo "Revision: ${NEW_REVISION}"
@@ -50,3 +53,5 @@ echo "Build time: ${BUILD_TIME} ($(date -d "@${BUILD_TIME}"))"
 echo "${BUILD_TIME}" > "${TIME_FILE}"
 
 touch "${VERSION_FILE}"
+
+cd "${WD}"

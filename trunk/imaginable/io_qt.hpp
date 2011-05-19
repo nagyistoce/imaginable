@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -22,24 +22,58 @@
 **
 *************/
 
-#ifndef IMAGINABLE__CORE__SETTINGS__INCLUDED
-#define IMAGINABLE__CORE__SETTINGS__INCLUDED
+
+#ifndef IMAGINABLE__QT_IO__INCLUDED
+#define IMAGINABLE__QT_IO__INCLUDED
 
 
-#include <QtCore/QHash>
-#include <QtCore/QString>
-#include <QtCore/QVariant>
+#include <QtGui/QImage>
+
+#include "image.hpp"
 
 
-class Settings : public QVariantHash
+namespace imaginable {
+
+class QImage_loader
 {
 public:
-	Settings();
-	~Settings();
+	QImage_loader(Image&);
+	~QImage_loader();
 
-	QVariant& operator [] (const QString &key);
+	void load(const QImage&);
 
-	const QVariant operator [] (const QString &key) const;
+private:
+	Image& m_image;
 };
 
-#endif // IMAGINABLE__CORE__SETTINGS__INCLUDED
+class QImage_saver
+{
+public:
+	QImage_saver(const Image&);
+	~QImage_saver();
+
+	void save(QImage&) const;
+	inline QImage save(void) const
+	{
+		QImage qimage;
+		save(qimage);
+		return qimage;
+	}
+
+private:
+	const Image& m_image;
+};
+
+inline void operator >> (const QImage& qimage,QImage_loader io)
+{
+	io.load(qimage);
+}
+
+inline void operator << (QImage& qimage,const QImage_saver& io)
+{
+	io.save(qimage);
+}
+
+}
+
+#endif // IMAGINABLE__QT_IO__INCLUDED

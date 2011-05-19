@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -23,26 +23,35 @@
 *************/
 
 
-#include "settings.hpp"
+#ifndef IMAGINABLE__PNM_LOADER__INCLUDED
+#define IMAGINABLE__PNM_LOADER__INCLUDED
 
 
-Settings::Settings()
-	: QVariantHash()
+#include <istream>
+
+#include "image.hpp"
+
+
+namespace imaginable {
+
+class PNM_loader
 {
+public:
+	PNM_loader(Image&);
+	~PNM_loader();
+
+	void load(std::istream&);
+
+private:
+	Image& m_image;
+};
+
+inline std::istream& operator >> (std::istream& stream,PNM_loader pnm)
+{
+	pnm.load(stream);
+	return stream;
 }
 
-Settings::~Settings()
-{
 }
 
-QVariant& Settings:: operator [] (const QString &key)
-{
-	return QVariantHash::operator [] (key);
-}
-
-const QVariant Settings:: operator [] (const QString &key) const
-{
-	if (contains(key))
-		return value(key);
-	return QVariant(QVariant::Invalid);
-}
+#endif // IMAGINABLE__PNM_LOADER__INCLUDED

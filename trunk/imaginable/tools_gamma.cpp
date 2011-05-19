@@ -23,38 +23,20 @@
 *************/
 
 
-#ifndef IMAGINABLE__VERSION__INCLUDED
-#define IMAGINABLE__VERSION__INCLUDED
+#include <cmath>
 
-
-#include <ctime>
+#include "tools_gamma.hpp"
 
 
 namespace imaginable {
 
-namespace version {
-
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
-
-	const char* full_string(void);
-
-	time_t      time       (void);
-
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+double gamma(double x,double k)
+{
+	if(k==0.)
+		return x;
+	if(k<0.)
+		return (exp(-k*x)-1.)/(exp(-k)-1.);
+	return log(x*(exp(k)-1.)+1.)/k;
 }
 
 }
-
-#endif // IMAGINABLE__VERSION__INCLUDED
