@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -22,21 +22,19 @@
 **
 *************/
 
-#ifndef IMAGINABLE__TYPES__INCLUDED
-#define IMAGINABLE__TYPES__INCLUDED
+
+#ifndef IMAGINABLE__TOOLS_TONEMAP__INCLUDED
+#define IMAGINABLE__TOOLS_TONEMAP__INCLUDED
 
 
-#include <QtDBus/QDBusArgument>
-#include <QtCore/QMetaType>
-#include <QtCore/QList>
-#include <QtCore/QHash>
+#include "tools.hpp"
 
 
-typedef QList<int> QintList;
-Q_DECLARE_METATYPE(QintList)
+namespace imaginable
+{
+	void tonemap_global(Image& img,double saturation_gamma,double lightness_factor);
 
-typedef QList<qulonglong> QulonglongList;
-Q_DECLARE_METATYPE(QulonglongList)
+	void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,double mix_factor);
+}
 
-
-#endif // IMAGINABLE__TYPES__INCLUDED
+#endif // IMAGINABLE__TOOLS_TONEMAP__INCLUDED

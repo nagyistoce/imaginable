@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -22,35 +22,18 @@
 **
 *************/
 
-#ifndef IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
-#define IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
+
+#ifndef IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
+#define IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
 
 
-#include <QtCore/QtPlugin>
-#include <QtCore/QSet>
-
-#include <settings.hpp>
-#include <function.hpp>
+#include "tools.hpp"
 
 
-class ResourceController
+namespace imaginable
 {
-public:
-	ResourceController(void)
-	{}
-	virtual ~ResourceController()
-	{}
+	Image::pixel findMaximum(const Image& img);
+	Image::pixel findMaximum(const Image& img,unsigned planeName);
+}
 
-	virtual int init (const Settings &) =0;
-
-	virtual QString type (void) const =0;
-
-	virtual QSet<FunctionDescription> provides (void) const =0;
-
-	virtual QSharedPointer<CallResult> call (QString name,const Arguments &input,Arguments &output) =0;
-
-};
-
-Q_DECLARE_INTERFACE(ResourceController,"imaginable.ResourceController/1.0")
-
-#endif // IMAGINABLE__RESOURCE_CONTROLLER_INTERFACE__INCLUDED
+#endif // IMAGINABLE__TOOLS_MAXIMUM__INCLUDED

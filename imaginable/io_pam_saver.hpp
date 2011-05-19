@@ -23,38 +23,35 @@
 *************/
 
 
-#ifndef IMAGINABLE__VERSION__INCLUDED
-#define IMAGINABLE__VERSION__INCLUDED
+#ifndef IMAGINABLE__PAM_SAVER__INCLUDED
+#define IMAGINABLE__PAM_SAVER__INCLUDED
 
 
-#include <ctime>
+#include <ostream>
+
+#include "image.hpp"
 
 
 namespace imaginable {
 
-namespace version {
+class PAM_saver
+{
+public:
+	PAM_saver(const Image&);
+	~PAM_saver();
 
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
+	void save(std::ostream&) const;
 
-	const char* full_string(void);
+private:
+	const Image& m_image;
+};
 
-	time_t      time       (void);
-
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+inline std::ostream& operator << (std::ostream& stream,const PAM_saver& pam)
+{
+	pam.save(stream);
+	return stream;
 }
 
 }
 
-#endif // IMAGINABLE__VERSION__INCLUDED
+#endif // IMAGINABLE__PAM_SAVER__INCLUDED

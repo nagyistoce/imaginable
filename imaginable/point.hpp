@@ -23,38 +23,62 @@
 *************/
 
 
-#ifndef IMAGINABLE__VERSION__INCLUDED
-#define IMAGINABLE__VERSION__INCLUDED
+#ifndef IMAGINABLE__POINT__INCLUDED
+#define IMAGINABLE__POINT__INCLUDED
 
-
-#include <ctime>
 
 
 namespace imaginable {
 
-namespace version {
+class Point
+{
+public:
+	union {
+		double x;
+		double r;
+	};
+	union {
+		double y;
+		double f;
+	};
 
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
+	Point(void);
+	Point(double x_,double y_);
+	template<typename T> Point(T x_,T y_)
+		: x(static_cast<double>(x_))
+		, y(static_cast<double>(y_))
+	{
+	}
+	~Point();
 
-	const char* full_string(void);
+	Point polar(void) const;
+	Point rect (void) const;
 
-	time_t      time       (void);
+	#define OPERATOR(OP) \
+	inline Point& operator OP (double value) \
+	{ \
+		x OP value; \
+		y OP value; \
+		return *this; \
+	}
+	OPERATOR(*=)
+	OPERATOR(/=)
+	#undef OPERATOR
 
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
+	#define OPERATOR(OP) \
+	inline Point& operator OP (const Point& rs) \
+	{ \
+		x OP rs.x; \
+		y OP rs.y; \
+		return *this; \
+	}
+	OPERATOR(+=)
+	OPERATOR(-=)
+	OPERATOR(*=)
+	OPERATOR(/=)
+	#undef OPERATOR
+};
 
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
 }
 
-}
-
-#endif // IMAGINABLE__VERSION__INCLUDED
+#endif // IMAGINABLE__POINT__INCLUDED

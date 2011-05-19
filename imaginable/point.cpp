@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -22,34 +22,44 @@
 **
 *************/
 
-#ifndef IMAGINABLE__MODULE_INTERFACE__INCLUDED
-#define IMAGINABLE__MODULE_INTERFACE__INCLUDED
+
+#include <cmath>
+
+#include "point.hpp"
 
 
-#include <QtCore/QtPlugin>
-#include <QtCore/QString>
-#include <QtCore/QSet>
+namespace imaginable {
 
-#include <function.hpp>
-
-
-class Module
+Point::Point(void)
+	: x(0.)
+	, y(0.)
 {
-public:
-	Module(void)
-	{}
-	virtual ~Module()
-	{}
+}
 
-	virtual QString resource_type (void) const =0;
+Point::Point(double x_,double y_)
+	: x(x_)
+	, y(y_)
+{
+}
 
-	virtual QSet<FunctionDescription> depends_on (void) const =0;
+Point::~Point()
+{
+}
 
-	virtual QSet<FunctionDescription> provides (void) const =0;
+Point Point::polar(void) const
+{
+	Point ret;
+	ret.r=sqrt(x*x+y*y);
+	ret.f=atan2(y,x);
+	return ret;
+}
 
-	virtual QSharedPointer<CallResult> call (QString name,const Arguments &input,Arguments &output) =0;
-};
+Point Point::rect(void) const
+{
+	Point ret;
+	ret.x=r*cos(f);
+	ret.y=r*sin(f);
+	return ret;
+}
 
-Q_DECLARE_INTERFACE(Module,"imaginable.Module/1.0")
-
-#endif // IMAGINABLE__MODULE_INTERFACE__INCLUDED
+}

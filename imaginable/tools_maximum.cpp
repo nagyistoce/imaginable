@@ -23,38 +23,39 @@
 *************/
 
 
-#ifndef IMAGINABLE__VERSION__INCLUDED
-#define IMAGINABLE__VERSION__INCLUDED
+#include <cmath>
 
-
-#include <ctime>
+#include "tools_maximum.hpp"
 
 
 namespace imaginable {
 
-namespace version {
+Image::pixel findMaximum(const Image& img)
+{
+	if(!img.hasData())
+		throw exception(exception::NO_IMAGE);
 
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
+	Image::pixel ret=0;
+	Image::t_planeNames planeNames=img.planeNames();
+	for(Image::t_planeNames::const_iterator I=planeNames.begin();I!=planeNames.end();++I)
+		ret=std::max(ret,findMaximum(img,*I));
+	return ret;
+}
 
-	const char* full_string(void);
+Image::pixel findMaximum(const Image& img,unsigned planeName)
+{
+	if(!img.hasData())
+		throw exception(exception::NO_IMAGE);
 
-	time_t      time       (void);
+	const Image::pixel* data=img.plane(planeName);
+	if(!data)
+		throw exception(exception::INVALID_PLANE);
 
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+	Image::pixel ret=0;
+	size_t m=img.width()*img.height();
+	for(size_t i=0;i<m;++i)
+		ret=std::max(ret,data[i]);
+	return ret;
 }
 
 }
-
-#endif // IMAGINABLE__VERSION__INCLUDED

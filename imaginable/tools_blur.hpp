@@ -23,38 +23,29 @@
 *************/
 
 
-#ifndef IMAGINABLE__VERSION__INCLUDED
-#define IMAGINABLE__VERSION__INCLUDED
+#ifndef IMAGINABLE__TOOLS_BLUR__INCLUDED
+#define IMAGINABLE__TOOLS_BLUR__INCLUDED
 
 
-#include <ctime>
+#include "tools.hpp"
 
 
-namespace imaginable {
+namespace imaginable
+{
+	void box_blur(Image& img,unsigned plane,const size_t& radius,bool use_alpha=false);
+	inline void box_blur_alpha(Image& img,unsigned plane,const size_t& radius)
+		{ box_blur(img,plane,radius,true); }
+#if 0
+	Image::pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,const size_t& radius,bool use_alpha);
 
-namespace version {
-
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
-
-	const char* full_string(void);
-
-	time_t      time       (void);
-
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+	inline Image::pixel* box_blur(Image& img,unsigned plane,const size_t& radius,bool use_alpha)
+	{
+		Image::pixel* ret=box_blur(img,plane,Image::PLANE__INTERNAL,radius,use_alpha);
+		img.removePlane(plane);
+		img.renamePlane(Image::PLANE__INTERNAL,plane);
+		return ret;
+	}
+#endif
 }
 
-}
-
-#endif // IMAGINABLE__VERSION__INCLUDED
+#endif // IMAGINABLE__TOOLS_BLUR__INCLUDED

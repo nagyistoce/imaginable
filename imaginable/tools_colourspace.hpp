@@ -23,38 +23,30 @@
 *************/
 
 
-#ifndef IMAGINABLE__VERSION__INCLUDED
-#define IMAGINABLE__VERSION__INCLUDED
+#ifndef IMAGINABLE__TOOLS_COLOURSPACE__INCLUDED
+#define IMAGINABLE__TOOLS_COLOURSPACE__INCLUDED
 
 
-#include <ctime>
+#include "tools.hpp"
 
 
-namespace imaginable {
+namespace imaginable
+{
+	void rgb_to_hsv(double r,double g,double b,double &h,double &s,double &v);
+	void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b);
 
-namespace version {
+	void rgb_to_hsl(double r,double g,double b,double &h,double &s,double &l);
+	void hsl_to_rgb(double h,double s,double l,double &r,double &g,double &b);
 
-	unsigned    major      (void);
-	unsigned    minor      (void);
-	const char* revision   (void);
-	unsigned    number     (void);
-	const char* label      (void);
+	void rgb_to_lightness(double r,double g,double b,double &l);
 
-	const char* full_string(void);
+	void rgb_to_hsv(Image& img,bool keep_rgb=false);
+	void hsv_to_rgb(Image& img,bool keep_hsv=false);
 
-	time_t      time       (void);
+	void rgb_to_hsl(Image& img,bool keep_rgb=false);
+	void hsl_to_rgb(Image& img,bool keep_hsl=false);
 
-	unsigned    year       (void);
-	unsigned    month      (void);
-	unsigned    day        (void);
-	unsigned    hour       (void);
-	unsigned    minute     (void);
-	unsigned    second     (void);
-
-	const char* ubuntu_style_string(void);
-	double      ubuntu_style(void);
+	void rgb_to_lightness(Image& img,bool keep_rgb=false);
 }
 
-}
-
-#endif // IMAGINABLE__VERSION__INCLUDED
+#endif // IMAGINABLE__TOOLS_COLOURSPACE__INCLUDED

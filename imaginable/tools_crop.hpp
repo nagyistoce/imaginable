@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -22,34 +22,17 @@
 **
 *************/
 
-#ifndef IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED
-#define IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED
+
+#ifndef IMAGINABLE__TOOLS_CROP__INCLUDED
+#define IMAGINABLE__TOOLS_CROP__INCLUDED
 
 
-#include <resource_controller.hpp>
-
-#include "version.hpp"
+#include "tools.hpp"
 
 
-class ResourceImage : public QObject, ResourceController
+namespace imaginable
 {
-Q_OBJECT
-Q_INTERFACES(ResourceController)
-public:
-	ResourceImage (void);
-	~ResourceImage ();
+	Image* crop(const Image& img,size_t& x,size_t& y);
+}
 
-	int init (const Settings &);
-
-	QString type (void) const;
-
-	QSet<FunctionDescription> provides (void) const;
-
-	QSharedPointer<CallResult> call (QString name,const Arguments &input,Arguments &output);
-
-private:
-	QSharedPointer<CallResult> create (uint width, uint height,Arguments &output);
-
-};
-
-#endif // IMAGINABLE__RESOURCE_CONTROLLER__IMAGE__INCLUDED
+#endif // IMAGINABLE__TOOLS_CROP__INCLUDED

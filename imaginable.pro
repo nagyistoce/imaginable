@@ -25,7 +25,7 @@
 TEMPLATE = subdirs
 SUBDIRS = \
 	imaginable \
-	resources
+	hdri_gui
 
 fullclean.depends = FORCE
 fullclean.commands += "rm -rf bin ; find . -name '*.pro.user' -exec rm '{}' ';'"

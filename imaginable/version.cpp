@@ -1,8 +1,8 @@
 /*************
 **
 ** Project:      Imaginable
-** File info:    $Id: version.cpp 31 2010-07-29 19:59:27Z Kuzma.Shapran $
-** Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** File info:    $Id$
+** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.
@@ -30,6 +30,8 @@
 
 #include "version.hpp"
 
+
+namespace imaginable {
 
 namespace version {
 
@@ -123,5 +125,7 @@ namespace version {
 		init_stm();
 		return static_cast<double>(stm.tm_year-100)+static_cast<double>(stm.tm_mon+1)/100.;
 	}
+
+}
 
 }
