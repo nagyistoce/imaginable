@@ -2,7 +2,7 @@
 **
 ** Project:      Imaginable
 ** File info:    $Id$
-** Author:       Copyright (C) 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+** Author:       Copyright (C) 2009 - 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
 **
 **  This file is part of Imaginable.

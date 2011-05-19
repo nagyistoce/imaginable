@@ -2,7 +2,7 @@
 ##
 ## Project:      Imaginable
 ## File info:    $Id$
-## Author:       Copyright (C) 2009-2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+## Author:       Copyright (C) 2009 - 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
 ##  This file is part of Imaginable.
@@ -63,11 +63,11 @@ HEADERS += \
 	tools_blur.hpp \
 	tools_tonemap.hpp
 
-autoversioning.target = ../imaginable/version.cpp
-autoversioning.commands = "@bash ../autoversion-svn.sh ../imaginable"
-autoversioning.depends = autoversioning2
 
-autoversioning2.commands = "@echo Autoversioning ..."
-autoversioning2.depends = FORCE
+autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
+autoversioning.depends = autoversioning_echo
+PRE_TARGETDEPS = autoversioning
 
-QMAKE_EXTRA_TARGETS += autoversioning autoversioning2
+autoversioning_echo.commands = "@echo Autoversioning ..."
+
+QMAKE_EXTRA_TARGETS += autoversioning autoversioning_echo
