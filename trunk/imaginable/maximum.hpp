@@ -23,20 +23,17 @@
 *************/
 
 
-#include <cmath>
+#ifndef IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
+#define IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
 
-#include "tools_gamma.hpp"
+
+#include "tools.hpp"
 
 
-namespace imaginable {
-
-double gamma(double x,double k)
+namespace imaginable
 {
-	if(k==0.)
-		return x;
-	if(k<0.)
-		return (exp(-k*x)-1.)/(exp(-k)-1.);
-	return log(x*(exp(k)-1.)+1.)/k;
+	Image::pixel findMaximum(const Image& img,progress_notifier notifier = dont_notify);
+	Image::pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier = dont_notify);
 }
 
-}
+#endif // IMAGINABLE__TOOLS_MAXIMUM__INCLUDED

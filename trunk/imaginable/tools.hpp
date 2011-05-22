@@ -27,6 +27,7 @@
 #define IMAGINABLE__TOOLS__INCLUDED
 
 
+#include <boost/function.hpp>
 #include <exception>
 
 #include "image.hpp"
@@ -79,6 +80,26 @@ namespace imaginable
 		Type m_type;
 	};
 
+
+	typedef boost::function<void (float)> progress_notifier;
+
+	inline void dont_notify(float) {}
+
+	class TimedProgress
+	{
+	public:
+		TimedProgress(progress_notifier,double timeout=0.33);
+		~TimedProgress();
+
+		void percent(float);
+
+		virtual double now(void);
+
+	private:
+		progress_notifier m_notifier;
+		double m_timeout;
+		double m_last_update;
+	};
 }
 
 #endif // IMAGINABLE__TOOLS__INCLUDED

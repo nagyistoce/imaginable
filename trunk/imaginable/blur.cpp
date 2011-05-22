@@ -25,12 +25,12 @@
 
 #include <boost/scoped_array.hpp>
 
-#include "tools_blur.hpp"
+#include "blur.hpp"
 
 
 namespace imaginable {
 
-void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha)
+void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha,progress_notifier notifier)
 {
 	if(!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -60,6 +60,8 @@ void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha)
 
 	for(ssize_t x=0;x<width;++x)
 	{
+		notifier(0.5*static_cast<float>(x)/static_cast<float>(width));
+
 		uint64_t blur=0;
 
 		size_t areaSize=0;
@@ -105,6 +107,8 @@ void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha)
 
 	for(ssize_t y=0;y<height;++y)
 	{
+		notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(height));
+
 		uint64_t blur=0;
 
 		size_t areaSize=0;

@@ -74,6 +74,8 @@ public:
 
 	typedef uint16_t pixel;
 
+	static const pixel MAXIMUM=static_cast<pixel>(-1);
+
 	typedef std::set<std::string> t_text_keys;
 
 private:

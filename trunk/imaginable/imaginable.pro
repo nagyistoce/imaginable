@@ -34,13 +34,15 @@ SOURCES += \
 	io_pnm_loader.cpp \
 	io_pam_saver.cpp \
 	io_qt.cpp \
-	tools_maximum.cpp \
-	tools_gamma.cpp \
-	tools_rotate.cpp \
-	tools_crop.cpp \
-	tools_colourspace.cpp \
-	tools_blur.cpp \
-	tools_tonemap.cpp
+	tools.cpp \
+	time.cpp \
+	maximum.cpp \
+	gamma.cpp \
+	rotate.cpp \
+	crop.cpp \
+	colourspace.cpp \
+	blur.cpp \
+	tonemap.cpp
 
 OTHER_FILES += \
 	version-major.inl \
@@ -55,13 +57,14 @@ HEADERS += \
 	io_pam_saver.hpp \
 	io_qt.hpp \
 	tools.hpp \
-	tools_maximum.hpp \
-	tools_gamma.hpp \
-	tools_rotate.hpp \
-	tools_crop.hpp \
-	tools_colourspace.hpp \
-	tools_blur.hpp \
-	tools_tonemap.hpp
+	time.hpp \
+	maximum.hpp \
+	gamma.hpp \
+	rotate.hpp \
+	crop.hpp \
+	colourspace.hpp \
+	blur.hpp \
+	tonemap.hpp
 
 
 autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"

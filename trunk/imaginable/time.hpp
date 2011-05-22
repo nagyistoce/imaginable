@@ -23,17 +23,19 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
-#define IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
+#ifndef TOOLS__TIME__INCLUDED
+#define TOOLS__TIME__INCLUDED
 
 
-#include "tools.hpp"
+#define __need_timeval
+#include <sys/time.h>
+
+#include <ctime>
 
 
-namespace imaginable
-{
-	Image::pixel findMaximum(const Image& img);
-	Image::pixel findMaximum(const Image& img,unsigned planeName);
-}
+double getHighPrecTime(void);
 
-#endif // IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
+void setTimeSpec(struct timespec&,double);
+void setTimeVal (struct timeval&,double);
+
+#endif // TOOLS__TIME__INCLUDED

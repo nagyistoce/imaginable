@@ -248,7 +248,7 @@ bool PGM_PPM_loader::loadHeader(void)
 	||  (!m_header[1]) )
 		return false;
 
-	if( ( m_header[2] > 0xffff )
+	if( ( m_header[2] > Image::MAXIMUM )
 	||  (!m_header[2]) )
 		return false;
 
@@ -337,7 +337,7 @@ bool PAM_loader::loadHeader(void)
 				{
 					try{
 						maxval=boost::lexical_cast<size_t>(tokens[1]);
-						if( maxval && (maxval<=0xffff) )
+						if( maxval && (maxval<=Image::MAXIMUM) )
 							ok=true;
 					}catch(...){}
 				}
