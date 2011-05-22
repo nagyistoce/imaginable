@@ -37,6 +37,7 @@
 #include <imaginable/io_qt.hpp>
 #include <imaginable/colourspace.hpp>
 #include <imaginable/tonemap.hpp>
+#include <imaginable/version.hpp>
 
 #include "version.hpp"
 
@@ -48,11 +49,13 @@ void hello(void)
 		"(High dynamic range image to low dynamic range image tonemap converter)\n"
 		"2009 - %|d| (c) Kuzma Shapran   <Kuzma [dot] Shapran [at] gmail [dot] com>\n"
 		"Version: %|s|\n"
+		"Imaginable version: %|s|\n"
 		"\n"
 		))
 		%program_invocation_short_name
 		%version::year()
 		%version::full_string()
+		%imaginable::version::full_string()
 		).str();
 }
 
