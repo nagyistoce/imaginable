@@ -23,29 +23,37 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_BLUR__INCLUDED
-#define IMAGINABLE__TOOLS_BLUR__INCLUDED
-
-
+#include "time.hpp"
 #include "tools.hpp"
 
 
 namespace imaginable
 {
-	void box_blur(Image& img,unsigned plane,const size_t& radius,bool use_alpha=false);
-	inline void box_blur_alpha(Image& img,unsigned plane,const size_t& radius)
-		{ box_blur(img,plane,radius,true); }
-#if 0
-	Image::pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,const size_t& radius,bool use_alpha);
 
-	inline Image::pixel* box_blur(Image& img,unsigned plane,const size_t& radius,bool use_alpha)
-	{
-		Image::pixel* ret=box_blur(img,plane,Image::PLANE__INTERNAL,radius,use_alpha);
-		img.removePlane(plane);
-		img.renamePlane(Image::PLANE__INTERNAL,plane);
-		return ret;
-	}
-#endif
+TimedProgress::TimedProgress(progress_notifier notifier,double timeout)
+	: m_notifier(notifier)
+	, m_timeout(timeout)
+	, m_last_update(0)
+{
 }
 
-#endif // IMAGINABLE__TOOLS_BLUR__INCLUDED
+TimedProgress::~TimedProgress()
+{
+}
+
+void TimedProgress::percent(float value)
+{
+	double now_=this->now();
+	if (now_ - m_last_update > m_timeout)
+	{
+		m_last_update = now_;
+		percent(value);
+	}
+}
+
+double TimedProgress::now(void)
+{
+	return getHighPrecTime();
+}
+
+}

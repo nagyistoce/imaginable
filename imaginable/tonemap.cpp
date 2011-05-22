@@ -29,20 +29,20 @@
 #include <vector>
 #include <cstring>
 
-#include "tools_gamma.hpp"
-#include "tools_blur.hpp"
-#include "tools_tonemap.hpp"
+#include "gamma.hpp"
+#include "blur.hpp"
+#include "tonemap.hpp"
 
 
 namespace imaginable {
 
 
-static const Image::pixel HDRI_MAXIMUM=0xffff;
-static const Image::pixel LDRI_MAXIMUM=0xff;
+static const Image::pixel HDRI_MAXIMUM=Image::MAXIMUM;
+static const Image::pixel LDRI_MAXIMUM=static_cast<uint8_t>(-1);
 static const size_t TABLE_POWER=2;
-static const size_t TABLE_SIZE=256*(1<<TABLE_POWER);
+static const size_t TABLE_SIZE=0x100 * (1<<TABLE_POWER);
 
-void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
+void tonemap_global(Image& img,double saturation_gamma,double lightness_factor,progress_notifier notifier)
 {
 	if(!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -72,6 +72,8 @@ void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
 			{
 				for(size_t p=0;p<size;++p)
 				{
+					notifier(0.25*static_cast<float>(p)/static_cast<float>(size));
+
 					++histo[lightness[p]>>(8-TABLE_POWER)];
 					++avg;
 				}
@@ -80,6 +82,8 @@ void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
 			{
 				for(size_t p=0;p<size;++p)
 				{
+					notifier(0.25*static_cast<float>(p)/static_cast<float>(size));
+
 					++histo[static_cast<size_t>(scale4*static_cast<double>(lightness[p]))];
 					++avg;
 				}
@@ -90,20 +94,28 @@ void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
 			if(img.maximum()==HDRI_MAXIMUM)
 			{
 				for(size_t p=0;p<size;++p)
+				{
+					notifier(0.25*static_cast<float>(p)/static_cast<float>(size));
+
 					if(alpha[p])
 					{
 						++histo[lightness[p]>>(8-TABLE_POWER)];
 						++avg;
 					}
+				}
 			}
 			else
 			{
 				for(size_t p=0;p<size;++p)
+				{
+					notifier(0.25*static_cast<float>(p)/static_cast<float>(size));
+
 					if(alpha[p])
 					{
 						++histo[static_cast<size_t>(scale4*static_cast<double>(lightness[p]))];
 						++avg;
 					}
+				}
 			}
 		}
 		avg/=TABLE_SIZE;
@@ -165,7 +177,11 @@ void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
 		}
 
 		for(size_t p=0;p<size;++p)
+		{
+			notifier(0.25+0.25*static_cast<float>(p)/static_cast<float>(size));
+
 			lightness[p]=table[static_cast<size_t>(scale4*static_cast<double>(lightness[p]))];
+		}
 	}
 
 	{
@@ -184,7 +200,11 @@ void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
 		}
 
 		for(size_t p=0;p<size;++p)
+		{
+			notifier(0.5+0.25*static_cast<float>(p)/static_cast<float>(size));
+
 			saturation[p]=curve[static_cast<size_t>(scale4*static_cast<double>(saturation[p]))];
+		}
 	}
 
 	{
@@ -192,10 +212,18 @@ void tonemap_global(Image& img,double saturation_gamma,double lightness_factor)
 
 		if(img.maximum()==HDRI_MAXIMUM)
 			for(size_t p=0;p<size;++p)
+			{
+				notifier(0.75+0.25*static_cast<float>(p)/static_cast<float>(size));
+
 				hue[p]>>=8;
+			}
 		else
 			for(size_t p=0;p<size;++p)
+			{
+				notifier(0.75+0.25*static_cast<float>(p)/static_cast<float>(size));
+
 				hue[p]=static_cast<Image::pixel>(scale*static_cast<double>(hue[p]));
+			}
 	}
 
 	img.setMaximum(LDRI_MAXIMUM);
@@ -206,7 +234,7 @@ enum
 	IMAGE__PLANE__BLURRED_LIGHTNESS=Image::PLANE__USER
 };
 
-void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,double mix_factor)
+void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,double mix_factor,progress_notifier notifier)
 {
 	if(!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -231,7 +259,11 @@ void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,dou
 		box_blur(img,IMAGE__PLANE__BLURRED_LIGHTNESS,blur_size,alpha);
 		//invert blurred lightness2
 		for(size_t p=0;p<size;++p)
+		{
+			notifier(0.2*static_cast<float>(p)/static_cast<float>(size));
+
 			blurred_lightness[p]=img.maximum()-blurred_lightness[p];
+		}
 
 		int64_t avg_blur=0;
 		size_t avg_blur_count=0;
@@ -242,6 +274,8 @@ void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,dou
 		//mix them
 		for(size_t p=0;p<size;++p)
 		{
+			notifier(0.2+0.2*static_cast<float>(p)/static_cast<float>(size));
+
 			if(!alpha || alpha[p])
 			{
 				avg_blur+=abs(static_cast<int64_t>(blurred_lightness[p])-static_cast<int64_t>(lightness[p]));
@@ -276,6 +310,8 @@ void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,dou
 
 		for(size_t p=0;p<size;++p)
 		{
+			notifier(0.4+0.2*static_cast<float>(p)/static_cast<float>(size));
+
 			double value=scale_l*(static_cast<double>(lightness[p])-shift_l);
 			if(value>static_cast<double>(LDRI_MAXIMUM))
 				value=static_cast<double>(LDRI_MAXIMUM);
@@ -303,7 +339,11 @@ void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,dou
 		}
 
 		for(size_t p=0;p<size;++p)
+		{
+			notifier(0.6+0.2*static_cast<float>(p)/static_cast<float>(size));
+
 			saturation[p]=curve[static_cast<size_t>(scale4*static_cast<double>(saturation[p]))];
+		}
 	}
 
 	{
@@ -311,10 +351,18 @@ void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,dou
 
 		if(img.maximum()==HDRI_MAXIMUM)
 			for(size_t p=0;p<size;++p)
+			{
+				notifier(0.8+0.2*static_cast<float>(p)/static_cast<float>(size));
+
 				hue[p]>>=8;
+			}
 		else
 			for(size_t p=0;p<size;++p)
+			{
+				notifier(0.8+0.2*static_cast<float>(p)/static_cast<float>(size));
+
 				hue[p]=static_cast<Image::pixel>(scale*static_cast<double>(hue[p]));
+			}
 	}
 
 	img.setMaximum(LDRI_MAXIMUM);

@@ -23,7 +23,7 @@
 *************/
 
 
-#include "tools_colourspace.hpp"
+#include "colourspace.hpp"
 
 
 namespace imaginable {
@@ -33,31 +33,31 @@ void rgb_to_hsv(double r,double g,double b,double &h,double &s,double &v)
 	h=0.;
 	s=0.;
 	double rgbmin=std::min(r,std::min(g,b));
-	v     =std::max(r,std::max(g,b));
+	v=std::max(r,std::max(g,b));
 	double rgbdelta=v-rgbmin;
 
-	if(v>0.)
+	if (v>0.)
 		s=rgbdelta/v;
 
-	if(s>0.)
+	if (s>0.)
 	{
-		if(r==v)
+		if (r==v)
 			h=   (g-b)/rgbdelta;
 		else
-		if(g==v)
+		if (g==v)
 			h=2.+(b-r)/rgbdelta;
 		else
-		if(b==v)
+		if (b==v)
 			h=4.+(r-g)/rgbdelta;
 		h/=6.;
-		if(h<0.)
+		if (h<0.)
 			h+=1.;
 	}
 }
 
 void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b)
 {
-	if(s<=0.)
+	if (s<=0.)
 	{
 		r=g=b=v;
 	}
@@ -66,7 +66,7 @@ void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b)
 		int i;
 		double f,p,q,t;
 
-		if(h>=1.)
+		if (h>=1.)
 			h=0.;
 		h*=6.;
 		i=static_cast<int>(h);
@@ -77,12 +77,12 @@ void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b)
 
 		switch (i)
 		{
-			case 0: r=v; g=t; b=p; break;
-			case 1: r=q; g=v; b=p; break;
-			case 2: r=p; g=v; b=t; break;
-			case 3: r=p; g=q; b=v; break;
-			case 4: r=t; g=p; b=v; break;
-			case 5: r=v; g=p; b=q; break;
+		case 0: r=v; g=t; b=p; break;
+		case 1: r=q; g=v; b=p; break;
+		case 2: r=p; g=v; b=t; break;
+		case 3: r=p; g=q; b=v; break;
+		case 4: r=t; g=p; b=v; break;
+		case 5: r=v; g=p; b=q; break;
 		}
 	}
 }
@@ -97,20 +97,20 @@ void rgb_to_hsl(double r,double g,double b,double &h,double &s,double &l)
 	s=0.;
 	l=(rgbmax+rgbmin)/2.;
 
-	if(rgbdelta>0.)
+	if (rgbdelta>0.)
 	{
 		s=rgbdelta/(2.*((l>.5)? (1.-l) : l));
 
-		if(r==rgbmax)
+		if (r==rgbmax)
 			h=   (g-b)/rgbdelta;
 		else
-		if(g==rgbmax)
+		if (g==rgbmax)
 			h=2.+(b-r)/rgbdelta;
 		else
-		if(b==rgbmax)
+		if (b==rgbmax)
 			h=4.+(r-g)/rgbdelta;
 		h/=6.;
-		if(h<0.)
+		if (h<0.)
 			h+=1.;
 	}
 }
@@ -128,12 +128,12 @@ void hsl_to_rgb(double h,double s,double l,double &r,double &g,double &b)
 	double q=(l>.5)? (l+s-(l*s)) : (l*(1.+s));
 	double p=2*l-q;
 	double t[3]={h+1./3.,h,h-1./3.};
-	if(t[0]>1.)
+	if (t[0]>1.)
 		t[0]-=1.;
-	if(t[2]<0.)
+	if (t[2]<0.)
 		t[2]+=1.;
 	double* c[3]={&r,&g,&b};
-	for(size_t i=0;i<3;++i)
+	for (size_t i=0; i<3; ++i)
 	{
 		*c[i]=
 			((t[i]<1./6.)? (p+((q-p)*6.*t[i])) :
@@ -214,12 +214,12 @@ void pixel_hsl_to_rgb(Image::pixel hue,Image::pixel saturation,Image::pixel ligh
 	blue =static_cast<Image::pixel>(db*maximum);
 }
 
-void rgb_to_hsv(Image& img,bool keep_rgb)
+void rgb_to_hsv(Image& img,bool keep_rgb,progress_notifier notifier)
 {
-	if(!img.hasData())
+	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	if(img.colourSpace()!=Image::IMAGE_RGB)
+	if (img.colourSpace() != Image::IMAGE_RGB)
 		throw exception(exception::INVALID_COLOUR_SPACE);
 
 	size_t width =img.width();
@@ -237,17 +237,19 @@ void rgb_to_hsv(Image& img,bool keep_rgb)
 	/* */ Image::pixel* value     =img.plane(Image::PLANE_HSV_VALUE);
 
 	double dmax=static_cast<double>(img.maximum());
-	for(size_t y=0;y<height;++y)
+	for (size_t y=0; y<height; ++y)
 	{
+		notifier(static_cast<float>(y)/static_cast<float>(height));
+
 		size_t yo=y*width;
-		for(size_t x=0;x<width;++x)
+		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
 			pixel_rgb_to_hsv(red[xyo],green[xyo],blue[xyo],hue[xyo],saturation[xyo],value[xyo],dmax);
 		}
 	}
 
-	if(!keep_rgb)
+	if (!keep_rgb)
 	{
 		img.removePlane(Image::PLANE_RED);
 		img.removePlane(Image::PLANE_GREEN);
@@ -255,12 +257,12 @@ void rgb_to_hsv(Image& img,bool keep_rgb)
 	}
 }
 
-void hsv_to_rgb(Image& img,bool keep_hsv)
+void hsv_to_rgb(Image& img,bool keep_hsv,progress_notifier notifier)
 {
-	if(!img.hasData())
+	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	if(img.colourSpace()!=Image::IMAGE_HSV)
+	if (img.colourSpace() != Image::IMAGE_HSV)
 		throw exception(exception::INVALID_COLOUR_SPACE);
 
 	size_t width =img.width();
@@ -278,17 +280,19 @@ void hsv_to_rgb(Image& img,bool keep_hsv)
 	/* */ Image::pixel* blue      =img.plane(Image::PLANE_BLUE);
 
 	double dmax=static_cast<double>(img.maximum());
-	for(size_t y=0;y<height;++y)
+	for (size_t y=0; y<height; ++y)
 	{
+		notifier(static_cast<float>(y)/static_cast<float>(height));
+
 		size_t yo=y*width;
-		for(size_t x=0;x<width;++x)
+		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
 			pixel_hsv_to_rgb(hue[xyo],saturation[xyo],value[xyo],red[xyo],green[xyo],blue[xyo],dmax);
 		}
 	}
 
-	if(!keep_hsv)
+	if (!keep_hsv)
 	{
 		img.removePlane(Image::PLANE_HUE);
 		img.removePlane(Image::PLANE_HSV_SATURATION);
@@ -296,12 +300,12 @@ void hsv_to_rgb(Image& img,bool keep_hsv)
 	}
 }
 
-void rgb_to_hsl(Image& img,bool keep_rgb)
+void rgb_to_hsl(Image& img,bool keep_rgb,progress_notifier notifier)
 {
-	if(!img.hasData())
+	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	if(img.colourSpace()!=Image::IMAGE_RGB)
+	if (img.colourSpace() != Image::IMAGE_RGB)
 		throw exception(exception::INVALID_COLOUR_SPACE);
 
 	size_t width =img.width();
@@ -319,17 +323,20 @@ void rgb_to_hsl(Image& img,bool keep_rgb)
 	/* */ Image::pixel* lightness =img.plane(Image::PLANE_HSL_LIGHTNESS);
 
 	double dmax=static_cast<double>(img.maximum());
-	for(size_t y=0;y<height;++y)
+	for (size_t y=0; y<height; ++y)
 	{
+
+		notifier(static_cast<float>(y)/static_cast<float>(height));
+
 		size_t yo=y*width;
-		for(size_t x=0;x<width;++x)
+		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
 			pixel_rgb_to_hsl(red[xyo],green[xyo],blue[xyo],hue[xyo],saturation[xyo],lightness[xyo],dmax);
 		}
 	}
 
-	if(!keep_rgb)
+	if (!keep_rgb)
 	{
 		img.removePlane(Image::PLANE_RED);
 		img.removePlane(Image::PLANE_GREEN);
@@ -337,49 +344,12 @@ void rgb_to_hsl(Image& img,bool keep_rgb)
 	}
 }
 
-void rgb_to_lightness(Image& img,bool keep_rgb)
+void hsl_to_rgb(Image& img,bool keep_hsl,progress_notifier notifier)
 {
-	if(!img.hasData())
+	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	if(img.colourSpace()!=Image::IMAGE_RGB)
-		throw exception(exception::INVALID_COLOUR_SPACE);
-
-	size_t width =img.width();
-	size_t height=img.height();
-
-	img.addPlane(Image::PLANE_HSL_LIGHTNESS);
-
-	const Image::pixel* red       =img.plane(Image::PLANE_RED);
-	const Image::pixel* green     =img.plane(Image::PLANE_GREEN);
-	const Image::pixel* blue      =img.plane(Image::PLANE_BLUE);
-	/* */ Image::pixel* lightness =img.plane(Image::PLANE_HSL_LIGHTNESS);
-
-	double dmax=static_cast<double>(img.maximum());
-	for(size_t y=0;y<height;++y)
-	{
-		size_t yo=y*width;
-		for(size_t x=0;x<width;++x)
-		{
-			size_t xyo=yo+x;
-			pixel_rgb_to_lightness(red[xyo],green[xyo],blue[xyo],lightness[xyo],dmax);
-		}
-	}
-
-	if(!keep_rgb)
-	{
-		img.removePlane(Image::PLANE_RED);
-		img.removePlane(Image::PLANE_GREEN);
-		img.removePlane(Image::PLANE_BLUE);
-	}
-}
-
-void hsl_to_rgb(Image& img,bool keep_hsl)
-{
-	if(!img.hasData())
-		throw exception(exception::NO_IMAGE);
-
-	if(img.colourSpace()!=Image::IMAGE_HSL)
+	if (img.colourSpace() != Image::IMAGE_HSL)
 		throw exception(exception::INVALID_COLOUR_SPACE);
 
 	size_t width =img.width();
@@ -397,21 +367,62 @@ void hsl_to_rgb(Image& img,bool keep_hsl)
 	/* */ Image::pixel* blue      =img.plane(Image::PLANE_BLUE);
 
 	double dmax=static_cast<double>(img.maximum());
-	for(size_t y=0;y<height;++y)
+	for (size_t y=0; y<height; ++y)
 	{
+		notifier(static_cast<float>(y)/static_cast<float>(height));
+
 		size_t yo=y*width;
-		for(size_t x=0;x<width;++x)
+		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
 			pixel_hsl_to_rgb(hue[xyo],saturation[xyo],lightness[xyo],red[xyo],green[xyo],blue[xyo],dmax);
 		}
 	}
 
-	if(!keep_hsl)
+	if (!keep_hsl)
 	{
 		img.removePlane(Image::PLANE_HUE);
 		img.removePlane(Image::PLANE_HSL_SATURATION);
 		img.removePlane(Image::PLANE_HSL_LIGHTNESS);
+	}
+}
+
+void rgb_to_lightness(Image& img,bool keep_rgb,progress_notifier notifier)
+{
+	if (!img.hasData())
+		throw exception(exception::NO_IMAGE);
+
+	if (img.colourSpace() != Image::IMAGE_RGB)
+		throw exception(exception::INVALID_COLOUR_SPACE);
+
+	size_t width =img.width();
+	size_t height=img.height();
+
+	img.addPlane(Image::PLANE_HSL_LIGHTNESS);
+
+	const Image::pixel* red       =img.plane(Image::PLANE_RED);
+	const Image::pixel* green     =img.plane(Image::PLANE_GREEN);
+	const Image::pixel* blue      =img.plane(Image::PLANE_BLUE);
+	/* */ Image::pixel* lightness =img.plane(Image::PLANE_HSL_LIGHTNESS);
+
+	double dmax=static_cast<double>(img.maximum());
+	for (size_t y=0; y<height; ++y)
+	{
+		notifier(static_cast<float>(y)/static_cast<float>(height));
+
+		size_t yo=y*width;
+		for (size_t x=0; x<width; ++x)
+		{
+			size_t xyo=yo+x;
+			pixel_rgb_to_lightness(red[xyo],green[xyo],blue[xyo],lightness[xyo],dmax);
+		}
+	}
+
+	if (!keep_rgb)
+	{
+		img.removePlane(Image::PLANE_RED);
+		img.removePlane(Image::PLANE_GREEN);
+		img.removePlane(Image::PLANE_BLUE);
 	}
 }
 

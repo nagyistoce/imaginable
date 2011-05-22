@@ -23,16 +23,20 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_CROP__INCLUDED
-#define IMAGINABLE__TOOLS_CROP__INCLUDED
+#include <cmath>
+
+#include "gamma.hpp"
 
 
-#include "tools.hpp"
+namespace imaginable {
 
-
-namespace imaginable
+double gamma(double x,double k)
 {
-	Image* crop(const Image& img,size_t& x,size_t& y);
+	if(k==0.)
+		return x;
+	if(k<0.)
+		return (exp(-k*x)-1.)/(exp(-k)-1.);
+	return log(x*(exp(k)-1.)+1.)/k;
 }
 
-#endif // IMAGINABLE__TOOLS_CROP__INCLUDED
+}
