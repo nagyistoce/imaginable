@@ -25,10 +25,11 @@
 TEMPLATE = subdirs
 SUBDIRS = \
 	imaginable \
+	tonemap_cli \
 	hdri_gui
 
 fullclean.depends = FORCE
-fullclean.commands += "rm -rf bin ; find . -name '*.pro.user' -exec rm '{}' ';'"
+fullclean.commands += "rm -rf bin lib; find . -name '*.pro.user' -exec rm '{}' ';'"
 distclean.depends = fullclean
 
 QMAKE_EXTRA_TARGETS += fullclean distclean

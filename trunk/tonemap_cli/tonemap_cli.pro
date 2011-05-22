@@ -1,6 +1,6 @@
 ##############
 ##
-## Project:      Imaginable
+## Project:      Imaginable :: tonemap (CLI)
 ## File info:    $Id$
 ## Author:       Copyright (C) 2009 - 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
@@ -23,55 +23,37 @@
 ##############
 
 
-TARGET = imaginable
+TARGET = tonemap_cli
 
-DESTDIR = ../lib
+DESTDIR = ../bin
 
-TEMPLATE = lib
+TEMPLATE = app
 
+CONFIG += console
 QT += core gui
 
 
 SOURCES += \
-	image.cpp \
-	point.cpp \
-	version.cpp \
-	io_pnm_loader.cpp \
-	io_pam_saver.cpp \
-	io_qt.cpp \
-	tools.cpp \
-	time.cpp \
-	maximum.cpp \
-	gamma.cpp \
-	rotate.cpp \
-	crop.cpp \
-	colourspace.cpp \
-	blur.cpp \
-	tonemap.cpp
+	main.cpp \
+	version.cpp
 
 HEADERS += \
-	image.hpp \
-	point.hpp \
-	version.hpp \
-	io_pnm_loader.hpp \
-	io_pam_saver.hpp \
-	io_qt.hpp \
-	tools.hpp \
-	time.hpp \
-	maximum.hpp \
-	gamma.hpp \
-	rotate.hpp \
-	crop.hpp \
-	colourspace.hpp \
-	blur.hpp \
-	tonemap.hpp
-
-
+	version.hpp
 
 OTHER_FILES += \
 	version-major.inl \
 	version-minor.inl \
 	version-label.inl
+
+
+INCLUDEPATH += ..
+
+
+LIBS += \
+	-L../lib \
+	-limaginable
+
+PRE_TARGETDEPS += ../lib/libimaginable.so
 
 
 autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
