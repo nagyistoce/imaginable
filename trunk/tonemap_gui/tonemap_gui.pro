@@ -2,7 +2,7 @@
 ##
 ## Project:      Imaginable
 ## File info:    $Id$
-## Author:       Copyright (C) 2009,2010 Kuzma Shapran <Kuzma.Shapran@gmail.com>
+## Author:       Copyright (C) 2009 - 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ## License:      GPLv3
 ##
 ##  This file is part of Imaginable.
@@ -22,14 +22,47 @@
 ##
 ##############
 
-TEMPLATE = subdirs
-SUBDIRS = \
-	imaginable \
-	tonemap_cli \
-	tonemap_gui
 
-fullclean.depends = FORCE
-fullclean.commands += "rm -rf bin lib; find . -name '*.pro.user' -exec rm '{}' ';'"
-distclean.depends = fullclean
+TARGET = tonemap_gui
 
-QMAKE_EXTRA_TARGETS += fullclean distclean
+DESTDIR = ../bin
+
+TEMPLATE = app
+QT += core gui
+
+
+SOURCES += \
+	main.cpp\
+	version.cpp \
+	mainwindow.cpp
+
+HEADERS += \
+	version.hpp \
+	mainwindow.hpp
+
+FORMS += \
+	mainwindow.ui
+
+OTHER_FILES += \
+	version-major.inl \
+	version-minor.inl \
+	version-label.inl
+
+
+INCLUDEPATH += ..
+
+
+LIBS += \
+	-L../lib \
+	-limaginable
+
+PRE_TARGETDEPS += ../lib/libimaginable.so
+
+
+autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
+autoversioning.depends = autoversioning_echo
+PRE_TARGETDEPS += autoversioning
+
+autoversioning_echo.commands = "@echo Autoversioning ..."
+
+QMAKE_EXTRA_TARGETS += autoversioning autoversioning_echo
