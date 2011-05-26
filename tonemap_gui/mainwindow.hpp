@@ -30,12 +30,31 @@
 #include "ui_mainwindow.h"
 
 
+class QProgressBar;
+class QLabel;
+
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
 	Q_OBJECT
 
 public:
 	explicit MainWindow(QWidget *parent = NULL);
+
+public slots:
+	void openFile(void);
+	void saveFile(void);
+
+	void setSaturation(int);
+	void setBlur(int);
+	void setMix(int);
+	void resetSliders(void);
+
+private:
+	QProgressBar *progress_bar;
+	QString last_user_dir;
+	QStringList filters;
+	int open_filter;
+	int save_filter;
 };
 
 #endif // IMAGINABLE__TINEMAP_GUI__MAINWINDOW__INCLUDED

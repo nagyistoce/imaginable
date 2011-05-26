@@ -23,11 +23,76 @@
 *************/
 
 
+#include <QtGui/QProgressBar>
+#include <QtGui/QFileDialog>
+#include <QtGui/QImageWriter>
+
 #include "mainwindow.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
+	, progress_bar(new QProgressBar(this))
 {
 	setupUi(this);
+	status_bar->addPermanentWidget(progress_bar,1);
+	progress_bar->setValue(0);
+	progress_bar->hide();
+
+	last_user_dir = QDir::homePath();
+
+	QString qt_can_write;
+	foreach (QByteArray ba,QImageWriter::supportedImageFormats())
+		qt_can_write += QString(" *.")+QString(ba);
+	filters
+		<< (tr("All images")+" (*.pam *.pnm *.ppm *.exr)"+qt_can_write)
+		<< (tr("HDRI images")+" (*.pam *.pnm *.ppm *.exr)")
+		<< (tr("LDRI images")+" (*.pam *.pnm *.ppm)"+qt_can_write)
+		<< tr("All files (*)");
+	open_filter = 1;
+	save_filter = 2;
+}
+
+void MainWindow::openFile(void)
+{
+	QString current_filter = filters[open_filter];
+	QString file_name = QFileDialog::getOpenFileName(this,tr("Open HDRI file"),last_user_dir,filters.join(";;"),&current_filter);
+	if (!file_name.isEmpty())
+	{
+		last_user_dir = QFileInfo(file_name).path();
+		original->setText(file_name);
+	}
+}
+
+void MainWindow::saveFile(void)
+{
+	QString current_filter = filters[save_filter];
+	QString file_name = QFileDialog::getSaveFileName(this,tr("Save LDRI file"),last_user_dir,filters.join(";;"),&current_filter);
+	if (!file_name.isEmpty())
+	{
+		last_user_dir = QFileInfo(file_name).path();
+		preview->setText(file_name);
+	}
+}
+
+void MainWindow::setSaturation(int value)
+{
+	value_saturation->setText(QString("+%1").arg(static_cast<double>(value)/10.,3,'f',1,'0'));
+}
+
+void MainWindow::setBlur(int value)
+{
+	value_blur->setText(QString("%1%").arg(value));
+}
+
+void MainWindow::setMix(int value)
+{
+	value_mix->setText(QString("%1%").arg(value));
+}
+
+void MainWindow::resetSliders(void)
+{
+	slider_saturation->setValue(10);
+	slider_blur      ->setValue(20);
+	slider_mix       ->setValue(50);
 }
