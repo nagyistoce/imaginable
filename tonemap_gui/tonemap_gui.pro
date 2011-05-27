@@ -66,3 +66,6 @@ PRE_TARGETDEPS += autoversioning
 autoversioning_echo.commands = "@echo Autoversioning ..."
 
 QMAKE_EXTRA_TARGETS += autoversioning autoversioning_echo
+
+RESOURCES += \
+    tonemap_gui.qrc

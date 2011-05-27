@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/file">
+        <file alias="open">fileopen.svg</file>
+        <file alias="save">filesave.svg</file>
+    </qresource>
+    <qresource prefix="/zoom">
+        <file alias="out">zoomout.svg</file>
+        <file alias="in">zoomin.svg</file>
+    </qresource>
+    <qresource prefix="/icon">
+        <file alias="tonemap">tonemap.svg</file>
+    </qresource>
+</RCC>
