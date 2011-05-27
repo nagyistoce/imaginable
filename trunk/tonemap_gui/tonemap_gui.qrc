@@ -2,10 +2,14 @@
     <qresource prefix="/file">
         <file alias="open">fileopen.svg</file>
         <file alias="save">filesave.svg</file>
+        <file alias="saveas">filesaveas.svg</file>
+        <file alias="quit">filequit.svg</file>
     </qresource>
     <qresource prefix="/zoom">
         <file alias="out">zoomout.svg</file>
         <file alias="in">zoomin.svg</file>
+        <file alias="fit">zoomfit.svg</file>
+        <file alias="one">zoomone.svg</file>
     </qresource>
     <qresource prefix="/icon">
         <file alias="tonemap">tonemap.svg</file>
