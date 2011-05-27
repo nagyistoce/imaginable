@@ -39,6 +39,31 @@ MainWindow::MainWindow(QWidget *parent)
 	progress_bar->setValue(0);
 	progress_bar->hide();
 
+	action_Open->setShortcut(QKeySequence::Open);
+	if (action_Open->shortcut().isEmpty())
+		action_Open->setShortcut(QKeySequence(tr("Ctrl+O")));
+
+	action_Save->setShortcut(QKeySequence::Save);
+	if (action_Save->shortcut().isEmpty())
+		action_Save->setShortcut(QKeySequence(tr("Ctrl+S")));
+
+	action_Save_as->setShortcut(QKeySequence::SaveAs);
+	if (action_Save_as->shortcut().isEmpty())
+		action_Save_as->setShortcut(QKeySequence(tr("Ctrl+Alt+S")));
+
+	action_Quit->setShortcut(QKeySequence::Quit);
+	if (action_Quit->shortcut().isEmpty())
+		action_Quit->setShortcut(QKeySequence(tr("Ctrl+Q")));
+
+	action_Zoom_in->setShortcut(QKeySequence::ZoomIn);
+	if (action_Zoom_in->shortcut().isEmpty())
+		action_Zoom_in->setShortcut(QKeySequence(tr("Ctrl++")));
+
+	action_Zoom_out->setShortcut(QKeySequence::ZoomOut);
+	if (action_Zoom_out->shortcut().isEmpty())
+		action_Zoom_out->setShortcut(QKeySequence(tr("Ctrl+-")));
+
+
 	last_user_dir = QDir::homePath();
 
 	QString qt_can_write;
