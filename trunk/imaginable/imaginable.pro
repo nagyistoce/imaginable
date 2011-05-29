@@ -44,7 +44,7 @@ SOURCES += \
 	maximum.cpp \
 	gamma.cpp \
 	rotate.cpp \
-	crop.cpp \
+	auto_crop.cpp \
 	colourspace.cpp \
 	blur.cpp \
 	tonemap.cpp
@@ -61,7 +61,7 @@ HEADERS += \
 	maximum.hpp \
 	gamma.hpp \
 	rotate.hpp \
-	crop.hpp \
+	auto_crop.hpp \
 	colourspace.hpp \
 	blur.hpp \
 	tonemap.hpp

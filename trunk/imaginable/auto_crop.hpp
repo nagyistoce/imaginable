@@ -23,8 +23,8 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_CROP__INCLUDED
-#define IMAGINABLE__TOOLS_CROP__INCLUDED
+#ifndef IMAGINABLE__TOOLS_AUTOCROP__INCLUDED
+#define IMAGINABLE__TOOLS_AUTOCROP__INCLUDED
 
 
 #include "tools.hpp"
@@ -32,7 +32,7 @@
 
 namespace imaginable
 {
-	Image* crop(const Image& img,size_t& x,size_t& y,progress_notifier notifier = dont_notify);
+	Image* auto_crop(const Image& img,size_t& x,size_t& y,progress_notifier notifier = dont_notify);
 }
 
-#endif // IMAGINABLE__TOOLS_CROP__INCLUDED
+#endif // IMAGINABLE__TOOLS_AUTOCROP__INCLUDED

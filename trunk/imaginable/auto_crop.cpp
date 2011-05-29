@@ -27,12 +27,12 @@
 
 #include <cstring>
 
-#include "crop.hpp"
+#include "auto_crop.hpp"
 
 
 namespace imaginable {
 
-Image* crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
+Image* auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
