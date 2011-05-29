@@ -27,6 +27,8 @@
 #define IMAGINABLE__TINEMAP_GUI__MAINWINDOW__INCLUDED
 
 
+#include <imaginable/image.hpp>
+
 #include "ui_mainwindow.h"
 
 
@@ -40,21 +42,66 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 public:
 	explicit MainWindow(QWidget *parent = NULL);
 
+protected:
+	void resizeEvent(QResizeEvent*);
+
 public slots:
-	void openFile(void);
-	void saveFile(void);
+	void fileOpen(void);
+	void fileSave(void);
+	void fileSaveAs(void);
+
+	void zoomIn(void);
+	void zoomOut(void);
+	void zoomOne(void);
+	void zoomToFit(void);
+
+	void horizontallySlided(int);
+	void verticallySlided(int);
+
+	void showOriginal(bool);
 
 	void setSaturation(int);
 	void setBlur(int);
 	void setMix(int);
 	void resetSliders(void);
 
+	void update_all(void);
+
 private:
+	QLabel *current_zoom;
 	QProgressBar *progress_bar;
+
 	QString last_user_dir;
-	QStringList filters;
-	int open_filter;
-	int save_filter;
+	QString open_filters;
+	QString save_filters;
+	QString safe_as_file_name;
+
+	enum {
+		ZOOM_CUSTOM,
+		ZOOM_ONE,
+		ZOOM_TO_FIT
+	} current_zoom_type;
+	double zoom;
+
+	size_t scaled_width;
+	size_t scaled_height;
+
+	size_t less_side;
+	size_t blur_in_pixels;
+
+	size_t less_scaled_side;
+	size_t scaled_blur_in_pixels;
+
+	imaginable::Image original_image;
+	imaginable::Image scaled_image;
+	imaginable::Image cropped_image;
+	imaginable::Image tonemapped_small_image;
+	imaginable::Image tonemapped_image;
+
+	static QPixmap image_to_pixmap(const imaginable::Image&);
+
+	void update_offset(void);
+	void update_preview(void);
 };
 
 #endif // IMAGINABLE__TINEMAP_GUI__MAINWINDOW__INCLUDED

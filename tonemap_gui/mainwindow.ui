@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>467</width>
-    <height>391</height>
+    <width>480</width>
+    <height>390</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,29 +45,59 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QSplitter" name="splitter">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="childrenCollapsible">
-          <bool>false</bool>
-         </property>
-         <widget class="QLabel" name="original">
-          <property name="text">
-           <string>original</string>
+        <widget class="QWidget" name="views" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1">
+          <property name="spacing">
+           <number>4</number>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+          <property name="margin">
+           <number>0</number>
           </property>
-         </widget>
-         <widget class="QLabel" name="preview">
-          <property name="text">
-           <string>preview</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+          <item>
+           <widget class="QLabel" name="original_view">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>original</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="preview">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>50</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>preview</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item row="0" column="1">
@@ -90,7 +120,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>467</width>
+     <width>480</width>
      <height>19</height>
     </rect>
    </property>
@@ -169,7 +199,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_saturation">
          <property name="text">
-          <string>&amp;Saturation</string>
+          <string>&amp;Saturation gamma</string>
          </property>
          <property name="buddy">
           <cstring>slider_saturation</cstring>
@@ -205,19 +235,22 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>50</width>
+           <width>40</width>
            <height>0</height>
           </size>
          </property>
          <property name="text">
           <string>+1.0</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
         </widget>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_blur">
          <property name="text">
-          <string>&amp;Blur</string>
+          <string>Gaussian &amp;blur</string>
          </property>
          <property name="buddy">
           <cstring>slider_blur</cstring>
@@ -240,25 +273,6 @@
          </property>
          <property name="tickInterval">
           <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="value_blur">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>20%</string>
          </property>
         </widget>
        </item>
@@ -301,14 +315,71 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>50</width>
+           <width>40</width>
            <height>0</height>
           </size>
          </property>
          <property name="text">
           <string>50%</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
         </widget>
+       </item>
+       <item row="1" column="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="value_blur_percent">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>40</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>20%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="value_blur_pixels">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0 px</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
@@ -381,6 +452,9 @@
    </property>
   </action>
   <action name="action_Save">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
      <normaloff>:/file/save</normaloff>:/file/save</iconset>
@@ -399,6 +473,9 @@
    </property>
   </action>
   <action name="action_Zoom_in">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
      <normaloff>:/zoom/in</normaloff>:/zoom/in</iconset>
@@ -408,6 +485,9 @@
    </property>
   </action>
   <action name="action_Zoom_out">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
      <normaloff>:/zoom/out</normaloff>:/zoom/out</iconset>
@@ -449,9 +529,6 @@
    </property>
   </action>
   <action name="action_Zoom_one">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
      <normaloff>:/zoom/one</normaloff>:/zoom/one</iconset>
@@ -464,6 +541,9 @@
    </property>
   </action>
   <action name="action_Save_as">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
      <normaloff>:/file/saveas</normaloff>:/file/saveas</iconset>
@@ -479,6 +559,70 @@
  </resources>
  <connections>
   <connection>
+   <sender>action_Open</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>fileOpen()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Save</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>fileSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Save_as</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>fileSaveAs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>233</x>
+     <y>195</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Quit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>313</x>
+     <y>183</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>show_original</sender>
    <signal>clicked(bool)</signal>
    <receiver>action_Show_original</receiver>
@@ -491,6 +635,102 @@
     <hint type="destinationlabel">
      <x>-1</x>
      <y>-1</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Show_original</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>show_original</receiver>
+   <slot>setChecked(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>59</x>
+     <y>346</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Show_original</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showOriginal(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>239</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Zoom_in</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoomIn()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>239</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Zoom_out</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoomOut()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>239</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Zoom_one</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoomOne()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>239</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>action_Zoom_to_fit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>zoomToFit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>239</x>
+     <y>194</y>
     </hint>
    </hints>
   </connection>
@@ -559,92 +799,52 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_Quit</sender>
-   <signal>triggered()</signal>
+   <sender>horizontalScrollBar</sender>
+   <signal>valueChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>close()</slot>
+   <slot>horizontallySlided(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
+     <x>231</x>
+     <y>196</y>
     </hint>
     <hint type="destinationlabel">
-     <x>313</x>
-     <y>183</y>
+     <x>239</x>
+     <y>194</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>action_Open</sender>
-   <signal>triggered()</signal>
+   <sender>verticalScrollBar</sender>
+   <signal>valueChanged(int)</signal>
    <receiver>MainWindow</receiver>
-   <slot>openFile()</slot>
+   <slot>verticallySlided(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
+     <x>467</x>
+     <y>121</y>
     </hint>
     <hint type="destinationlabel">
-     <x>313</x>
-     <y>183</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>action_Save</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>saveFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>313</x>
-     <y>183</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>action_Show_original</sender>
-   <signal>triggered(bool)</signal>
-   <receiver>original</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>119</x>
-     <y>125</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>action_Show_original</sender>
-   <signal>triggered(bool)</signal>
-   <receiver>show_original</receiver>
-   <slot>setChecked(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>59</x>
-     <y>346</y>
+     <x>239</x>
+     <y>194</y>
     </hint>
    </hints>
   </connection>
  </connections>
  <slots>
+  <slot>fileOpen()</slot>
+  <slot>fileSave()</slot>
+  <slot>fileSaveAs()</slot>
+  <slot>showOriginal(bool)</slot>
+  <slot>zoomIn()</slot>
+  <slot>zoomOut()</slot>
+  <slot>zoomOne()</slot>
+  <slot>zoomToFit()</slot>
   <slot>setSaturation(int)</slot>
   <slot>setBlur(int)</slot>
   <slot>setMix(int)</slot>
   <slot>resetSliders()</slot>
-  <slot>openFile()</slot>
-  <slot>saveFile()</slot>
+  <slot>horizontallySlided(int)</slot>
+  <slot>verticallySlided(int)</slot>
  </slots>
 </ui>
