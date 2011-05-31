@@ -1,6 +1,6 @@
 /*************
 **
-** Project:      Imaginable
+** Project:      Imaginable :: tonemap (GUI)
 ** File info:    $Id$
 ** Author:       Copyright (C) 2009 - 2011 Kuzma Shapran <Kuzma.Shapran@gmail.com>
 ** License:      GPLv3
@@ -23,16 +23,34 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_ROTATE__INCLUDED
-#define IMAGINABLE__TOOLS_ROTATE__INCLUDED
+#ifndef IMAGINABLE__TONEMAP_GUI__PREVIEW__INCLUDED
+#define IMAGINABLE__TONEMAP_GUI__PREVIEW__INCLUDED
 
 
-#include "tools.hpp"
+#include <QLabel>
 
 
-namespace imaginable
+class Preview : public QLabel
 {
-	Image rotate(const Image& img,double radian,progress_notifier notifier = dont_notify);
-}
+	Q_OBJECT
+public:
+	explicit Preview(QWidget *parent = NULL);
 
-#endif // IMAGINABLE__TOOLS_ROTATE__INCLUDED
+protected:
+	void mousePressEvent(QMouseEvent*);
+	void mouseMoveEvent(QMouseEvent*);
+	void mouseReleaseEvent(QMouseEvent*);
+	void resizeEvent(QResizeEvent*);
+
+signals:
+	void resized(int,int);
+	void shifted(int,int);
+
+private:
+	bool m_is_shifting;
+	int m_old_x;
+	int m_old_y;
+
+};
+
+#endif // IMAGINABLE__TONEMAP_GUI__PREVIEW__INCLUDED

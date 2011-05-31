@@ -24,15 +24,22 @@
 
 
 #include <boost/scoped_array.hpp>
+#include <boost/bind.hpp>
 
 #include <cstring>
 
 #include "auto_crop.hpp"
+#include "crop.hpp"
 
 
 namespace imaginable {
 
-Image* auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
+void notifier_80_100(progress_notifier notifier,float value)
+{
+	notifier(value/5. + .2);
+}
+
+Image auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -116,13 +123,15 @@ Image* auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier not
 	if( (left==right) || (top==bottom) )
 		throw exception(exception::FULLY_TRANSPARENT_IMAGE);
 
+	return crop(img,left,top,right-left,bottom-top,boost::bind(&notifier_80_100,notifier,_1));
+/*
 	Image* ret=new Image(right-left,bottom-top);
 
 	const Image::t_planeNames& planeNames=img.planeNames();
 	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
-		ret->addPlane(*I);
-	ret->setMaximum(img.maximum());
-	ret->copyTextFrom(img);
+		ret.addPlane(*I);
+	ret.setMaximum(img.maximum());
+	ret.copyTextFrom(img);
 
 	size_t m=planeNames.size();
 	size_t i=0;
@@ -134,7 +143,7 @@ Image* auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier not
 			notifier(0.8+0.2*static_cast<float>(i++)/static_cast<float>(m));
 
 			const Image::pixel* from=img.plane(*I);
-			Image::pixel* to=ret->plane(*I);
+			Image::pixel* to=ret.plane(*I);
 			memcpy(to,from+top*width,(bottom-top)*width*sizeof(Image::pixel));
 		}
 	}
@@ -145,13 +154,14 @@ Image* auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier not
 			notifier(0.8+0.2*static_cast<float>(i++)/static_cast<float>(m));
 
 			const Image::pixel* from=img.plane(*I);
-			Image::pixel* to=ret->plane(*I);
+			Image::pixel* to=ret.plane(*I);
 			for (size_t y=0; y<(bottom-top); ++y)
 				memcpy(to+y*(right-left),from+(y+top)*width+left,(right-left)*sizeof(Image::pixel));
 		}
 	}
 
 	return ret;
+*/
 }
 
 }

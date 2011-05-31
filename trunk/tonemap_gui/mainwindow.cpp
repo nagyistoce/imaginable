@@ -35,6 +35,7 @@
 #include <imaginable/io_qt.hpp>
 #include <imaginable/colourspace.hpp>
 #include <imaginable/tonemap.hpp>
+#include <imaginable/crop.hpp>
 
 #include "mainwindow.hpp"
 
@@ -43,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, current_zoom(new QLabel(this))
 	, progress_bar(new QProgressBar(this))
+	, m_lock_update_offset(false)
 {
 	setupUi(this);
 	status_bar->addPermanentWidget(progress_bar,1);
@@ -252,9 +254,18 @@ void MainWindow::showOriginal(bool value)
 	QTimer::singleShot(0,this,SLOT(update_all()));
 }
 
-void MainWindow::resizeEvent(QResizeEvent*)
+void MainWindow::previewResized(int,int)
 {
 	update_all();
+}
+
+void MainWindow::previewShifted(int dx,int dy)
+{
+	m_lock_update_offset = true;
+		horizontalScrollBar->setValue(horizontalScrollBar->value()-dx);
+		verticalScrollBar  ->setValue(  verticalScrollBar->value()-dy);
+	m_lock_update_offset = false;
+	update_offset();
 }
 
 void MainWindow::horizontallySlided(int)
@@ -299,15 +310,33 @@ void MainWindow::update_all(void)
 		break;
 	}
 
+	int cx = -1;
+	if (horizontalScrollBar->maximum())
+		cx = horizontalScrollBar->value() + (scaled_image.width () - horizontalScrollBar->maximum())/2;
+
+	int cy = -1;
+	if (verticalScrollBar->maximum())
+		cy =   verticalScrollBar->value() + (scaled_image.height() -   verticalScrollBar->maximum())/2;
+
 	if ((preview->width () < static_cast<int>(scaled_image.width ()))
 	||  (preview->height() < static_cast<int>(scaled_image.height())))
 	{
+		horizontalScrollBar->setValue   (0);
 		horizontalScrollBar->setMaximum (std::max(preview->width (),static_cast<int>(scaled_image.width ())) - preview->width ());
-		horizontalScrollBar->setValue   (horizontalScrollBar->maximum()/ 2);
+		if (cx < 0)
+			cx =  horizontalScrollBar->maximum()/2;
+		else
+			cx -= (scaled_image.width () - horizontalScrollBar->maximum())/2;
+		horizontalScrollBar->setValue   (cx);
 		horizontalScrollBar->setPageStep(horizontalScrollBar->maximum()/10);
 
+		verticalScrollBar  ->setValue   (0);
 		verticalScrollBar  ->setMaximum (std::max(preview->height(),static_cast<int>(scaled_image.height())) - preview->height());
-		verticalScrollBar  ->setValue   (verticalScrollBar->maximum()/ 2);
+		if (cy < 0)
+			cy =  verticalScrollBar->maximum()/2;
+		else
+			cy -= (scaled_image.height() - verticalScrollBar->maximum())/2;
+		verticalScrollBar  ->setValue   (cy);
 		verticalScrollBar  ->setPageStep(verticalScrollBar->maximum()/10);
 	}
 	else
@@ -321,14 +350,20 @@ void MainWindow::update_all(void)
 
 void MainWindow::update_offset(void)
 {
+	if (m_lock_update_offset)
+		return;
+
+	if (scaled_image.empty())
+		return;
+
 	if (horizontalScrollBar->maximum()
 	||  verticalScrollBar  ->maximum())
 	{
-		cropped_image = scaled_image         .copy()/*.crop(
+		cropped_image = imaginable::crop(scaled_image,
 			horizontalScrollBar->value(),
-			std::min(preview->width (),static_cast<int>(scaled_image.width ())),
 			verticalScrollBar->value(),
-			std::min(preview->height(),static_cast<int>(scaled_image.height())) )*/;
+			std::min(preview->width (),static_cast<int>(scaled_image.width ())),
+			std::min(preview->height(),static_cast<int>(scaled_image.height())) );
 	}
 	else
 		cropped_image = scaled_image.copy();

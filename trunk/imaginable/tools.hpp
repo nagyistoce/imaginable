@@ -40,15 +40,16 @@ namespace imaginable
 	public:
 		typedef enum
 		{
-			NO_IMAGE=0,             //crop  rgb_to_hsv  box_blur tone_map
-			NO_ALPHA_CHANNEL,       //crop
-			FULLY_TRANSPARENT_IMAGE,//crop
-			INVALID_COLOUR_SPACE,   //      rgb_to_hsv           tone_map
-			INVALID_RADIUS,         //                  box_blur
-			INVALID_PLANE,          //                  box_blur
-			PLANE_EXISTS,           //                  box_blur
-			NOT_AN_HDRI,            //                           tone_map
-			INVALID_DATA            //                           tone_map
+			NO_IMAGE=0,             //auto_crop  crop  rgb_to_hsv  box_blur tone_map
+			NO_ALPHA_CHANNEL,       //auto_crop
+			FULLY_TRANSPARENT_IMAGE,//auto_crop
+			EMPTY_IMAGE,            //           crop
+			INVALID_COLOUR_SPACE,   //                 rgb_to_hsv           tone_map
+			INVALID_RADIUS,         //                             box_blur
+			INVALID_PLANE,          //                             box_blur
+			PLANE_EXISTS,           //                             box_blur
+			NOT_AN_HDRI,            //                                      tone_map
+			INVALID_DATA            //                                      tone_map
 		} Type;
 		explicit exception(const Type& type) throw()
 			: std::exception()
@@ -64,6 +65,7 @@ namespace imaginable
 				case NO_IMAGE:                return "No image";
 				case NO_ALPHA_CHANNEL:        return "No alpha channel";
 				case FULLY_TRANSPARENT_IMAGE: return "Fully transparent image";
+				case EMPTY_IMAGE:             return "Empty image";
 				case INVALID_COLOUR_SPACE:    return "Invalid colour space";
 				case INVALID_RADIUS:          return "Invalid radius";
 				case INVALID_PLANE:           return "Invalid plane";
