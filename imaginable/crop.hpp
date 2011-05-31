@@ -23,8 +23,8 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_ROTATE__INCLUDED
-#define IMAGINABLE__TOOLS_ROTATE__INCLUDED
+#ifndef IMAGINABLE__TOOLS_CROP__INCLUDED
+#define IMAGINABLE__TOOLS_CROP__INCLUDED
 
 
 #include "tools.hpp"
@@ -32,7 +32,7 @@
 
 namespace imaginable
 {
-	Image rotate(const Image& img,double radian,progress_notifier notifier = dont_notify);
+	Image crop(const Image& img,size_t x,size_t y,size_t width,size_t height,progress_notifier notifier = dont_notify);
 }
 
-#endif // IMAGINABLE__TOOLS_ROTATE__INCLUDED
+#endif // IMAGINABLE__TOOLS_AUTOCROP__INCLUDED

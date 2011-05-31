@@ -23,8 +23,8 @@
 *************/
 
 
-#ifndef IMAGINABLE__TINEMAP_GUI__MAINWINDOW__INCLUDED
-#define IMAGINABLE__TINEMAP_GUI__MAINWINDOW__INCLUDED
+#ifndef IMAGINABLE__TONEMAP_GUI__MAINWINDOW__INCLUDED
+#define IMAGINABLE__TONEMAP_GUI__MAINWINDOW__INCLUDED
 
 
 #include <imaginable/image.hpp>
@@ -42,9 +42,6 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 public:
 	explicit MainWindow(QWidget *parent = NULL);
 
-protected:
-	void resizeEvent(QResizeEvent*);
-
 public slots:
 	void fileOpen(void);
 	void fileSave(void);
@@ -59,6 +56,9 @@ public slots:
 	void verticallySlided(int);
 
 	void showOriginal(bool);
+
+	void previewResized(int,int);
+	void previewShifted(int,int);
 
 	void setSaturation(int);
 	void setBlur(int);
@@ -92,6 +92,8 @@ private:
 	size_t less_scaled_side;
 	size_t scaled_blur_in_pixels;
 
+	bool m_lock_update_offset;
+
 	imaginable::Image original_image;
 	imaginable::Image scaled_image;
 	imaginable::Image cropped_image;
@@ -104,4 +106,4 @@ private:
 	void update_preview(void);
 };
 
-#endif // IMAGINABLE__TINEMAP_GUI__MAINWINDOW__INCLUDED
+#endif // IMAGINABLE__TONEMAP_GUI__MAINWINDOW__INCLUDED

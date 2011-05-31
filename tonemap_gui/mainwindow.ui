@@ -54,7 +54,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="original_view">
+           <widget class="Preview" name="original_view">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -76,7 +76,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="preview">
+           <widget class="Preview" name="preview">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -554,6 +554,17 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Preview</class>
+   <extends>QLabel</extends>
+   <header>preview.hpp</header>
+   <slots>
+    <signal>shifted(int,int)</signal>
+    <signal>resized(int,int)</signal>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="tonemap_gui.qrc"/>
  </resources>
@@ -741,8 +752,8 @@
    <slot>setSaturation(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>181</x>
-     <y>228</y>
+     <x>292</x>
+     <y>264</y>
     </hint>
     <hint type="destinationlabel">
      <x>186</x>
@@ -757,8 +768,8 @@
    <slot>setBlur(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>298</x>
-     <y>256</y>
+     <x>371</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -773,8 +784,8 @@
    <slot>setMix(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>290</y>
+     <x>371</x>
+     <y>328</y>
     </hint>
     <hint type="destinationlabel">
      <x>396</x>
@@ -789,8 +800,8 @@
    <slot>resetSliders()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>578</x>
-     <y>321</y>
+     <x>471</x>
+     <y>356</y>
     </hint>
     <hint type="destinationlabel">
      <x>630</x>
@@ -830,6 +841,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>original_view</sender>
+   <signal>shifted(int,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>previewShifted(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>69</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preview</sender>
+   <signal>shifted(int,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>previewShifted(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>344</x>
+     <y>62</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>351</x>
+     <y>53</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>preview</sender>
+   <signal>resized(int,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>previewResized(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>75</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>333</x>
+     <y>51</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>fileOpen()</slot>
@@ -846,5 +905,7 @@
   <slot>resetSliders()</slot>
   <slot>horizontallySlided(int)</slot>
   <slot>verticallySlided(int)</slot>
+  <slot>previewResized(int,int)</slot>
+  <slot>previewShifted(int,int)</slot>
  </slots>
 </ui>

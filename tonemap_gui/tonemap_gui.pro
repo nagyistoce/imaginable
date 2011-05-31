@@ -34,11 +34,13 @@ QT += core gui
 SOURCES += \
 	main.cpp\
 	version.cpp \
-	mainwindow.cpp
+	mainwindow.cpp \
+    preview.cpp
 
 HEADERS += \
 	version.hpp \
-	mainwindow.hpp
+	mainwindow.hpp \
+    preview.hpp
 
 FORMS += \
 	mainwindow.ui
