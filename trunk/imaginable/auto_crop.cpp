@@ -34,11 +34,6 @@
 
 namespace imaginable {
 
-void notifier_80_100(progress_notifier notifier,float value)
-{
-	notifier(value/5. + .2);
-}
-
 Image auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
 {
 	if (!img.hasData())
@@ -123,7 +118,7 @@ Image auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier noti
 	if( (left==right) || (top==bottom) )
 		throw exception(exception::FULLY_TRANSPARENT_IMAGE);
 
-	return crop(img,left,top,right-left,bottom-top,boost::bind(&notifier_80_100,notifier,_1));
+	return crop(img,left,top,right-left,bottom-top,boost::bind(&scaled_notifier,notifier,0.8,0.2,_1));
 /*
 	Image* ret=new Image(right-left,bottom-top);
 

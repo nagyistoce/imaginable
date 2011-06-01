@@ -214,6 +214,8 @@ void pixel_hsl_to_rgb(Image::pixel hue,Image::pixel saturation,Image::pixel ligh
 	blue =static_cast<Image::pixel>(db*maximum);
 }
 
+#define NOTIFY_STEP 10
+
 void rgb_to_hsv(Image& img,bool keep_rgb,progress_notifier notifier)
 {
 	if (!img.hasData())
@@ -239,7 +241,8 @@ void rgb_to_hsv(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		notifier(static_cast<float>(y)/static_cast<float>(height));
+		if (!(y%NOTIFY_STEP))
+			notifier(static_cast<float>(y)/static_cast<float>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
@@ -282,7 +285,8 @@ void hsv_to_rgb(Image& img,bool keep_hsv,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		notifier(static_cast<float>(y)/static_cast<float>(height));
+		if (!(y%NOTIFY_STEP))
+			notifier(static_cast<float>(y)/static_cast<float>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
@@ -325,8 +329,8 @@ void rgb_to_hsl(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-
-		notifier(static_cast<float>(y)/static_cast<float>(height));
+		if (!(y%NOTIFY_STEP))
+			notifier(static_cast<float>(y)/static_cast<float>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
@@ -369,7 +373,8 @@ void hsl_to_rgb(Image& img,bool keep_hsl,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		notifier(static_cast<float>(y)/static_cast<float>(height));
+		if (!(y%NOTIFY_STEP))
+			notifier(static_cast<float>(y)/static_cast<float>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
@@ -408,7 +413,8 @@ void rgb_to_lightness(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		notifier(static_cast<float>(y)/static_cast<float>(height));
+		if (!(y%NOTIFY_STEP))
+			notifier(static_cast<float>(y)/static_cast<float>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)

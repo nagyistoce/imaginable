@@ -28,6 +28,8 @@
 #include <QtGui/QImageWriter>
 #include <QtCore/QTimer>
 
+#include <boost/bind.hpp>
+
 #include <fstream>
 
 #include <imaginable/io_pnm_loader.hpp>
@@ -36,6 +38,7 @@
 #include <imaginable/colourspace.hpp>
 #include <imaginable/tonemap.hpp>
 #include <imaginable/crop.hpp>
+#include <imaginable/tools.hpp>
 
 #include "mainwindow.hpp"
 
@@ -44,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, current_zoom(new QLabel(this))
 	, progress_bar(new QProgressBar(this))
-	, m_lock_update_offset(false)
+	, m_lock_update(0)
 	, m_update_flags(0)
 {
 	setupUi(this);
@@ -150,7 +153,7 @@ void MainWindow::fileSave(void)
 		fileSaveAs();
 	else
 	{
-		tonemapped_image = original_image.copy();
+		imaginable::Image tonemapped_image = original_image.copy();
 		imaginable::rgb_to_hsl(tonemapped_image,false);
 		imaginable::tonemap_local(tonemapped_image,static_cast<double>(slider_saturation->value())/10.,blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.);
 		imaginable::hsl_to_rgb(tonemapped_image,false);
@@ -221,31 +224,38 @@ void MainWindow::setSaturation(int value)
 {
 	value_saturation->setText(QString("+%1").arg(static_cast<double>(value)/10.,3,'f',1,'0'));
 
-	m_update_flags |= UPDATE_PREVIEW;
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_TONEMAP;
 }
 
 void MainWindow::setBlur(int value)
 {
 	value_blur_percent->setText(QString("%1%").arg(value));
-	blur_in_pixels = static_cast<double>(less_side) * static_cast<double>(value)/100.;
-	scaled_blur_in_pixels = static_cast<double>(less_scaled_side) * static_cast<double>(value)/100.;
-	value_blur_pixels ->setText(QString("%1 px").arg(blur_in_pixels));
+	blur_in_pixels        = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side)        * static_cast<double>(value)/100.));
+	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * static_cast<double>(value)/100.));
+	value_blur_pixels->setText(QString("%1 px").arg(blur_in_pixels));
 
-	m_update_flags |= UPDATE_PREVIEW;
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_TONEMAP;
 }
 
 void MainWindow::setMix(int value)
 {
 	value_mix->setText(QString("%1%").arg(value));
 
-	m_update_flags |= UPDATE_PREVIEW;
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_TONEMAP;
 }
 
 void MainWindow::resetSliders(void)
 {
-	slider_saturation->setValue(10);
-	slider_blur      ->setValue(20);
-	slider_mix       ->setValue(50);
+	++m_lock_update;
+		slider_saturation->setValue(10);
+		slider_blur      ->setValue(20);
+		slider_mix       ->setValue(50);
+	--m_lock_update;
+
+	m_update_flags |= UPDATE_TONEMAP;
 }
 
 QPixmap MainWindow::image_to_pixmap(const imaginable::Image& src)
@@ -269,32 +279,32 @@ void MainWindow::previewResized(int,int)
 
 void MainWindow::previewShifted(int dx,int dy)
 {
-	m_lock_update_offset = true;
+	++m_lock_update;
 		horizontalScrollBar->setValue(horizontalScrollBar->value()-dx);
 		verticalScrollBar  ->setValue(  verticalScrollBar->value()-dy);
-	m_lock_update_offset = false;
+	--m_lock_update;
 
-	m_update_flags |= UPDATE_OFFSET;
+	m_update_flags |= UPDATE_PREVIEW;
 }
 
 void MainWindow::horizontallySlided(int)
 {
-	if (!m_lock_update_offset)
-		m_update_flags |= UPDATE_OFFSET;
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_PREVIEW;
 }
 
 void MainWindow::verticallySlided(int)
 {
-	if (!m_lock_update_offset)
-		m_update_flags |= UPDATE_OFFSET;
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_PREVIEW;
 }
 
 void MainWindow::updateTimeout(void)
 {
 	if (m_update_flags & UPDATE_ALL)
 		update_all();
-	else if (m_update_flags & UPDATE_OFFSET)
-		update_offset();
+	else if (m_update_flags & UPDATE_TONEMAP)
+		update_tonemap();
 	else if (m_update_flags & UPDATE_PREVIEW)
 		update_preview();
 	m_update_flags = 0;
@@ -367,14 +377,41 @@ void MainWindow::update_all(void)
 		verticalScrollBar  ->setMaximum(0);
 	}
 
-	update_offset();
+	update_tonemap();
 }
 
-void MainWindow::update_offset(void)
+void MainWindow::update_tonemap(void)
 {
 	if (scaled_image.empty())
 		return;
 
+	less_scaled_side = std::min(scaled_image.width(),scaled_image.height());
+	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * static_cast<double>(slider_blur->value())/100.));
+
+
+	tonemapped_scaled_image = scaled_image.copy();
+
+	progress_bar->show();
+
+	imaginable::rgb_to_hsl(tonemapped_scaled_image,false);
+
+	imaginable::TimedProgress timed_progress(boost::bind(&MainWindow::tonemap_notification,this,_1));
+	imaginable::tonemap_local(tonemapped_scaled_image,static_cast<double>(slider_saturation->value())/10.,scaled_blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
+
+	imaginable::hsl_to_rgb(tonemapped_scaled_image,false);
+
+	progress_bar->hide();
+
+
+	update_preview();
+}
+
+void MainWindow::update_preview(void)
+{
+	if (scaled_image.empty())
+		return;
+
+	imaginable::Image cropped_image;
 	if (horizontalScrollBar->maximum()
 	||  verticalScrollBar  ->maximum())
 	{
@@ -387,20 +424,26 @@ void MainWindow::update_offset(void)
 	else
 		cropped_image = scaled_image.copy();
 
-	less_scaled_side = std::min(cropped_image.width(),cropped_image.height());
-	scaled_blur_in_pixels = static_cast<double>(less_scaled_side) * static_cast<double>(slider_blur->value())/100.;
-
 	original_view->setPixmap(image_to_pixmap(cropped_image));
 
-	update_preview();
+
+	imaginable::Image tonemapped_cropped_image;
+	if (horizontalScrollBar->maximum()
+	||  verticalScrollBar  ->maximum())
+	{
+		tonemapped_cropped_image = imaginable::crop(tonemapped_scaled_image,
+			horizontalScrollBar->value(),
+			verticalScrollBar->value(),
+			std::min(preview->width (),static_cast<int>(tonemapped_scaled_image.width ())),
+			std::min(preview->height(),static_cast<int>(tonemapped_scaled_image.height())) );
+	}
+	else
+		tonemapped_cropped_image = tonemapped_scaled_image.copy();
+
+	preview->setPixmap(image_to_pixmap(tonemapped_cropped_image));
 }
 
-void MainWindow::update_preview(void)
+void MainWindow::tonemap_notification(float value)
 {
-	tonemapped_small_image = cropped_image.copy();
-	imaginable::rgb_to_hsl(tonemapped_small_image,false);
-	//imaginable::tonemap_local(tonemapped_small_image,static_cast<double>(slider_saturation->value())/10.,scaled_blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.);
-	imaginable::hsl_to_rgb(tonemapped_small_image,false);
-
-	preview->setPixmap(image_to_pixmap(tonemapped_small_image));
+	progress_bar->setValue(value * 100);
 }

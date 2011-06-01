@@ -43,6 +43,8 @@ T sign_(const T& value)
 
 #define sign(VALUE) sign_<double>(VALUE)
 
+#define NOTIFY_STEP 10
+
 Image rotate(const Image& img,double radian,progress_notifier notifier)
 {
 	if (!img.hasData())
@@ -95,7 +97,8 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 
 	for (size_t y=0; y<new_height; ++y)
 	{
-		notifier(mult*static_cast<float>(y)/static_cast<float>(new_height));
+		if (!(y%NOTIFY_STEP))
+			notifier(mult*static_cast<float>(y)/static_cast<float>(new_height));
 
 		size_t dst_yo=y*new_width;
 		for (size_t x=0; x<new_width; ++x)
@@ -186,7 +189,8 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 		Image::pixel* dst_plane=ret.plane(Image::PLANE_ALPHA);
 		for (size_t y=0; y<new_height; ++y)
 		{
-			notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(new_height));
+			if (!(y%NOTIFY_STEP))
+				notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(new_height));
 
 			size_t dst_yo=y*new_width;
 			for (size_t x=0; x<new_width; ++x)
@@ -212,7 +216,8 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 			Image::pixel* dst_plane=ret.plane(Image::PLANE__INTERNAL);
 			for (size_t y=0; y<new_height; ++y)
 			{
-				notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(new_height));
+				if (!(y%NOTIFY_STEP))
+					notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(new_height));
 
 				size_t dst_yo=y*new_width;
 				for (size_t x=0;x<new_width;++x)

@@ -24,6 +24,7 @@
 
 
 #include <boost/array.hpp>
+#include <boost/bind.hpp>
 
 #include <cmath>
 #include <vector>
@@ -234,68 +235,87 @@ enum
 	IMAGE__PLANE__BLURRED_LIGHTNESS=Image::PLANE__USER
 };
 
-void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,double mix_factor,progress_notifier notifier)
+#define NOTIFY_STEP 50
+
+void tonemap_local(Image& img,double saturation_gamma,size_t blur_size,double mix_factor,progress_notifier notifier)
 {
-	if(!img.hasData())
+	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	if(img.maximum()<=LDRI_MAXIMUM)
-		throw exception(exception::NOT_AN_HDRI);
+//	if(img.maximum()<=LDRI_MAXIMUM)
+//		throw exception(exception::NOT_AN_HDRI);
 
-	if(img.colourSpace()!=Image::IMAGE_HSL)
+	if (img.colourSpace() != Image::IMAGE_HSL)
 		throw exception(exception::INVALID_COLOUR_SPACE);
 
-
-	size_t size=img.width()*img.height();
+	size_t size = img.width() * img.height();
 
 	{
-		Image::pixel* alpha=img.plane(Image::PLANE_ALPHA);
-		Image::pixel* lightness=img.plane(Image::PLANE_HSL_LIGHTNESS);
+		Image::pixel *alpha=img.plane(Image::PLANE_ALPHA);
+		Image::pixel *lightness=img.plane(Image::PLANE_HSL_LIGHTNESS);
 		img.addPlane(IMAGE__PLANE__BLURRED_LIGHTNESS);
-		Image::pixel* blurred_lightness=img.plane(IMAGE__PLANE__BLURRED_LIGHTNESS);
+		Image::pixel *blurred_lightness=img.plane(IMAGE__PLANE__BLURRED_LIGHTNESS);
 
 		memcpy(blurred_lightness,lightness,size*sizeof(Image::pixel));
+
 		//blur lightness2
-		box_blur(img,IMAGE__PLANE__BLURRED_LIGHTNESS,blur_size,alpha);
+		/* */
+		size_t blur_size_3 = blur_size/3;
+		if (blur_size_3)
+			box_blur(img,IMAGE__PLANE__BLURRED_LIGHTNESS,blur_size_3,alpha,boost::bind(&scaled_notifier,notifier,0.        ,0.25/3.,_1));
+		if (blur_size_3)
+			box_blur(img,IMAGE__PLANE__BLURRED_LIGHTNESS,blur_size_3,alpha,boost::bind(&scaled_notifier,notifier,1./3.*0.25,0.25/3.,_1));
+		blur_size_3 = blur_size-2*(blur_size_3);
+		if (blur_size_3)
+			box_blur(img,IMAGE__PLANE__BLURRED_LIGHTNESS,blur_size_3,alpha,boost::bind(&scaled_notifier,notifier,2./3.*0.25,0.25/3.,_1));
+		/*/
+		box_blur(img,IMAGE__PLANE__BLURRED_LIGHTNESS,blur_size,alpha,boost::bind(&scaled_notifier,notifier,0.,0.25,_1));
+		/ * */
+		notifier(1*0.25);
+
 		//invert blurred lightness2
-		for(size_t p=0;p<size;++p)
+		for (size_t p=0; p<size; ++p)
 		{
-			notifier(0.2*static_cast<float>(p)/static_cast<float>(size));
+			if (!(p%NOTIFY_STEP))
+				notifier(  0.25+0.25*static_cast<float>(p)/static_cast<float>(size));
 
-			blurred_lightness[p]=img.maximum()-blurred_lightness[p];
+			blurred_lightness[p] = img.maximum()-blurred_lightness[p];
 		}
+		notifier(2*0.25);
 
-		int64_t avg_blur=0;
-		size_t avg_blur_count=0;
+		//int64_t avg_blur=0;
+		//size_t avg_blur_count=0;
 //		int64_t median=img.maximum()/2;
 
-		Image::pixel edge_low=HDRI_MAXIMUM;
-		Image::pixel edge_high=0;
+		Image::pixel edge_low  = HDRI_MAXIMUM;
+		Image::pixel edge_high = 0;
 		//mix them
-		for(size_t p=0;p<size;++p)
+		for (size_t p=0; p<size; ++p)
 		{
-			notifier(0.2+0.2*static_cast<float>(p)/static_cast<float>(size));
+			if (!(p%NOTIFY_STEP))
+				notifier(2*0.25+0.25*static_cast<float>(p)/static_cast<float>(size));
 
-			if(!alpha || alpha[p])
+			if (!alpha || alpha[p])
 			{
-				avg_blur+=abs(static_cast<int64_t>(blurred_lightness[p])-static_cast<int64_t>(lightness[p]));
-				++avg_blur_count;
-				Image::pixel value=static_cast<Image::pixel>(
+				//avg_blur += abs(static_cast<int64_t>(blurred_lightness[p])-static_cast<int64_t>(lightness[p]));
+				//++avg_blur_count;
+				Image::pixel value = static_cast<Image::pixel>(
 					(1.-mix_factor)*static_cast<double>(lightness[p])+
 					mix_factor     *static_cast<double>(blurred_lightness[p]) );
-				edge_low=std::min(edge_low,value);
-				edge_high=std::max(edge_high,value);
-				lightness[p]=value;
+				edge_low  = std::min(edge_low,value);
+				edge_high = std::max(edge_high,value);
+				lightness[p] = value;
 			}
 		}
-		avg_blur*=2./avg_blur_count;
+		//avg_blur *= 2./avg_blur_count;
 //std::cout<<"edges: "<<edge_low<<" .. "<<edge_high;
-		edge_high=(HDRI_MAXIMUM-edge_high);
+		//edge_high = (HDRI_MAXIMUM - edge_high);
 //std::cout<<" ("<<edge_high<<")"<<std::endl<<std::flush;
 		//Image::pixel avg_edge=std::min(edge_low,static_cast<Image::pixel>(HDRI_MAXIMUM-edge_high));
 //std::cout<<"avg_blur = "<<avg_blur<<std::endl<<std::flush;
-		double shift_l=edge_low;//avg_edge;
-		double scale_l=static_cast<double>(LDRI_MAXIMUM)/(static_cast<double>(img.maximum())-edge_low-edge_high/*2.*avg_edge*/);
+		double shift_l = edge_low;//avg_edge;
+		double scale_l = static_cast<double>(LDRI_MAXIMUM)/(edge_high-edge_low/*static_cast<double>(img.maximum())-edge_low-edge_high*//*2.*avg_edge*/);
+		notifier(3*0.25);
 
 		img.removePlane(IMAGE__PLANE__BLURRED_LIGHTNESS);
 //		img.removePlane(Image::PLANE_HSL_SATURATION);
@@ -308,239 +328,74 @@ void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,dou
 
 //std::cout<<"Compression = "<<(256.*scale_l)<<std::endl<<std::flush;
 
-		for(size_t p=0;p<size;++p)
+		if (size >= HDRI_MAXIMUM)
 		{
-			notifier(0.4+0.2*static_cast<float>(p)/static_cast<float>(size));
-
-			double value=scale_l*(static_cast<double>(lightness[p])-shift_l);
-			if(value>static_cast<double>(LDRI_MAXIMUM))
-				value=static_cast<double>(LDRI_MAXIMUM);
-			else if(value<0.)
-				value=0.;
-			lightness[p]=static_cast<Image::pixel>(value);
-		}
-	}
-
-	double scale=static_cast<double>(LDRI_MAXIMUM)/static_cast<double>(img.maximum());
-	double scale4=scale*static_cast<double>(1<<TABLE_POWER);
-	{
-		Image::pixel* saturation=img.plane(Image::PLANE_HSL_SATURATION);
-
-		boost::array<Image::pixel,TABLE_SIZE> curve = { { 0 } };
-
-		for(size_t i=0;i<curve.size();++i)
-		{
-			double value=static_cast<double>(LDRI_MAXIMUM)*gamma(static_cast<double>(i)/static_cast<double>(TABLE_SIZE),saturation_gamma);
-			if(value>static_cast<double>(LDRI_MAXIMUM))
-				value=static_cast<double>(LDRI_MAXIMUM);
-			else if(value<0.)
-				value=0.;
-			curve[i]=static_cast<Image::pixel>(value);
-		}
-
-		for(size_t p=0;p<size;++p)
-		{
-			notifier(0.6+0.2*static_cast<float>(p)/static_cast<float>(size));
-
-			saturation[p]=curve[static_cast<size_t>(scale4*static_cast<double>(saturation[p]))];
-		}
-	}
-
-	{
-		Image::pixel* hue=img.plane(Image::PLANE_HUE);
-
-		if(img.maximum()==HDRI_MAXIMUM)
-			for(size_t p=0;p<size;++p)
+			Image::pixel lightness_map[HDRI_MAXIMUM+1];
+			for (size_t p=0; p<HDRI_MAXIMUM+1; ++p)
 			{
-				notifier(0.8+0.2*static_cast<float>(p)/static_cast<float>(size));
-
-				hue[p]>>=8;
+				double value = scale_l*(static_cast<double>(p)-shift_l);
+				if (value > static_cast<double>(LDRI_MAXIMUM))
+					value = static_cast<double>(LDRI_MAXIMUM);
+				else if (value < 0.)
+					value = 0.;
+				lightness_map[p] = static_cast<Image::pixel>(value);
 			}
+			for (size_t p=0; p<size; ++p)
+				lightness[p] = lightness_map[lightness[p]];
+		}
 		else
-			for(size_t p=0;p<size;++p)
+			for (size_t p=0; p<size; ++p)
 			{
-				notifier(0.8+0.2*static_cast<float>(p)/static_cast<float>(size));
-
-				hue[p]=static_cast<Image::pixel>(scale*static_cast<double>(hue[p]));
+				double value = scale_l*(static_cast<double>(lightness[p])-shift_l);
+				if (value > static_cast<double>(LDRI_MAXIMUM))
+					value = static_cast<double>(LDRI_MAXIMUM);
+				else if (value < 0.)
+					value = 0.;
+				lightness[p] = static_cast<Image::pixel>(value);
 			}
 	}
-
-	img.setMaximum(LDRI_MAXIMUM);
-}
-
-#if 0
-void tone_map_20091013(Image& img,double saturation_compression,double lightness_compression)
-{
-	if(!img.hasData())
-		throw exception(exception::NO_IMAGE);
-
-	if(img.maximum()<=LDRI_MAXIMUM)
-		throw exception(exception::NOT_AN_HDRI);
-
-	if(img.colourSpace()!=Image::IMAGE_HSL)
-		throw exception(exception::INVALID_COLOUR_SPACE);
-
-
-	size_t width =img.width();
-	size_t height=img.height();
-	size_t size  =width*height;
-
-	std::map<unsigned int,double> compression;
-	compression[Image::PLANE_HSL_SATURATION]=saturation_compression;
-	compression[Image::PLANE_HSL_LIGHTNESS ]= lightness_compression;
 
 	double scale=static_cast<double>(LDRI_MAXIMUM)/static_cast<double>(img.maximum());
-	Image::t_planeNames planes=img.planeNames();
-	for(Image::t_planeNames::const_iterator I=planes.begin();I!=planes.end();++I)
 	{
-		Image::pixel* plane=img.plane(*I);
-
-		switch(*I)
+		Image::pixel saturation_map[HDRI_MAXIMUM+1];
+		for (size_t p=0; p<HDRI_MAXIMUM+1; ++p)
 		{
-			case Image::PLANE_HUE_SECTOR:
-			break;
-			case Image::PLANE_HSL_SATURATION:
-			case Image::PLANE_HSL_LIGHTNESS:
-			{
-				boost::array<size_t,256> histo = { { 0 } };
-
-				for(size_t y=0;y<height;++y)
-				{
-					size_t yo=y*width;
-					for(size_t x=0;x<width;++x)
-					{
-						size_t xo=yo+x;
-						++histo[static_cast<size_t>(scale*static_cast<double>(plane[xo]))];
-					}
-				}
-
-				size_t gap_count =size/ 1000;
-				size_t edge_count=size/10000;
-
-				size_t dark_edge=std::find_if(histo.begin(),histo.end(),std::bind2nd(std::greater<size_t>(),edge_count))-histo.begin();
-				if(dark_edge>=histo.size())
-				{
-					std::cout<<(boost::format(gettext("Cannot find dark edge in %|s| channel.\n")) %((*I==Image::PLANE_HSL_SATURATION)?gettext("saturation"):gettext("lightness")) ).str();
-					throw exception(exception::INVALID_DATA);
-				}
-				size_t gap_right=std::find_if(histo.begin()+dark_edge,histo.end(),std::bind2nd(std::greater<size_t>(),gap_count))-histo.begin();
-				if(gap_right>=histo.size())
-				{
-					std::cout<<(boost::format(gettext("Cannot find dark gap right side in %|s| channel.\n")) %((*I==Image::PLANE_HSL_SATURATION)?gettext("saturation"):gettext("lightness")) ).str();
-					throw exception(exception::INVALID_DATA);
-				}
-				std::vector<std::pair<size_t,size_t> > gap;
-				size_t gap_left;
-				while(true)
-				{
-					gap_left=std::find_if(histo.begin()+gap_right,histo.end(),std::bind2nd(std::less<size_t>(),gap_count))-histo.begin();
-					if(gap_left>=histo.size())
-						break;
-
-					gap_right=std::find_if(histo.begin()+gap_left,histo.end(),std::bind2nd(std::greater<size_t>(),gap_count))-histo.begin();
-					if(gap_right>=histo.size())
-						break;
-
-					gap.push_back(std::make_pair(gap_left,gap_right));
-				}
-
-				size_t light_edge=histo.size()-(std::find_if(histo.rbegin(),histo.rbegin()+histo.size()-gap_left,std::bind2nd(std::greater<size_t>(),edge_count))-histo.rbegin());
-
-				//	gap.clear();
-				//	dark_edge=0;
-				//	light_edge=255;
-
-				size_t gaps=gap.size();
-				/* */ // debug info [
-				std::cout<<(boost::format(
-					"%|s| channel info:\n"
-					"dark_edge=%|d|\n"
-					"light_edge=%|d|\n"
-					"gaps=%|d|\n")
-					%((*I==Image::PLANE_HSL_SATURATION)?gettext("Saturation"):gettext("Lightness"))
-					%dark_edge
-					%light_edge
-					%gaps).str();
-				/* */ // ]
-				size_t total_gaps=0;
-				for(size_t i=0;i<gaps;++i)
-				{
-					/* */std::cout<<(boost::format("gap[%|d|]: %|d| .. %|d| = %|d|\n") %i %gap[i].first %gap[i].second %(gap[i].second-gap[i].first) ).str();
-					total_gaps+=gap[i].second-gap[i].first;
-				}
-
-				size_t compressed_range=light_edge-dark_edge-total_gaps;
-				/* */std::cout<<(boost::format("Compressed range=%|d|\n") %compressed_range ).str();
-
-				if(!compressed_range)
-				{
-					std::cout<<(boost::format(gettext("Cannot calculate compressed range in %|s| channel.\n")) %((*I==Image::PLANE_HSL_SATURATION)?gettext("saturation"):gettext("lightness")) ).str();
-					throw exception(exception::INVALID_DATA);
-				}
-
-
-				boost::array<double,257> curve;
-
-				double contrast_curve=pow(2.,compression[*I]);
-
-				curve[0]=0.;
-
-				for(size_t x=0;x<dark_edge;++x)
-					curve[x+1]=1.;
-
-				for(size_t x=dark_edge;x<light_edge;++x)
-					curve[x+1]=contrast_curve;
-
-				for(size_t x=light_edge;x<histo.size();++x)
-					curve[x+1]=1.;
-
-				for(size_t i=0;i<gaps;++i)
-					for(size_t x=gap[i].first;x<gap[i].second;++x)
-						curve[x+1]=1.;
-
-				size_t m=curve.size();
-				for(size_t x=1;x<m;++x)
-					curve[x]+=curve[x-1];
-
-				--m;
-				double curve_max=curve[m];
-
-				for(size_t x=0;x<m;++x)
-					curve[x]=(curve[x]+curve[x+1])/(2.*curve_max)*256/(static_cast<double>(x)+0.5);
-
-				/*
-				for(size_t i=0;i<256;++i)
-					std::cout<<curve[i]<<"\n";
-				*/
-
-				for(size_t y=0;y<height;++y)
-				{
-					size_t yo=y*width;
-					for(size_t x=0;x<width;++x)
-					{
-						size_t xo=yo+x;
-						double value=static_cast<double>(plane[xo])*curve[static_cast<size_t>(scale*static_cast<double>(plane[xo]))];
-						if(value>65535.)
-							value=65535.;
-						plane[xo]=static_cast<Image::pixel>(scale*value);
-					}
-				}
-			}
-			break;
-			default:
-				for(size_t y=0;y<height;++y)
-				{
-					size_t yo=y*width;
-					for(size_t x=0;x<width;++x)
-					{
-						size_t xo=yo+x;
-						plane[xo]=static_cast<Image::pixel>(scale*static_cast<double>(plane[xo]));
-					}
-				}
+			double value = static_cast<double>(LDRI_MAXIMUM)*gamma(static_cast<double>(p)/static_cast<double>(img.maximum()),saturation_gamma);
+			if (value > static_cast<double>(LDRI_MAXIMUM))
+				value = static_cast<double>(LDRI_MAXIMUM);
+			else if (value < 0.)
+				value = 0.;
+			saturation_map[p] = value;
 		}
+
+		Image::pixel *saturation=img.plane(Image::PLANE_HSL_SATURATION);
+		for (size_t p=0; p<size; ++p)
+			saturation[p] = saturation_map[saturation[p]];
 	}
+
+	{
+		Image::pixel *hue=img.plane(Image::PLANE_HUE);
+
+		if (img.maximum() == HDRI_MAXIMUM)
+			for (size_t p=0; p<size; ++p)
+			{
+				if (!(p%NOTIFY_STEP))
+					notifier(3*0.25+0.25*static_cast<float>(p)/static_cast<float>(size));
+
+				hue[p] >>= 8;
+			}
+		else if (img.maximum() != LDRI_MAXIMUM)
+			for (size_t p=0; p<size; ++p)
+			{
+				if (!(p%NOTIFY_STEP))
+					notifier(3*0.25+0.25*static_cast<float>(p)/static_cast<float>(size));
+
+				hue[p] = static_cast<Image::pixel>(scale*static_cast<double>(hue[p]));
+			}
+		notifier(1.);
+	}
+
 	img.setMaximum(LDRI_MAXIMUM);
 }
-#endif
 
 }
