@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, current_zoom(new QLabel(this))
 	, progress_bar(new QProgressBar(this))
 	, m_lock_update_offset(false)
+	, m_update_flags(0)
 {
 	setupUi(this);
 	status_bar->addPermanentWidget(progress_bar,1);
@@ -76,6 +77,11 @@ MainWindow::MainWindow(QWidget *parent)
 	action_Zoom_out->setShortcut(QKeySequence::ZoomOut);
 	if (action_Zoom_out->shortcut().isEmpty())
 		action_Zoom_out->setShortcut(QKeySequence(tr("Ctrl+-")));
+
+
+	update_timer.setInterval(100);
+	update_timer.setSingleShot(false);
+	connect(&update_timer,SIGNAL(timeout()),this,SLOT(updateTimeout()));
 
 
 	last_user_dir = QDir::homePath();
@@ -130,7 +136,8 @@ void MainWindow::fileOpen(void)
 
 			less_side = std::min(original_image.width(),original_image.height());
 
-			update_all();
+			m_update_flags |= UPDATE_ALL;
+			update_timer.start();
 
 			setBlur(slider_blur->value());
 		}
@@ -182,7 +189,7 @@ void MainWindow::zoomIn(void)
 	zoom *= 1.125;
 	current_zoom_type = ZOOM_CUSTOM;
 
-	update_all();
+	m_update_flags |= UPDATE_ALL;
 }
 
 void MainWindow::zoomOut(void)
@@ -191,7 +198,7 @@ void MainWindow::zoomOut(void)
 	zoom /= 1.125;
 	current_zoom_type = ZOOM_CUSTOM;
 
-	update_all();
+	m_update_flags |= UPDATE_ALL;
 }
 
 void MainWindow::zoomOne(void)
@@ -200,21 +207,21 @@ void MainWindow::zoomOne(void)
 	zoom = 1.;
 	current_zoom_type = ZOOM_ONE;
 
-	update_all();
+	m_update_flags |= UPDATE_ALL;
 }
 
 void MainWindow::zoomToFit(void)
 {
 	current_zoom_type = ZOOM_TO_FIT;
 
-	update_all();
+	m_update_flags |= UPDATE_ALL;
 }
 
 void MainWindow::setSaturation(int value)
 {
 	value_saturation->setText(QString("+%1").arg(static_cast<double>(value)/10.,3,'f',1,'0'));
 
-	update_preview();
+	m_update_flags |= UPDATE_PREVIEW;
 }
 
 void MainWindow::setBlur(int value)
@@ -224,14 +231,14 @@ void MainWindow::setBlur(int value)
 	scaled_blur_in_pixels = static_cast<double>(less_scaled_side) * static_cast<double>(value)/100.;
 	value_blur_pixels ->setText(QString("%1 px").arg(blur_in_pixels));
 
-	update_preview();
+	m_update_flags |= UPDATE_PREVIEW;
 }
 
 void MainWindow::setMix(int value)
 {
 	value_mix->setText(QString("%1%").arg(value));
 
-	update_preview();
+	m_update_flags |= UPDATE_PREVIEW;
 }
 
 void MainWindow::resetSliders(void)
@@ -251,12 +258,13 @@ QPixmap MainWindow::image_to_pixmap(const imaginable::Image& src)
 void MainWindow::showOriginal(bool value)
 {
 	original_view->setVisible(value);
-	QTimer::singleShot(0,this,SLOT(update_all()));
+
+	m_update_flags |= UPDATE_ALL;
 }
 
 void MainWindow::previewResized(int,int)
 {
-	update_all();
+	m_update_flags |= UPDATE_ALL;
 }
 
 void MainWindow::previewShifted(int dx,int dy)
@@ -265,17 +273,31 @@ void MainWindow::previewShifted(int dx,int dy)
 		horizontalScrollBar->setValue(horizontalScrollBar->value()-dx);
 		verticalScrollBar  ->setValue(  verticalScrollBar->value()-dy);
 	m_lock_update_offset = false;
-	update_offset();
+
+	m_update_flags |= UPDATE_OFFSET;
 }
 
 void MainWindow::horizontallySlided(int)
 {
-	update_offset();
+	if (!m_lock_update_offset)
+		m_update_flags |= UPDATE_OFFSET;
 }
 
 void MainWindow::verticallySlided(int)
 {
-	update_offset();
+	if (!m_lock_update_offset)
+		m_update_flags |= UPDATE_OFFSET;
+}
+
+void MainWindow::updateTimeout(void)
+{
+	if (m_update_flags & UPDATE_ALL)
+		update_all();
+	else if (m_update_flags & UPDATE_OFFSET)
+		update_offset();
+	else if (m_update_flags & UPDATE_PREVIEW)
+		update_preview();
+	m_update_flags = 0;
 }
 
 void MainWindow::update_all(void)
@@ -350,9 +372,6 @@ void MainWindow::update_all(void)
 
 void MainWindow::update_offset(void)
 {
-	if (m_lock_update_offset)
-		return;
-
 	if (scaled_image.empty())
 		return;
 

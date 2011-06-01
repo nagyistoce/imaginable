@@ -29,6 +29,8 @@
 
 #include <imaginable/image.hpp>
 
+#include <QtCore/QTimer>
+
 #include "ui_mainwindow.h"
 
 
@@ -65,7 +67,7 @@ public slots:
 	void setMix(int);
 	void resetSliders(void);
 
-	void update_all(void);
+	void updateTimeout(void);
 
 private:
 	QLabel *current_zoom;
@@ -102,6 +104,16 @@ private:
 
 	static QPixmap image_to_pixmap(const imaginable::Image&);
 
+	enum {
+		UPDATE_ALL     = 1<<2,
+		UPDATE_OFFSET  = 1<<1,
+		UPDATE_PREVIEW = 1<<0
+	};
+	uint m_update_flags;
+
+	QTimer update_timer;
+
+	void update_all(void);
 	void update_offset(void);
 	void update_preview(void);
 };
