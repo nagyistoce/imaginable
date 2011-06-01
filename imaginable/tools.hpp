@@ -90,18 +90,22 @@ namespace imaginable
 	class TimedProgress
 	{
 	public:
-		TimedProgress(progress_notifier,double timeout=0.33);
+		TimedProgress(progress_notifier,double timeout=0.333);
 		~TimedProgress();
 
-		void percent(float);
-
 		virtual double now(void);
+
+		void update(float);
+
+		progress_notifier notifier(void);
 
 	private:
 		progress_notifier m_notifier;
 		double m_timeout;
 		double m_last_update;
 	};
+
+	void scaled_notifier(progress_notifier notifier,float offset,float scale,float value);
 }
 
 #endif // IMAGINABLE__TOOLS__INCLUDED

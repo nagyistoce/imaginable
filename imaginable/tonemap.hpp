@@ -34,7 +34,7 @@ namespace imaginable
 {
 	void tonemap_global(Image& img,double saturation_gamma,double lightness_factor,progress_notifier notifier = dont_notify);
 
-	void tonemap_local(Image& img,double saturation_gamma,Image::pixel blur_size,double mix_factor,progress_notifier notifier = dont_notify);
+	void tonemap_local(Image& img,double saturation_gamma,size_t blur_size,double mix_factor,progress_notifier notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_TONEMAP__INCLUDED

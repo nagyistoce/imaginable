@@ -23,6 +23,8 @@
 *************/
 
 
+#include <boost/bind.hpp>
+
 #include "time.hpp"
 #include "tools.hpp"
 
@@ -41,19 +43,30 @@ TimedProgress::~TimedProgress()
 {
 }
 
-void TimedProgress::percent(float value)
+void TimedProgress::update(float value)
 {
 	double now_=this->now();
 	if (now_ - m_last_update > m_timeout)
 	{
 		m_last_update = now_;
-		percent(value);
+		m_notifier(value);
 	}
 }
 
 double TimedProgress::now(void)
 {
 	return getHighPrecTime();
+}
+
+progress_notifier TimedProgress::notifier(void)
+{
+	return boost::bind(&TimedProgress::update,this,_1);
+}
+
+
+void scaled_notifier(progress_notifier notifier,float offset,float scale,float value)
+{
+	notifier(offset+scale*value);
 }
 
 }

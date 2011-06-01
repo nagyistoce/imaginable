@@ -94,19 +94,17 @@ private:
 	size_t less_scaled_side;
 	size_t scaled_blur_in_pixels;
 
-	bool m_lock_update_offset;
+	size_t m_lock_update;
 
 	imaginable::Image original_image;
 	imaginable::Image scaled_image;
-	imaginable::Image cropped_image;
-	imaginable::Image tonemapped_small_image;
-	imaginable::Image tonemapped_image;
+	imaginable::Image tonemapped_scaled_image;
 
 	static QPixmap image_to_pixmap(const imaginable::Image&);
 
 	enum {
 		UPDATE_ALL     = 1<<2,
-		UPDATE_OFFSET  = 1<<1,
+		UPDATE_TONEMAP = 1<<1,
 		UPDATE_PREVIEW = 1<<0
 	};
 	uint m_update_flags;
@@ -114,8 +112,10 @@ private:
 	QTimer update_timer;
 
 	void update_all(void);
-	void update_offset(void);
+	void update_tonemap(void);
 	void update_preview(void);
+
+	void tonemap_notification(float);
 };
 
 #endif // IMAGINABLE__TONEMAP_GUI__MAINWINDOW__INCLUDED
