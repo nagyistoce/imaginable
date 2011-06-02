@@ -27,12 +27,14 @@
 #define IMAGINABLE__TOOLS_ROTATE__INCLUDED
 
 
+#include <boost/shared_ptr.hpp>
+
 #include "tools.hpp"
 
 
 namespace imaginable
 {
-	Image rotate(const Image& img,double radian,progress_notifier notifier = dont_notify);
+	boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_ROTATE__INCLUDED

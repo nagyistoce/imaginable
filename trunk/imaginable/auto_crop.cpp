@@ -34,7 +34,7 @@
 
 namespace imaginable {
 
-Image auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
+boost::shared_ptr<Image> auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
