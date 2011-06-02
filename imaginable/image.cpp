@@ -49,20 +49,20 @@ Image::~Image()
 		close(U->second);
 }
 
-Image Image::copy(void) const
+boost::shared_ptr<Image> Image::copy(void) const
 {
-	Image ret;
+	boost::shared_ptr<Image> ret(new Image());
 
-	ret.setSize(m_width,m_height);
-	ret.setMaximum(m_maximum);
+	ret->setSize(m_width,m_height);
+	ret->setMaximum(m_maximum);
 	size_t square=m_width*m_height*sizeof(pixel);
 	for(t_planes::const_iterator I=m_plane.begin();I!=m_plane.end();++I)
 	{
-		ret.addPlane(I->first);
-		memcpy(ret.plane(I->first),I->second.get(),square);
+		ret->addPlane(I->first);
+		memcpy(ret->plane(I->first),I->second.get(),square);
 	}
 	for(t_text::const_iterator I=m_text.begin();I!=m_text.end();++I)
-		ret.setText(I->first,I->second);
+		ret->setText(I->first,I->second);
 
 	return ret;
 }

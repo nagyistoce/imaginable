@@ -45,7 +45,7 @@ T sign_(const T& value)
 
 #define NOTIFY_STEP 10
 
-Image rotate(const Image& img,double radian,progress_notifier notifier)
+boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -81,11 +81,11 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 
 	Point new_center=Point(static_cast<double>(new_width)/2.,static_cast<double>(new_height)/2.);
 
-	Image ret(new_width,new_height);
+	boost::shared_ptr<Image> ret(new Image(new_width,new_height));
 	Image::t_planeNames planeNames=img.planeNames();
 	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
-		ret.addPlane(*I);
-	ret.addPlane(Image::PLANE__INTERNAL);
+		ret->addPlane(*I);
+	ret->addPlane(Image::PLANE__INTERNAL);
 
 	int xo[4]={0,1,0,1};
 	int yo[4]={0,0,1,1};
@@ -93,7 +93,7 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 	for (size_t i=0; i<4; ++i)
 		xyo[i]=xo[i]+yo[i]*img.width();
 
-	float mult = ((!ret.hasTransparency()) && (img.maximum()==Image::MAXIMUM)) ? 1.0 : 0.5;
+	float mult = ((!ret->hasTransparency()) && (img.maximum()==Image::MAXIMUM)) ? 1.0 : 0.5;
 
 	for (size_t y=0; y<new_height; ++y)
 	{
@@ -127,7 +127,7 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 
 
 			size_t k_eff[4]={0};
-			Image::pixel* dst_plane=ret.plane(Image::PLANE__INTERNAL);
+			Image::pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
 			if ( (src_x>=0)
 			&&   (src_x+1<static_cast<int>(img.width()))
 			&&   (src_y>=0)
@@ -156,7 +156,7 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 
 			for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 			{
-				dst_plane=ret.plane(*I);
+				dst_plane=ret->plane(*I);
 
 				size_t v=0;
 				if (K)
@@ -182,11 +182,11 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 		}
 	}
 
-	if (ret.hasTransparency())
+	if (ret->hasTransparency())
 	{
-		const Image::pixel* src_plane=ret.plane(Image::PLANE__INTERNAL);
+		const Image::pixel* src_plane=ret->plane(Image::PLANE__INTERNAL);
 		const Image::pixel* alpha_plane=img.plane(Image::PLANE_ALPHA);
-		Image::pixel* dst_plane=ret.plane(Image::PLANE_ALPHA);
+		Image::pixel* dst_plane=ret->plane(Image::PLANE_ALPHA);
 		for (size_t y=0; y<new_height; ++y)
 		{
 			if (!(y%NOTIFY_STEP))
@@ -207,13 +207,13 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 						);
 			}
 		}
-		ret.removePlane(Image::PLANE__INTERNAL);
+		ret->removePlane(Image::PLANE__INTERNAL);
 	}
 	else
 	{
 		if (img.maximum()!=Image::MAXIMUM)
 		{
-			Image::pixel* dst_plane=ret.plane(Image::PLANE__INTERNAL);
+			Image::pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
 			for (size_t y=0; y<new_height; ++y)
 			{
 				if (!(y%NOTIFY_STEP))
@@ -233,11 +233,11 @@ Image rotate(const Image& img,double radian,progress_notifier notifier)
 				}
 			}
 		}
-		ret.renamePlane(Image::PLANE__INTERNAL,Image::PLANE_ALPHA);
+		ret->renamePlane(Image::PLANE__INTERNAL,Image::PLANE_ALPHA);
 	}
 
-	ret.setMaximum(img.maximum());
-	ret.copyTextFrom(img);
+	ret->setMaximum(img.maximum());
+	ret->copyTextFrom(img);
 
 	return ret;
 }

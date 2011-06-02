@@ -27,6 +27,7 @@
 #define IMAGINABLE__IMAGE__INCLUDED
 
 
+#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
 #include <map>
@@ -98,7 +99,7 @@ public:
 	~Image();
 
 
-	Image copy(void) const;
+	boost::shared_ptr<Image> copy(void) const;
 
 
 	inline size_t width  (void) const { return m_width;  }
