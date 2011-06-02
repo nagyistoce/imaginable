@@ -96,24 +96,34 @@ private:
 
 	size_t m_lock_update;
 
-	imaginable::Image original_image;
-	imaginable::Image scaled_image;
-	imaginable::Image tonemapped_scaled_image;
+	boost::shared_ptr<imaginable::Image> original_image;
+	boost::shared_ptr<imaginable::Image> scaled_image;
+	boost::shared_ptr<imaginable::Image> precropped_image;
+
+	int precrop_x;
+	int precrop_y;
+	int precrop_w;
+	int precrop_h;
 
 	static QPixmap image_to_pixmap(const imaginable::Image&);
 
+// scale      move|blur      sat|mix
+// scale |-> precrop (+blur) -> tonemap -> crop -> preview
+//       :
+//        -> crop > preview original
+
 	enum {
-		UPDATE_ALL     = 1<<2,
-		UPDATE_TONEMAP = 1<<1,
-		UPDATE_PREVIEW = 1<<0
+		UPDATE_SCALE   = 1<<2,
+		UPDATE_PRECROP = 1<<1,
+		UPDATE_TONEMAP = 1<<0
 	};
 	uint m_update_flags;
 
 	QTimer update_timer;
 
-	void update_all(void);
+	void update_scale  (void);
+	void update_precrop(void);
 	void update_tonemap(void);
-	void update_preview(void);
 
 	void tonemap_notification(float);
 };
