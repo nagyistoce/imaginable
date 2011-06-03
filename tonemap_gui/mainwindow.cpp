@@ -38,6 +38,7 @@
 #include <imaginable/colourspace.hpp>
 #include <imaginable/tonemap.hpp>
 #include <imaginable/crop.hpp>
+#include <imaginable/scale.hpp>
 #include <imaginable/tools.hpp>
 
 #include "mainwindow.hpp"
@@ -155,8 +156,12 @@ void MainWindow::fileSave(void)
 	{
 		boost::shared_ptr<imaginable::Image> tonemapped_image = original_image->copy();
 		imaginable::rgb_to_hsl(*tonemapped_image,false);
-		imaginable::tonemap_local(*tonemapped_image,static_cast<double>(slider_saturation->value())/10.,blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.);
+
+		imaginable::TimedProgress timed_progress(boost::bind(&MainWindow::tonemap_notification,this,_1));
+		imaginable::tonemap_local(*tonemapped_image,static_cast<double>(slider_saturation->value())/10.,blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
+
 		imaginable::hsl_to_rgb(*tonemapped_image,false);
+
 
 		if (safe_as_file_name.endsWith(".pam",Qt::CaseInsensitive))
 		{
@@ -179,7 +184,6 @@ void MainWindow::fileSaveAs(void)
 	if (!file_name.isEmpty())
 	{
 		last_user_dir = QFileInfo(file_name).path();
-		preview->setText(file_name);
 		safe_as_file_name = file_name;
 
 		fileSave();
@@ -323,9 +327,9 @@ void MainWindow::update_scale(void)
 			static_cast<double>(preview->height())/static_cast<double>(original_image->height()) );
 	// FALL THROUGH
 	case ZOOM_CUSTOM:
-		scaled_image = original_image->         copy() /* scale(
+		scaled_image = scale_nearest(*original_image,
 				static_cast<size_t>(static_cast<double>(original_image->width ())*zoom),
-				static_cast<size_t>(static_cast<double>(original_image->height())*zoom) )*/;
+				static_cast<size_t>(static_cast<double>(original_image->height())*zoom) );
 	break;
 	case ZOOM_ONE:
 		scaled_image = original_image->copy();

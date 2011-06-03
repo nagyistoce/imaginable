@@ -48,7 +48,8 @@ SOURCES += \
 	auto_crop.cpp \
 	colourspace.cpp \
 	blur.cpp \
-	tonemap.cpp
+	tonemap.cpp \
+	scale.cpp
 
 HEADERS += \
 	image.hpp \
@@ -66,7 +67,8 @@ HEADERS += \
 	auto_crop.hpp \
 	colourspace.hpp \
 	blur.hpp \
-	tonemap.hpp
+	tonemap.hpp \
+	scale.hpp
 
 
 

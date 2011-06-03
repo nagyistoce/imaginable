@@ -68,7 +68,7 @@
              </size>
             </property>
             <property name="text">
-             <string>original</string>
+             <string/>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -90,7 +90,7 @@
              </size>
             </property>
             <property name="text">
-             <string>preview</string>
+             <string/>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
