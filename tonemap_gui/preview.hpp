@@ -41,10 +41,14 @@ protected:
 	void mouseMoveEvent(QMouseEvent*);
 	void mouseReleaseEvent(QMouseEvent*);
 	void resizeEvent(QResizeEvent*);
+	void dragEnterEvent(QDragEnterEvent*);
+	void dropEvent(QDropEvent*);
 
 signals:
 	void resized(int,int);
 	void shifted(int,int);
+	void imageDropped(QImage);
+	void urlDropped(QString);
 
 private:
 	bool m_is_shifting;

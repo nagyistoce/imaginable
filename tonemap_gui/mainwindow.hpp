@@ -44,6 +44,8 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 public:
 	explicit MainWindow(QWidget *parent = NULL);
 
+	bool loadFile(QString);
+
 public slots:
 	void fileOpen(void);
 	void fileSave(void);
@@ -61,6 +63,8 @@ public slots:
 
 	void previewResized(int,int);
 	void previewShifted(int,int);
+	void previewImageDropped(QImage);
+	void previewUrlDropped(QString);
 
 	void setSaturation(int);
 	void setBlur(int);
@@ -120,6 +124,8 @@ private:
 	uint m_update_flags;
 
 	QTimer update_timer;
+
+	void imageLoaded(void);
 
 	void update_scale  (void);
 	void update_precrop(void);

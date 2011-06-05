@@ -60,6 +60,8 @@ LIBS += \
 
 PRE_TARGETDEPS += ../lib/libimaginable.so
 
+QMAKE_LFLAGS += -Wl,-rpath,../lib
+
 
 autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
 autoversioning.depends = autoversioning_echo

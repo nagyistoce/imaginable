@@ -28,11 +28,16 @@
 #include "mainwindow.hpp"
 
 
-int main(int argc, char *argv[])
+int main(int argc,char *argv[])
 {
 	QApplication a(argc, argv);
+
 	MainWindow w;
 	w.show();
+
+	int argi=1;
+	for(bool ok=false; (!ok) && (argi < argc); argi++)
+		ok = w.loadFile(QString::fromLocal8Bit(argv[argi]));
 
 	return a.exec();
 }

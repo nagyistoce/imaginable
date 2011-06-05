@@ -24,6 +24,7 @@
 
 
 #include <QtGui/QResizeEvent>
+#include <QtCore/QUrl>
 
 #include "preview.hpp"
 
@@ -33,6 +34,7 @@ Preview::Preview(QWidget *parent)
 	, m_is_shifting(false)
 {
 	setMouseTracking(true);
+	setAcceptDrops(true);
 }
 
 void Preview::mousePressEvent(QMouseEvent *event)
@@ -64,7 +66,70 @@ void Preview::mouseReleaseEvent(QMouseEvent *event)
 	}
 }
 
-void Preview::resizeEvent(QResizeEvent* event)
+void Preview::resizeEvent(QResizeEvent *event)
 {
 	emit resized(event->size().width(),event->size().height());
+}
+
+void Preview::dragEnterEvent(QDragEnterEvent *event)
+{
+	if (event->mimeData()->hasImage())
+	{
+		if (event->dropAction() == Qt::CopyAction)
+			event->acceptProposedAction();
+		else
+		{
+			event->setDropAction(Qt::CopyAction);
+			event->accept();
+		}
+	}
+	else if (event->mimeData()->hasUrls())
+	{
+		if (event->dropAction() == Qt::CopyAction)
+			event->acceptProposedAction();
+		else
+		{
+			event->setDropAction(Qt::CopyAction);
+			event->accept();
+		}
+	}
+	else
+	{
+		event->setDropAction(Qt::IgnoreAction);
+		event->accept();
+	}
+}
+
+void Preview::dropEvent(QDropEvent *event)
+{
+	if (event->mimeData()->hasImage())
+	{
+		emit imageDropped(qvariant_cast<QImage>(event->mimeData()->imageData()));
+
+		if (event->dropAction() == Qt::CopyAction)
+			event->acceptProposedAction();
+		else
+		{
+			event->setDropAction(Qt::CopyAction);
+			event->accept();
+		}
+	}
+	else if (event->mimeData()->hasUrls())
+	{
+		foreach (QUrl url,event->mimeData()->urls())
+			emit urlDropped(url.toLocalFile());
+
+		if (event->dropAction() == Qt::CopyAction)
+			event->acceptProposedAction();
+		else
+		{
+			event->setDropAction(Qt::CopyAction);
+			event->accept();
+		}
+	}
+	else
+	{
+		event->setDropAction(Qt::IgnoreAction);
+		event->accept();
+	}
 }
