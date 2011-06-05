@@ -31,6 +31,7 @@
 #include <boost/bind.hpp>
 
 #include <fstream>
+#include <iostream>
 
 #include <imaginable/io_pnm_loader.hpp>
 #include <imaginable/io_pam_saver.hpp>
@@ -103,9 +104,26 @@ MainWindow::MainWindow(QWidget *parent)
 	save_filters += tr("All images supported by QT")+"("+qt_can_write.join(" ")+")";
 }
 
-void MainWindow::fileOpen(void)
+void MainWindow::imageLoaded(void)
 {
-	QString file_name = QFileDialog::getOpenFileName(this,tr("Open HDRI file"),last_user_dir,open_filters+";;"+tr("All files(*)"));
+	safe_as_file_name.clear();
+	action_Save       ->setEnabled(true);
+	action_Save_as    ->setEnabled(true);
+	action_Zoom_in    ->setEnabled(true);
+	action_Zoom_out   ->setEnabled(true);
+	action_Zoom_to_fit->setChecked(true);
+	current_zoom_type = ZOOM_TO_FIT;
+
+	less_side = std::min(original_image->width(),original_image->height());
+
+	m_update_flags |= UPDATE_SCALE;
+	update_timer.start();
+
+	setBlur(slider_blur->value());
+}
+
+bool MainWindow::loadFile(QString file_name)
+{
 	if (!file_name.isEmpty())
 	{
 		last_user_dir = QFileInfo(file_name).path();
@@ -130,22 +148,37 @@ void MainWindow::fileOpen(void)
 		{
 			original_image = new_image;
 
-			safe_as_file_name.clear();
-			action_Save       ->setEnabled(true);
-			action_Save_as    ->setEnabled(true);
-			action_Zoom_in    ->setEnabled(true);
-			action_Zoom_out   ->setEnabled(true);
-			action_Zoom_to_fit->setChecked(true);
-			current_zoom_type = ZOOM_TO_FIT;
+			imageLoaded();
 
-			less_side = std::min(original_image->width(),original_image->height());
-
-			m_update_flags |= UPDATE_SCALE;
-			update_timer.start();
-
-			setBlur(slider_blur->value());
+			return true;
 		}
 	}
+	return false;
+}
+
+void MainWindow::previewImageDropped(QImage image)
+{
+	boost::shared_ptr<imaginable::Image> new_image(new imaginable::Image);
+
+	if (!image.isNull())
+		image >> imaginable::QImage_loader(*new_image);
+
+	if (!new_image->empty())
+	{
+		original_image = new_image;
+
+		imageLoaded();
+	}
+}
+
+void MainWindow::previewUrlDropped(QString url)
+{
+	loadFile(url);
+}
+
+void MainWindow::fileOpen(void)
+{
+	loadFile(QFileDialog::getOpenFileName(this,tr("Open HDRI file"),last_user_dir,open_filters+";;"+tr("All files(*)")));
 }
 
 void MainWindow::fileSave(void)
@@ -327,6 +360,7 @@ void MainWindow::update_scale(void)
 			static_cast<double>(preview->height())/static_cast<double>(original_image->height()) );
 	// FALL THROUGH
 	case ZOOM_CUSTOM:
+		zoom = std::min(std::max(zoom,2./static_cast<double>(std::min(original_image->width(),original_image->height()))),1.);
 		scaled_image = scale_nearest(*original_image,
 				static_cast<size_t>(static_cast<double>(original_image->width ())*zoom),
 				static_cast<size_t>(static_cast<double>(original_image->height())*zoom) );
