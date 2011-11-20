@@ -32,20 +32,36 @@
 
 namespace imaginable
 {
-	void box_blur(Image& img,unsigned plane,const size_t& radius,bool use_alpha=false,progress_notifier notifier = dont_notify);
+	template <typename PIXEL, typename ALPHA_PIXEL>
+		void universal_box_blur(PIXEL *plane,ssize_t width,ssize_t height,size_t radius,ALPHA_PIXEL *alpha,progress_notifier notifier);
 
-	inline void box_blur(Image& img,unsigned plane,const size_t& radius,progress_notifier notifier)
+	template <typename PIXEL, typename ALPHA_PIXEL>
+		void universal_gaussian_blur(PIXEL *plane,ssize_t width,ssize_t height,size_t radius,ALPHA_PIXEL *alpha,progress_notifier notifier);
+
+
+	void box_blur(Image& img,unsigned plane,size_t radius,bool use_alpha=false,progress_notifier notifier = dont_notify);
+
+	inline void box_blur(Image& img,unsigned plane,size_t radius,progress_notifier notifier)
 		{ box_blur(img,plane,radius,false,notifier); }
 
-	inline void box_blur_alpha(Image& img,unsigned plane,const size_t& radius,progress_notifier notifier = dont_notify)
+	inline void box_blur_alpha(Image& img,unsigned plane,size_t radius,progress_notifier notifier = dont_notify)
 		{ box_blur(img,plane,radius,true,notifier); }
 
-#if 0
-	Image::pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,const size_t& radius,bool use_alpha);
 
-	inline Image::pixel* box_blur(Image& img,unsigned plane,const size_t& radius,bool use_alpha)
+	void gaussian_blur(Image& img,unsigned plane,size_t radius,bool use_alpha=false,progress_notifier notifier = dont_notify);
+
+	inline void gaussian_blur(Image& img,unsigned plane,size_t radius,progress_notifier notifier)
+		{ gaussian_blur(img,plane,radius,false,notifier); }
+
+	inline void gaussian_blur_alpha(Image& img,unsigned plane,size_t radius,progress_notifier notifier = dont_notify)
+		{ gaussian_blur(img,plane,radius,true,notifier); }
+
+#if 0
+	Image::Pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,size_t radius,bool use_alpha);
+
+	inline Image::Pixel* box_blur(Image& img,unsigned plane,size_t radius,bool use_alpha)
 	{
-		Image::pixel* ret=box_blur(img,plane,Image::PLANE__INTERNAL,radius,use_alpha);
+		Image::Pixel* ret=box_blur(img,plane,Image::PLANE__INTERNAL,radius,use_alpha);
 		img.removePlane(plane);
 		img.renamePlane(Image::PLANE__INTERNAL,plane);
 		return ret;

@@ -37,6 +37,7 @@
 #include <imaginable/io_qt.hpp>
 #include <imaginable/colourspace.hpp>
 #include <imaginable/tonemap.hpp>
+#include <imaginable/time.hpp>
 #include <imaginable/version.hpp>
 
 #include "version.hpp"
@@ -44,7 +45,7 @@
 
 void hello(void)
 {
-	std::cerr<<(boost::format(gettext(
+	std::cerr << (boost::format(gettext(
 		"%|s|: HDRI to LDRI tonemap converter\n"
 		"(High dynamic range image to low dynamic range image tonemap converter)\n"
 		"2009 - %|d| (c) Kuzma Shapran   <Kuzma [dot] Shapran [at] gmail [dot] com>\n"
@@ -61,38 +62,120 @@ void hello(void)
 
 void usage(void)
 {
-	std::cerr<<(boost::format(gettext(
+	std::cerr << (boost::format(gettext(
 		"Usage:\n"
-		"%|s| <input_HDR_image> <output_LDR_image> <saturation_gamma> -g <lightness_factor>\n"
-		"%|s| <input_HDR_image> <output_LDR_image> <saturation_gamma> -l { -x <blur_px_size> | -b <blur_size_factor>} <mix_factor>\n"
+		"%|s| options\n"
 		"\n"
-		"Use '-' sign as filename to use input and/or output streams instead of files\n"
-		"-g  -- use global tonemap function\n"
-		"-l  -- use local tonemap function\n"
-		"saturation_gamma:   type: double   range: [-10.0 .. 10.0]\n"
-		"lightness_factor:   type: double   range: [0.0 .. 10.0]\n"
-		"blur_px_size:       type: unsigned integer  (in pixels)\n"
-		"blur_size_factor:   type: double   range: (0.0 .. 1.0]\n"
-		"mix_factor:         type: double   range: [0.0 .. 1.0]\n"
+		"Main options are:\n"
+		"  -i <input_HDR_image>\n"
+		"    default: stdin\n"
+		"  -o <output_LDR_image>\n"
+		"    default: stdout\n"
+		"\n"
+		"  -m <method_name>\n"
+		"    Valid method names are:\n"
+		"      g global\n"
+		"      a average\n"
+		"      p parabolic\n"
+		"      e exponential\n"
+		"\n"
+		"Global method options are:\n"
+		"  -s <saturation_gamma>\n"
+		"    value type: double   range: [-10.0 .. 10.0]  default: 0.0\n"
+		"  -l <lightness_factor>\n"
+		"    value type: double   range: [0.0 .. 10.0]\n"
+		"\n"
+		"Average method options are:\n"
+		"  -s <saturation_gamma>\n"
+		"    value type: double   range: [-10.0 .. 10.0]  default: 0.0\n"
+		"  -bp <blur_px_size>\n"
+		"    value type: unsigned integer  (radius in pixels)\n"
+		"  -bf <blur_size_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of the smallest side\n"
+		"Note: Use only one of -bp and -bf options\n"
+		"  -f <mix_factor>\n"
+		"    value type: double   range: [0.0 .. 1.0]  default: 0.5\n"
+		"\n"
+		"Parabolic minmax method options are:\n"
+		"  -s <saturation_gamma>\n"
+		"    value type: double   range: [-10.0 .. 10.0]  default: 0.0\n"
+		"  -mp <minmax_px_size>\n"
+		"    value type: unsigned integer  (radius in pixels)\n"
+		"  -mf <minmax_size_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of the smallest side\n"
+		"Note: Use only one of -mp and -mf options\n"
+		"  -bp <blur_px_size>\n"
+		"    value type: unsigned integer  (radius in pixels)\n"
+		"  -bf <blur_size_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of the smallest side\n"
+		"Note: Use only one of -bp and -bf options\n"
+		"  -r <min_range_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of full luma range  default: 0.25\n"
+		"\n"
+		"Exponential minmax method options are:\n"
+		"  -s <saturation_gamma>\n"
+		"    value type: double   range: [-10.0 .. 10.0]  default: 0.0\n"
+		"  -e <exponential_factor>\n"
+		"    value type: double   range: (0.0 .. 10.0]  default: 1.0\n"
+		"  -mp <minmax_px_size>\n"
+		"    value type: unsigned integer  (radius in pixels)\n"
+		"  -mf <minmax_size_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of the smallest side\n"
+		"Note: Use only one of -mp and -mf options\n"
+		"  -bp <blur_px_size>\n"
+		"    value type: unsigned integer  (radius in pixels)\n"
+		"  -bf <blur_size_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of the smallest side\n"
+		"Note: Use only one of -bp and -bf options\n"
+		"  -r <min_range_factor>\n"
+		"    value type: double   range: (0.0 .. 1.0] -- part of full luma range  default: 0.25\n"
 		))
 		%program_invocation_short_name
-		%program_invocation_short_name
 		).str();
+}
+
+double last_printer_percent = 0.0;
+
+void percent_printer(float value)
+{
+	double now = getHighPrecTime();
+	if (now - last_printer_percent > 1./3.)
+	{
+		last_printer_percent = now;
+		std::cout << "\b\b\b\b\b\b" << (boost::format(gettext("%|5.1f|%%")) %(value*100) ).str() << std::flush;
+	}
 }
 
 int main(int argc,char* argv[])
 {
 	std::string input_name;
-	bool use_stdin;
+	bool use_stdin = true;
+
 	std::string output_name;
-	bool use_stdout;
-	bool tonemap_global_function;
-	double saturation_gamma;
+	bool use_stdout = true;
+
+	char method_name = ' ';
+
+	double saturation_gamma = 0.0;
+
 	double lightness_factor;
+	bool lightness_factor_specified = false;
+
 	bool blur_in_pixels=false;
 	size_t blur_px_size;
 	double blur_size_factor=0.;
-	double mix_factor;
+	bool blur_specfified = false;
+
+	double mix_factor = 0.5;
+
+	double exponential_factor = 1.0;
+
+	bool minmax_in_pixels=false;
+	size_t minmax_px_size;
+	double minmax_size_factor=0.;
+	bool minmax_specfified = false;
+
+	double min_range_factor = 0.25;
 
 	hello();
 
@@ -100,143 +183,309 @@ int main(int argc,char* argv[])
 	{
 		char* tail;
 
-		if(argc<=4) throw true;
-
-		input_name=std::string(argv[1]);
-		if(input_name.empty())
+		for (int argi = 1; argi<argc; ++argi)
 		{
-			std::cerr<<gettext("Empty input name\n");
-			throw false;
-		}
-		use_stdin= (input_name == "-");
-
-		output_name=std::string(argv[2]);
-		if(output_name.empty())
-		{
-			std::cerr<<gettext("Empty output name\n");
-			throw false;
-		}
-		use_stdout= (output_name == "-");
-
-		saturation_gamma=strtod(argv[3],&tail);
-		if( (*tail) || (saturation_gamma<-10.) || (saturation_gamma>10.) )
-		{
-			std::cerr<<gettext("Invalid saturation_gamma value\n");
-			throw false;
-		}
-
-		if(std::string(argv[4]) == "-g")
-			tonemap_global_function=true;
-		else if(std::string(argv[4]) == "-l")
-			tonemap_global_function=false;
-		else
-		{
-			std::cerr<<gettext("Invalid tonemap function flag\n");
-			throw false;
-		}
-
-		if(tonemap_global_function)
-		{
-			if(argc<=5) throw true;
-
-			lightness_factor=strtod(argv[5],&tail);
-			if( (*tail) || (lightness_factor<-10.) || (lightness_factor>10.) )
+			if (!strcmp(argv[argi],"-i"))
 			{
-				std::cerr<<gettext("Invalid lightness_factor value\n");
-				throw false;
-			}
-		}
-		else
-		{
-			if(argc<=7) throw true;
-
-			if(std::string(argv[5]) == "-x")
-				blur_in_pixels=true;
-			else if(std::string(argv[5]) == "-b")
-				blur_in_pixels=false;
-			else
-			{
-				std::cerr<<gettext("Invalid blur flag\n");
-				throw false;
-			}
-
-			if(blur_in_pixels)
-			{
-				blur_px_size=static_cast<size_t>(strtoull(argv[6],&tail,10));
-				if( (*tail) || (!blur_px_size) || (blur_px_size>10000) )
+				++argi;
+				if (argi == argc)
 				{
-					std::cerr<<gettext("Invalid blur_px_size value\n");
+					std::cerr << gettext("Missed input name") << std::endl;
+					throw false;
+				}
+				input_name = std::string(argv[argi]);
+				if(input_name.empty())
+				{
+					std::cerr << gettext("Empty input name") << std::endl;
+					throw false;
+				}
+				use_stdin = false;
+			}
+			else if (!strcmp(argv[argi],"-o"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed output name") << std::endl;
+					throw false;
+				}
+				output_name = std::string(argv[argi]);
+				if(output_name.empty())
+				{
+					std::cerr << gettext("Empty output name") << std::endl;
+					throw false;
+				}
+				use_stdout = false;
+			}
+			else if (!strcmp(argv[argi],"-m"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed method name") << std::endl;
+					throw false;
+				}
+				if (((!strcmp(argv[argi],"g"))) || (!strcmp(argv[argi],"global"))
+				||  ((!strcmp(argv[argi],"a"))) || (!strcmp(argv[argi],"average"))
+				||  ((!strcmp(argv[argi],"p"))) || (!strcmp(argv[argi],"parabolic"))
+				||  ((!strcmp(argv[argi],"e"))) || (!strcmp(argv[argi],"exponential")))
+					method_name = argv[argi][0];
+				else
+				{
+					std::cerr << gettext("Invalid method name") << std::endl;
 					throw false;
 				}
 			}
-			else
+			else if (!strcmp(argv[argi],"-s"))
 			{
-				blur_size_factor=strtod(argv[6],&tail);
-				if( (*tail) || (blur_size_factor<=0.) || (blur_size_factor>1.) )
+				++argi;
+				if (argi == argc)
 				{
-					std::cerr<<gettext("Invalid blur_size_factor value\n");
+					std::cerr << gettext("Missed saturation_gamma value") << std::endl;
+					throw false;
+				}
+				saturation_gamma = strtod(argv[argi],&tail);
+				if( (*tail) || (saturation_gamma < -10.) || (saturation_gamma > 10.) )
+				{
+					std::cerr << gettext("Invalid saturation_gamma value") << std::endl;
 					throw false;
 				}
 			}
-
-			mix_factor=strtod(argv[7],&tail);
-			if( (*tail) || (mix_factor<0.) || (mix_factor>1.) )
+			else if (!strcmp(argv[argi],"-l"))
 			{
-				std::cerr<<gettext("Invalid mix_factor value\n");
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed lightness_factor value") << std::endl;
+					throw false;
+				}
+				lightness_factor = strtod(argv[argi],&tail);
+				if( (*tail) || (lightness_factor < -10.) || (lightness_factor > 10.) )
+				{
+					std::cerr << gettext("Invalid lightness_factor value") << std::endl;
+					throw false;
+				}
+				lightness_factor_specified = true;
+			}
+			else if (!strcmp(argv[argi],"-bp"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed blur_px_size value") << std::endl;
+					throw false;
+				}
+				blur_px_size = static_cast<size_t>(strtoull(argv[argi],&tail,10));
+				if( (*tail) || (!blur_px_size) || (blur_px_size > 10000) )
+				{
+					std::cerr << gettext("Invalid blur_px_size value") << std::endl;
+					throw false;
+				}
+				blur_in_pixels = true;
+				blur_specfified = true;
+			}
+			else if (!strcmp(argv[argi],"-bf"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed blur_size_factor value") << std::endl;
+					throw false;
+				}
+				blur_size_factor = strtod(argv[argi],&tail);
+				if( (*tail) || (blur_size_factor <= 0.) || (blur_size_factor > 1.) )
+				{
+					std::cerr << gettext("Invalid blur_size_factor value") << std::endl;
+					throw false;
+				}
+				blur_in_pixels = false;
+				blur_specfified = true;
+			}
+			else if (!strcmp(argv[argi],"-e"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed exponential_factor value") << std::endl;
+					throw false;
+				}
+				exponential_factor = strtod(argv[argi],&tail);
+				if( (*tail) || (exponential_factor <= 0.) || (exponential_factor > 10.) )
+				{
+					std::cerr << gettext("Invalid exponential_factor value") << std::endl;
+					throw false;
+				}
+			}
+			else if (!strcmp(argv[argi],"-f"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed mix_factor value") << std::endl;
+					throw false;
+				}
+				mix_factor = strtod(argv[argi],&tail);
+				if( (*tail) || (mix_factor < 0.) || (mix_factor > 1.) )
+				{
+					std::cerr << gettext("Invalid mix_factor value") << std::endl;
+					throw false;
+				}
+			}
+			else if (!strcmp(argv[argi],"-mp"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed minmax_px_size value") << std::endl;
+					throw false;
+				}
+				minmax_px_size = static_cast<size_t>(strtoull(argv[argi],&tail,10));
+				if( (*tail) || (!minmax_px_size) || (minmax_px_size > 10000) )
+				{
+					std::cerr << gettext("Invalid minmax_px_size value") << std::endl;
+					throw false;
+				}
+				minmax_in_pixels = true;
+				minmax_specfified = true;
+			}
+			else if (!strcmp(argv[argi],"-mf"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed minmax_size_factor value") << std::endl;
+					throw false;
+				}
+				minmax_size_factor = strtod(argv[argi],&tail);
+				if( (*tail) || (minmax_size_factor <= 0.) || (minmax_size_factor > 1.) )
+				{
+					std::cerr << gettext("Invalid minmax_size_factor value") << std::endl;
+					throw false;
+				}
+				minmax_in_pixels = false;
+				minmax_specfified = true;
+			}
+			else if (!strcmp(argv[argi],"-r"))
+			{
+				++argi;
+				if (argi == argc)
+				{
+					std::cerr << gettext("Missed min_range_factor value") << std::endl;
+					throw false;
+				}
+				min_range_factor = strtod(argv[argi],&tail);
+				if( (*tail) || (min_range_factor <= 0.) || (min_range_factor > 1.) )
+				{
+					std::cerr << gettext("Invalid min_range_factor value") << std::endl;
+					throw false;
+				}
+			}
+		}
+		if (method_name == ' ') // not specified
+		{
+			std::cerr << gettext("Missed lightness_factor value") << std::endl;
+			throw false;
+		}
+		switch (method_name)
+		{
+		case 'g':
+			if (!lightness_factor_specified)
+			{
+				std::cerr << gettext("Missed method name") << std::endl;
 				throw false;
 			}
+			break;
+
+		case 'a':
+			if (!blur_specfified)
+			{
+				std::cerr << gettext("Missed blur radius") << std::endl;
+				throw false;
+			}
+			break;
+
+		case 'p':
+			if (!minmax_specfified)
+			{
+				std::cerr << gettext("Missed minmax radius") << std::endl;
+				throw false;
+			}
+			if (!blur_specfified)
+			{
+				std::cerr << gettext("Missed blur radius") << std::endl;
+				throw false;
+			}
+
+		case 'e':
+			if (!minmax_specfified)
+			{
+				std::cerr << gettext("Missed minmax radius") << std::endl;
+				throw false;
+			}
+			if (!blur_specfified)
+			{
+				std::cerr << gettext("Missed blur radius") << std::endl;
+				throw false;
+			}
+			break;
 		}
 	}
-	catch(bool)
+	catch (bool)
 	{
 		usage();
 		return 1;
 	}
 
+	std::cout << (boost::format(gettext("Input HDRI: %|s|")) %(use_stdin ? std::string("<input stream>") : input_name) ).str() << std::endl;
+	std::cout << (boost::format(gettext("Output LDRI: %|s|")) %(use_stdout ? std::string("<output stream>") : output_name) ).str() << std::endl;
 
-	std::cerr<<(boost::format(gettext(
-		"Converting HDRI %|s| to LDRI %|s|\n"
-		"Saturation gamma: %|.3f|\n"
-		"Tonemap function: %|s|\n"
-		))
-		%(use_stdin ?std::string( "<input stream>"): input_name)
-		%(use_stdout?std::string("<output stream>"):output_name)
-		%saturation_gamma
-		%(tonemap_global_function?"global":"local")
-		).str();
+	switch (method_name)
+	{
+	case 'g':
+		std::cout << (boost::format(gettext("Saturation gamma: %|.3f|")) %saturation_gamma ).str() << std::endl;
+		std::cout << (boost::format(gettext("Lightness factor: %|.3f|")) %lightness_factor ).str() << std::endl;
+		break;
 
-	if(tonemap_global_function)
-	{
-		std::cerr<<(boost::format(gettext(
-			"Lightness factor: %|.3f|\n"
-			))
-			%lightness_factor
-			).str();
-	}
-	else
-	{
+	case 'a':
+		std::cout << (boost::format(gettext("Saturation gamma: %|.3f|")) %saturation_gamma ).str() << std::endl;
 		if(blur_in_pixels)
-			std::cerr<<(boost::format(gettext(
-				"Blur: %|d| px\n"
-				))
-				%blur_px_size
-				).str();
+			std::cout << (boost::format(gettext("Blur radius: %|d| px")) %blur_px_size ).str() << std::endl;
 		else
-			std::cerr<<(boost::format(gettext(
-				"Blur: %|.3f|%%\n"
-				))
-				%(blur_size_factor*100.)
-				).str();
-		std::cerr<<(boost::format(gettext(
-			"Mix factor: %|.3f|\n"
-			))
-			%mix_factor
-			).str();
+			std::cout << (boost::format(gettext("Blur radius: %|.3f|%%")) %(blur_size_factor*100.) ).str() << std::endl;
+		std::cout << (boost::format(gettext("Mix factor: %|.3f|")) %mix_factor ).str() << std::endl;
+		break;
+
+	case 'p':
+		std::cout << (boost::format(gettext("Saturation gamma: %|.3f|")) %saturation_gamma ).str() << std::endl;
+		if(minmax_in_pixels)
+			std::cout << (boost::format(gettext("Minmax radius: %|d| px")) %minmax_px_size ).str() << std::endl;
+		else
+			std::cout << (boost::format(gettext("Minmax radius: %|.3f|%%")) %(minmax_size_factor*100.) ).str() << std::endl;
+		if(blur_in_pixels)
+			std::cout << (boost::format(gettext("Blur radius: %|d| px")) %blur_px_size ).str() << std::endl;
+		else
+			std::cout << (boost::format(gettext("Blur radius: %|.3f|%%")) %(blur_size_factor*100.) ).str() << std::endl;
+		std::cout << (boost::format(gettext("Min range factor: %|.3f|")) %min_range_factor ).str() << std::endl;
+		break;
+
+	case 'e':
+		std::cout << (boost::format(gettext("Saturation gamma: %|.3f|")) %saturation_gamma ).str() << std::endl;
+		std::cout << (boost::format(gettext("Exponential factor: %|.3f|")) %exponential_factor ).str() << std::endl;
+		if(minmax_in_pixels)
+			std::cout << (boost::format(gettext("Minmax radius: %|d| px")) %minmax_px_size ).str() << std::endl;
+		else
+			std::cout << (boost::format(gettext("Minmax radius: %|.3f|%%")) %(minmax_size_factor*100.) ).str() << std::endl;
+		if(blur_in_pixels)
+			std::cout << (boost::format(gettext("Blur radius: %|d| px")) %blur_px_size ).str() << std::endl;
+		else
+			std::cout << (boost::format(gettext("Blur radius: %|.3f|%%")) %(blur_size_factor*100.) ).str() << std::endl;
+		std::cout << (boost::format(gettext("Min range factor: %|.3f|")) %min_range_factor ).str() << std::endl;
+		break;
 	}
 
 	boost::scoped_ptr<imaginable::Image> img(new imaginable::Image);
 
-	std::cerr<<gettext("Loading: ...");
+	std::cout << gettext("Loading: ...") << std::flush;
 	if(use_stdin)
 		std::cin >> imaginable::PNM_loader(*img.get());
 	else
@@ -255,36 +504,56 @@ int main(int argc,char* argv[])
 				qimage >> imaginable::QImage_loader(*img.get());
 		}
 	}
-	std::cerr<<"\b\b\b"<<gettext("done\n");
+	std::cout << "\b\b\b"<<gettext("done") << std::endl;
 
-	if(!blur_in_pixels)
+	switch (method_name)
 	{
-		blur_px_size=static_cast<imaginable::Image::pixel>(static_cast<double>(std::min(img->width(),img->height()))*blur_size_factor);
-		std::cerr<<(boost::format(gettext(
-			"Blur: %|d| px\n"
-			))
-			%blur_px_size
-			).str();
+	case 'p':
+	case 'e':
+		if(!minmax_in_pixels)
+		{
+			minmax_px_size=static_cast<imaginable::Image::Pixel>(static_cast<double>(std::min(img->width(),img->height()))*minmax_size_factor);
+			std::cout << (boost::format(gettext("Minmax radius: %|d| px")) %minmax_px_size ).str() << std::endl;
+		}
+	// FALL THROUGH
+	case 'a':
+		if(!blur_in_pixels)
+		{
+			blur_px_size=static_cast<imaginable::Image::Pixel>(static_cast<double>(std::min(img->width(),img->height()))*blur_size_factor);
+			std::cout << (boost::format(gettext("Blur radius: %|d| px")) %blur_px_size ).str() << std::endl;
+		}
+		break;
 	}
 
-	std::cerr<<gettext("Converting: ...");
+	std::cout << gettext("Converting: ...   ") << std::flush;
 	try
 	{
-		imaginable::rgb_to_hsl(*img.get(),false);
-		if(tonemap_global_function)
-			imaginable::tonemap_global(*img.get(),saturation_gamma,lightness_factor);
-		else
-			imaginable::tonemap_local(*img.get(),saturation_gamma,blur_px_size,mix_factor/2.);
-		imaginable::hsl_to_rgb(*img.get(),false);
-		std::cerr<<"\b\b\b"<<gettext("done\n");
+		imaginable::rgb_to_hcy(*img.get(), false);
+		switch (method_name)
+		{
+		case 'g':
+			imaginable::tonemap_global(*img.get(), saturation_gamma, lightness_factor, &percent_printer);
+			break;
+		case 'a':
+			imaginable::tonemap_local_average(*img.get(), saturation_gamma, blur_px_size, mix_factor/2., &percent_printer);
+			break;
+		case 'p':
+			imaginable::tonemap_local_minmax_parabolic(*img.get(), saturation_gamma, minmax_px_size, blur_px_size, min_range_factor, &percent_printer);
+			break;
+		case 'e':
+			imaginable::tonemap_local_minmax_exponential(*img.get(), saturation_gamma, exponential_factor, minmax_px_size, blur_px_size, min_range_factor, &percent_printer);
+			break;
+		}
+		imaginable::hcy_to_rgb(*img.get(), false);
+		std::cout << "\b\b\b\b\b\b      \b\b\b\b\b\b" << gettext("done") << std::endl;
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr<<"\b\b\b"<<(boost::format(gettext("failed: %|s|\n")) %e.what() ).str();
+		std::cout << std::endl << (boost::format(gettext("failed: %|s|")) %e.what() ).str() << std::endl;
 		return 1;
 	}
 
-	std::cerr<<gettext("Saving: ...");
+	std::cout << gettext("Saving: ...") << std::flush;
 	if( (img.get()) && (img->hasData()) )
 	{
 		if(use_stdout)
@@ -304,8 +573,8 @@ int main(int argc,char* argv[])
 				qimage.save(output_name.c_str());
 			}
 		}
-		std::cerr<<"\b\b\b"<<gettext("done\n");
+		std::cout << "\b\b\b" << gettext("done") << std::endl;
 	}
 	else
-		std::cerr<<gettext("Nothing to save.\n");
+		std::cout << "\b\b\b" << gettext("Nothing to save.") << std::endl;
 }

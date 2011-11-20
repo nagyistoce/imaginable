@@ -41,7 +41,7 @@ class PNM_base_loader
 protected:
 	std::istream& m_stream;
 
-	bool loadAndUnpackPlanes(Image::pixel** plane,size_t depth);
+	bool loadAndUnpackPlanes(Image::Pixel** plane,size_t depth);
 
 public:
 	PNM_base_loader(std::istream&,Image*);
@@ -50,15 +50,6 @@ public:
 	Image* image;
 	virtual bool loadHeader(void)=0;
 	virtual void loadImage (void)=0;
-};
-
-#define CLASS_DECL(CLASS,PARENT,FUNCTION) \
-class CLASS: public PARENT                \
-{                                         \
-public:                                   \
-	CLASS(std::istream&,Image*);          \
-	virtual ~CLASS();                     \
-	virtual FUNCTION(void);               \
 };
 
 class PNM_legacy_loader: public PNM_base_loader
@@ -73,6 +64,15 @@ public:
 	void loadLegacyHeader(size_t);
 };
 
+#define CLASS_DECL(CLASS,PARENT,FUNCTION) \
+class CLASS: public PARENT                \
+{                                         \
+public:                                   \
+	CLASS(std::istream&,Image*);          \
+	virtual ~CLASS();                     \
+	virtual FUNCTION(void);               \
+};
+
 CLASS_DECL(PBM_loader,PNM_legacy_loader,bool loadHeader)
 CLASS_DECL(PBMA_loader,PBM_loader,void loadImage)
 CLASS_DECL(PBMB_loader,PBM_loader,void loadImage)
@@ -82,6 +82,8 @@ CLASS_DECL(PGMA_loader,PGM_PPM_loader,void loadImage)
 CLASS_DECL(PGMB_loader,PGM_PPM_loader,void loadImage)
 CLASS_DECL(PPMA_loader,PGM_PPM_loader,void loadImage)
 CLASS_DECL(PPMB_loader,PGM_PPM_loader,void loadImage)
+
+#undef CLASS_DECL
 
 class PAM_loader: public PNM_base_loader
 {
@@ -131,27 +133,27 @@ void PNM_loader::load(std::istream& stream)
 		boost::scoped_ptr<PNM_base_loader> loader(NULL);
 		switch(header)
 		{
-			case PNM_PBMA:
-				loader.reset(new PBMA_loader(stream,&m_image));
-				break;
-			case PNM_PGMA:
-				loader.reset(new PGMA_loader(stream,&m_image));
-				break;
-			case PNM_PPMA:
-				loader.reset(new PPMA_loader(stream,&m_image));
-				break;
-			case PNM_PBMB:
-				loader.reset(new PBMB_loader(stream,&m_image));
-				break;
-			case PNM_PGMB:
-				loader.reset(new PGMB_loader(stream,&m_image));
-				break;
-			case PNM_PPMB:
-				loader.reset(new PPMB_loader(stream,&m_image));
-				break;
-			case PNM_PAM:
-				loader.reset(new PAM_loader (stream,&m_image));
-				break;
+		case PNM_PBMA:
+			loader.reset(new PBMA_loader(stream,&m_image));
+			break;
+		case PNM_PGMA:
+			loader.reset(new PGMA_loader(stream,&m_image));
+			break;
+		case PNM_PPMA:
+			loader.reset(new PPMA_loader(stream,&m_image));
+			break;
+		case PNM_PBMB:
+			loader.reset(new PBMB_loader(stream,&m_image));
+			break;
+		case PNM_PGMB:
+			loader.reset(new PGMB_loader(stream,&m_image));
+			break;
+		case PNM_PPMB:
+			loader.reset(new PPMB_loader(stream,&m_image));
+			break;
+		case PNM_PAM:
+			loader.reset(new PAM_loader (stream,&m_image));
+			break;
 		}
 		if(loader.get())
 			if(loader->loadHeader())
@@ -185,6 +187,7 @@ CLASS_DEF(PPMA_loader,PGM_PPM_loader)
 CLASS_DEF(PPMB_loader,PGM_PPM_loader)
 CLASS_DEF(PAM_loader,PNM_base_loader)
 
+#undef CLASS_DEF
 
 void PNM_legacy_loader::loadLegacyHeader(size_t parts)
 {
@@ -358,7 +361,7 @@ bool PAM_loader::loadHeader(void)
 		return false;
 
 	image->setSize(width,height);
-	image->setMaximum(static_cast<Image::pixel>(maxval));
+	image->setMaximum(static_cast<Image::Pixel>(maxval));
 	image->setText("TUPLTYPE",m_tupltype);
 
 	return true;
@@ -367,14 +370,16 @@ bool PAM_loader::loadHeader(void)
 
 void PBMA_loader::loadImage(void)
 {
-	if(image->addPlane(Image::PLANE_MONO))
+	if(image->addPlane(Image::PLANE_GRAY))
 	{
-		Image::pixel* planes=image->plane(Image::PLANE_MONO);
+		Image::Pixel* planes=image->plane(Image::PLANE_GRAY);
 		size_t total=image->width()*image->height();
 
+		image->setMaximum(1);
+
 		char ch;
-		size_t pixel=0;
-		while( (pixel<total) && m_stream.good() )
+		size_t Pixel=0;
+		while( (Pixel<total) && m_stream.good() )
 		{
 			m_stream.read(&ch,sizeof(ch));
 			if(m_stream.good())
@@ -383,8 +388,8 @@ void PBMA_loader::loadImage(void)
 				{
 					case '0':
 					case '1':
-						planes[pixel]=(ch=='1')?0:1;
-						++pixel;
+						planes[Pixel]=(ch=='1')?0:1;
+						++Pixel;
 					break;
 					case '#':
 					{
@@ -395,7 +400,7 @@ void PBMA_loader::loadImage(void)
 				}
 			}
 		}
-		if(pixel==total)
+		if(Pixel==total)
 			return;
 	}
 	image->clear();
@@ -403,9 +408,9 @@ void PBMA_loader::loadImage(void)
 
 void PGMA_loader::loadImage(void)
 {
-	if(image->addPlane(Image::PLANE_GREY))
+	if(image->addPlane(Image::PLANE_GRAY))
 	{
-		Image::pixel* planes=image->plane(Image::PLANE_GREY);
+		Image::Pixel* planes=image->plane(Image::PLANE_GRAY);
 		size_t total=image->width()*image->height();
 
 		size_t cur_pixel=0;
@@ -444,7 +449,7 @@ void PPMA_loader::loadImage(void)
 	&&  (image->addPlane(Image::PLANE_GREEN))
 	&&  (image->addPlane(Image::PLANE_BLUE)) )
 	{
-		Image::pixel* planes[3];
+		Image::Pixel* planes[3];
 		planes[0]=image->plane(Image::PLANE_RED);
 		planes[1]=image->plane(Image::PLANE_GREEN);
 		planes[2]=image->plane(Image::PLANE_BLUE);
@@ -487,9 +492,9 @@ void PPMA_loader::loadImage(void)
 
 void PBMB_loader::loadImage(void)
 {
-	if(image->addPlane(Image::PLANE_MONO))
+	if(image->addPlane(Image::PLANE_GRAY))
 	{
-		Image::pixel* planes=image->plane(Image::PLANE_MONO);
+		Image::Pixel* planes=image->plane(Image::PLANE_GRAY);
 
 		size_t mx=image->width();
 		size_t my=image->height();
@@ -517,9 +522,9 @@ void PBMB_loader::loadImage(void)
 
 void PGMB_loader::loadImage(void)
 {
-	if(image->addPlane(Image::PLANE_GREY))
+	if(image->addPlane(Image::PLANE_GRAY))
 	{
-		Image::pixel* planes=image->plane(Image::PLANE_GREY);
+		Image::Pixel* planes=image->plane(Image::PLANE_GRAY);
 
 		if(loadAndUnpackPlanes(&planes,1))
 			return;
@@ -533,7 +538,7 @@ void PPMB_loader::loadImage(void)
 	&&  (image->addPlane(Image::PLANE_GREEN))
 	&&  (image->addPlane(Image::PLANE_BLUE)) )
 	{
-		Image::pixel* planes[3];
+		Image::Pixel* planes[3];
 		planes[0]=image->plane(Image::PLANE_RED);
 		planes[1]=image->plane(Image::PLANE_GREEN);
 		planes[2]=image->plane(Image::PLANE_BLUE);
@@ -546,8 +551,8 @@ void PPMB_loader::loadImage(void)
 
 void PAM_loader::loadImage(void)
 {
-	boost::scoped_array<Image::pixel*> b_plane(new Image::pixel*[m_depth]);
-	Image::pixel** planes=b_plane.get();
+	boost::scoped_array<Image::Pixel*> b_plane(new Image::Pixel*[m_depth]);
+	Image::Pixel** planes=b_plane.get();
 	size_t planes_known=0;
 
 	do{
@@ -555,8 +560,8 @@ void PAM_loader::loadImage(void)
 		{
 			if(m_depth<1)
 				break;
-			if(image->addPlane(Image::PLANE_MONO))
-				planes[planes_known++]=image->plane(Image::PLANE_MONO);
+			if(image->addPlane(Image::PLANE_GRAY))
+				planes[planes_known++]=image->plane(Image::PLANE_GRAY);
 			else
 				break;
 		}
@@ -564,10 +569,10 @@ void PAM_loader::loadImage(void)
 		{
 			if(m_depth<2)
 				break;
-			if( (image->addPlane(Image::PLANE_MONO))
+			if( (image->addPlane(Image::PLANE_GRAY))
 			&&  (image->addPlane(Image::PLANE_ALPHA)) )
 			{
-				planes[planes_known++]=image->plane(Image::PLANE_MONO);
+				planes[planes_known++]=image->plane(Image::PLANE_GRAY);
 				planes[planes_known++]=image->plane(Image::PLANE_ALPHA);
 			}
 			else
@@ -577,8 +582,8 @@ void PAM_loader::loadImage(void)
 		{
 			if(m_depth<1)
 				break;
-			if(image->addPlane(Image::PLANE_GREY))
-				planes[planes_known++]=image->plane(Image::PLANE_GREY);
+			if(image->addPlane(Image::PLANE_GRAY))
+				planes[planes_known++]=image->plane(Image::PLANE_GRAY);
 			else
 				break;
 		}
@@ -586,10 +591,10 @@ void PAM_loader::loadImage(void)
 		{
 			if(m_depth<2)
 				break;
-			if( (image->addPlane(Image::PLANE_GREY))
+			if( (image->addPlane(Image::PLANE_GRAY))
 			&&  (image->addPlane(Image::PLANE_ALPHA)) )
 			{
-				planes[planes_known++]=image->plane(Image::PLANE_GREY);
+				planes[planes_known++]=image->plane(Image::PLANE_GRAY);
 				planes[planes_known++]=image->plane(Image::PLANE_ALPHA);
 			}
 			else
@@ -646,7 +651,7 @@ void PAM_loader::loadImage(void)
 }
 
 
-bool PNM_base_loader::loadAndUnpackPlanes(Image::pixel** planes,size_t depth)
+bool PNM_base_loader::loadAndUnpackPlanes(Image::Pixel** planes,size_t depth)
 {
 	size_t mx=image->width();
 	size_t my=image->height();
@@ -668,7 +673,7 @@ bool PNM_base_loader::loadAndUnpackPlanes(Image::pixel** planes,size_t depth)
 					size_t xdo=yo+x;
 					size_t xso=(yo+x)*depth;
 					for(size_t p=0;p<depth;++p)
-						planes[p][xdo]=data[xso+p];
+						planes[p][xdo]=static_cast<Image::Pixel>(data[xso+p]);
 				}
 			}
 			return true;
@@ -690,7 +695,7 @@ bool PNM_base_loader::loadAndUnpackPlanes(Image::pixel** planes,size_t depth)
 					size_t xdo=yo+x;
 					size_t xso=(yo+x)*depth;
 					for(size_t p=0;p<depth;++p)
-						planes[p][xdo]=__bswap_16(data[xso+p]);
+						planes[p][xdo]=static_cast<Image::Pixel>(__bswap_16(data[xso+p]));
 				}
 			}
 			return true;

@@ -30,18 +30,18 @@
 
 namespace imaginable {
 
-Image::pixel findMaximum(const Image& img,progress_notifier notifier)
+Image::Pixel findMaximum(const Image& img,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	Image::pixel ret=0;
-	Image::t_planeNames planeNames=img.planeNames();
+	Image::Pixel ret=0;
+	Image::PlaneNames planeNames=img.planeNames();
 
 	size_t m=planeNames.size();
 	size_t i=0;
 
-	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 	{
 		notifier(static_cast<float>(i++)/static_cast<float>(m));
 
@@ -50,16 +50,16 @@ Image::pixel findMaximum(const Image& img,progress_notifier notifier)
 	return ret;
 }
 
-Image::pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier)
+Image::Pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	const Image::pixel* data=img.plane(planeName);
+	const Image::Pixel* data=img.plane(planeName);
 	if (!data)
 		throw exception(exception::INVALID_PLANE);
 
-	Image::pixel ret=0;
+	Image::Pixel ret=0;
 	size_t m=img.width()*img.height();
 	for (size_t i=0; i<m; ++i)
 	{

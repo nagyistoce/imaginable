@@ -32,8 +32,8 @@
 
 namespace imaginable
 {
-	Image::pixel findMaximum(const Image& img,progress_notifier notifier = dont_notify);
-	Image::pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier = dont_notify);
+	Image::Pixel findMaximum(const Image& img,progress_notifier notifier = dont_notify);
+	Image::Pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_MAXIMUM__INCLUDED

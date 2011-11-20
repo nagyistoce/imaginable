@@ -41,6 +41,7 @@
 #include <imaginable/crop.hpp>
 #include <imaginable/scale.hpp>
 #include <imaginable/tools.hpp>
+#include <imaginable/gamma.hpp>
 
 #include "mainwindow.hpp"
 
@@ -49,8 +50,10 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, current_zoom(new QLabel(this))
 	, progress_bar(new QProgressBar(this))
+	, less_side(0)
 	, m_lock_update(0)
 	, m_update_flags(0)
+	, m_prev_update_flags(0)
 {
 	setupUi(this);
 	status_bar->addPermanentWidget(progress_bar,1);
@@ -84,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent)
 		action_Zoom_out->setShortcut(QKeySequence(tr("Ctrl+-")));
 
 
-	update_timer.setInterval(100);
+	update_timer.setInterval(250);
 	update_timer.setSingleShot(false);
 	connect(&update_timer,SIGNAL(timeout()),this,SLOT(updateTimeout()));
 
@@ -128,7 +131,7 @@ bool MainWindow::loadFile(QString file_name)
 	{
 		last_user_dir = QFileInfo(file_name).path();
 
-		boost::shared_ptr<imaginable::Image> new_image(new imaginable::Image);
+		imaginable::SharedImage new_image(new imaginable::Image);
 
 		if (file_name.endsWith(".pnm",Qt::CaseInsensitive)
 		||  file_name.endsWith(".pam",Qt::CaseInsensitive) )
@@ -158,7 +161,7 @@ bool MainWindow::loadFile(QString file_name)
 
 void MainWindow::previewImageDropped(QImage image)
 {
-	boost::shared_ptr<imaginable::Image> new_image(new imaginable::Image);
+	imaginable::SharedImage new_image(new imaginable::Image);
 
 	if (!image.isNull())
 		image >> imaginable::QImage_loader(*new_image);
@@ -187,13 +190,13 @@ void MainWindow::fileSave(void)
 		fileSaveAs();
 	else
 	{
-		boost::shared_ptr<imaginable::Image> tonemapped_image = original_image->copy();
-		imaginable::rgb_to_hsl(*tonemapped_image,false);
+		imaginable::SharedImage tonemapped_image = original_image->copy();
+		imaginable::rgb_to_hcy(*tonemapped_image,false);
 
 		imaginable::TimedProgress timed_progress(boost::bind(&MainWindow::tonemap_notification,this,_1));
-		imaginable::tonemap_local(*tonemapped_image,static_cast<double>(slider_saturation->value())/10.,blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
+		imaginable::tonemap_local(*tonemapped_image,imaginable::gamma(static_cast<double>(slider_saturation->value())/100.,-3.)*10.,blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
 
-		imaginable::hsl_to_rgb(*tonemapped_image,false);
+		imaginable::hcy_to_rgb(*tonemapped_image,false);
 
 
 		if (safe_as_file_name.endsWith(".pam",Qt::CaseInsensitive))
@@ -259,7 +262,7 @@ void MainWindow::zoomToFit(void)
 
 void MainWindow::setSaturation(int value)
 {
-	value_saturation->setText(QString("+%1").arg(static_cast<double>(value)/10.,3,'f',1,'0'));
+	value_saturation->setText(QString("+%1").arg(imaginable::gamma(static_cast<double>(value)/100.,-3.)*10.,1,'f',2,'0'));
 
 	if (!m_lock_update)
 		m_update_flags |= UPDATE_TONEMAP;
@@ -267,13 +270,14 @@ void MainWindow::setSaturation(int value)
 
 void MainWindow::setBlur(int value)
 {
-	value_blur_percent->setText(QString("%1%").arg(value));
-	blur_in_pixels        = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side)        * static_cast<double>(value)/100.));
-	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * static_cast<double>(value)/100.));
+	double corrected_blur = imaginable::gamma(static_cast<double>(value)/100.,-2.);
+	value_blur_percent->setText(QString("%1%").arg(static_cast<size_t>(corrected_blur*100.)));
+	blur_in_pixels        = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side)        * corrected_blur));
+	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_blur));
 	value_blur_pixels->setText(QString("%1 px").arg(blur_in_pixels));
 
 	if (!m_lock_update)
-		m_update_flags |= UPDATE_PRECROP;
+		m_update_flags |= UPDATE_TONEMAP;
 }
 
 void MainWindow::setMix(int value)
@@ -287,31 +291,38 @@ void MainWindow::setMix(int value)
 void MainWindow::resetSliders(void)
 {
 	++m_lock_update;
-		slider_saturation->setValue(10);
-		slider_blur      ->setValue(20);
+		slider_saturation->setValue(imaginable::gamma(0.1,3.)*100.);
+		slider_blur      ->setValue(imaginable::gamma(0.2,2.)*100.);
 		slider_mix       ->setValue(50);
 	--m_lock_update;
 
-	m_update_flags |= UPDATE_PRECROP;
+	m_update_flags |= UPDATE_TONEMAP;
 }
 
-QPixmap MainWindow::image_to_pixmap(const imaginable::Image& src)
+//QPixmap MainWindow::image_to_pixmap(const imaginable::Image& src)
+//{
+//	QImage qimage;
+//	qimage << imaginable::QImage_saver(src);
+//	return QPixmap::fromImage(qimage);
+//}
+
+QImage MainWindow::image_to_qimage(const imaginable::Image& src)
 {
 	QImage qimage;
 	qimage << imaginable::QImage_saver(src);
-	return QPixmap::fromImage(qimage);
+	return qimage;
 }
 
 void MainWindow::showOriginal(bool value)
 {
 	original_view->setVisible(value);
 
-	m_update_flags |= action_Zoom_to_fit->isChecked() ? UPDATE_SCALE : UPDATE_PRECROP;
+	m_update_flags |= action_Zoom_to_fit->isChecked() ? UPDATE_SCALE : UPDATE_VIEWS;
 }
 
 void MainWindow::previewResized(int,int)
 {
-	m_update_flags |= action_Zoom_to_fit->isChecked() ? UPDATE_SCALE : UPDATE_PRECROP;
+	m_update_flags |= action_Zoom_to_fit->isChecked() ? UPDATE_SCALE : UPDATE_VIEWS;
 }
 
 void MainWindow::previewShifted(int dx,int dy)
@@ -321,30 +332,44 @@ void MainWindow::previewShifted(int dx,int dy)
 		verticalScrollBar  ->setValue(  verticalScrollBar->value()-dy);
 	--m_lock_update;
 
-	m_update_flags |= UPDATE_PRECROP;
+	m_update_flags |= UPDATE_VIEWS;
 }
 
 void MainWindow::horizontallySlided(int)
 {
 	if (!m_lock_update)
-		m_update_flags |= UPDATE_PRECROP;
+		m_update_flags |= UPDATE_VIEWS;
 }
 
 void MainWindow::verticallySlided(int)
 {
 	if (!m_lock_update)
-		m_update_flags |= UPDATE_PRECROP;
+		m_update_flags |= UPDATE_VIEWS;
 }
 
 void MainWindow::updateTimeout(void)
 {
-	if      (m_update_flags & UPDATE_SCALE)
-		update_scale();
-	else if (m_update_flags & UPDATE_PRECROP)
-		update_precrop();
-	else if (m_update_flags & UPDATE_TONEMAP)
-		update_tonemap();
-	m_update_flags = 0;
+	if (m_prev_update_flags && !m_update_flags)
+	{
+		progress_bar->setMaximum(100);
+		if      (m_prev_update_flags & UPDATE_SCALE)
+			update_scale();
+		else if (m_prev_update_flags & UPDATE_TONEMAP)
+			update_tonemap();
+		else if (m_prev_update_flags & UPDATE_VIEWS)
+			update_views();
+		m_prev_update_flags = 0;
+	}
+	else if (m_update_flags)
+	{
+		if (progress_bar->maximum())
+		{
+			progress_bar->setMaximum(0);
+			progress_bar->show();
+		}
+		m_prev_update_flags |= m_update_flags;
+		m_update_flags = 0;
+	}
 }
 
 void MainWindow::update_scale(void)
@@ -356,8 +381,8 @@ void MainWindow::update_scale(void)
 	{
 	case ZOOM_TO_FIT:
 		zoom = std::min(
-			static_cast<double>(preview->width ())/static_cast<double>(original_image->width ()),
-			static_cast<double>(preview->height())/static_cast<double>(original_image->height()) );
+			static_cast<double>(tonemapped_view->width ())/static_cast<double>(original_image->width ()),
+			static_cast<double>(tonemapped_view->height())/static_cast<double>(original_image->height()) );
 	// FALL THROUGH
 	case ZOOM_CUSTOM:
 		zoom = std::min(std::max(zoom,2./static_cast<double>(std::min(original_image->width(),original_image->height()))),1.);
@@ -388,11 +413,11 @@ void MainWindow::update_scale(void)
 	if (verticalScrollBar->maximum())
 		cy =   verticalScrollBar->value() + (scaled_image->height() -   verticalScrollBar->maximum())/2;
 
-	if ((preview->width () < static_cast<int>(scaled_image->width ()))
-	||  (preview->height() < static_cast<int>(scaled_image->height())))
+	if ((tonemapped_view->width () < static_cast<int>(scaled_image->width ()))
+	||  (tonemapped_view->height() < static_cast<int>(scaled_image->height())))
 	{
 		horizontalScrollBar->setValue   (0);
-		horizontalScrollBar->setMaximum (std::max(preview->width (),static_cast<int>(scaled_image->width ())) - preview->width ());
+		horizontalScrollBar->setMaximum (std::max(tonemapped_view->width (),static_cast<int>(scaled_image->width ())) - tonemapped_view->width ());
 		if (cx < 0)
 			cx =  horizontalScrollBar->maximum()/2;
 		else
@@ -401,7 +426,7 @@ void MainWindow::update_scale(void)
 		horizontalScrollBar->setPageStep(horizontalScrollBar->maximum()/10);
 
 		verticalScrollBar  ->setValue   (0);
-		verticalScrollBar  ->setMaximum (std::max(preview->height(),static_cast<int>(scaled_image->height())) - preview->height());
+		verticalScrollBar  ->setMaximum (std::max(tonemapped_view->height(),static_cast<int>(scaled_image->height())) - tonemapped_view->height());
 		if (cy < 0)
 			cy =  verticalScrollBar->maximum()/2;
 		else
@@ -415,44 +440,10 @@ void MainWindow::update_scale(void)
 		verticalScrollBar  ->setMaximum(0);
 	}
 
-	update_precrop();
-}
-
-void MainWindow::update_precrop(void)
-{
-	if (!scaled_image)
-		return;
-
-
-	if (original_view->isVisible())
-	{
-		boost::shared_ptr<imaginable::Image> cropped_image;
-		if (horizontalScrollBar->maximum()
-		||  verticalScrollBar  ->maximum())
-		{
-			int crop_x = horizontalScrollBar->value();
-			int crop_y = verticalScrollBar  ->value();
-			int crop_w = std::min(preview->width (),static_cast<int>(scaled_image->width ()));
-			int crop_h = std::min(preview->height(),static_cast<int>(scaled_image->height()));
-			cropped_image = imaginable::crop(*scaled_image,crop_x,crop_y,crop_w,crop_h);
-		}
-		else
-			cropped_image = scaled_image->copy();
-
-		original_view->setPixmap(image_to_pixmap(*cropped_image));
-	}
-
-
 
 	less_scaled_side = std::min(scaled_image->width(),scaled_image->height());
-	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * static_cast<double>(slider_blur->value())/100.));
-
-	precrop_x = std::max(0,horizontalScrollBar->value() - static_cast<int>(scaled_blur_in_pixels));
-	precrop_y = std::max(0,  verticalScrollBar->value() - static_cast<int>(scaled_blur_in_pixels));
-	precrop_w = std::min(static_cast<int>(scaled_image->width ()),preview->width () + static_cast<int>(scaled_blur_in_pixels)) + horizontalScrollBar->value() - precrop_x;
-	precrop_h = std::min(static_cast<int>(scaled_image->height()),preview->height() + static_cast<int>(scaled_blur_in_pixels)) +   verticalScrollBar->value() - precrop_y;
-
-	precropped_image = imaginable::crop(*scaled_image,precrop_x,precrop_y,precrop_w,precrop_h);
+	double corrected_blur = imaginable::gamma(static_cast<double>(slider_blur->value())/100.,-2.);
+	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_blur));
 
 	update_tonemap();
 }
@@ -463,34 +454,47 @@ void MainWindow::update_tonemap(void)
 		return;
 
 
-	boost::shared_ptr<imaginable::Image> tonemapped_precropped_image = precropped_image->copy();
+	tonemapped_scaled_image = scaled_image->copy();
 
 	progress_bar->show();
 
-	imaginable::rgb_to_hsl(*tonemapped_precropped_image,false);
+	imaginable::rgb_to_hcy(*tonemapped_scaled_image,false);
 
 	imaginable::TimedProgress timed_progress(boost::bind(&MainWindow::tonemap_notification,this,_1));
-	imaginable::tonemap_local(*tonemapped_precropped_image,static_cast<double>(slider_saturation->value())/10.,scaled_blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
+	imaginable::tonemap_local(*tonemapped_scaled_image,imaginable::gamma(static_cast<double>(slider_saturation->value())/100.,-3.)*10.,scaled_blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
 
-	imaginable::hsl_to_rgb(*tonemapped_precropped_image,false);
+	imaginable::hcy_to_rgb(*tonemapped_scaled_image,false);
 
 	progress_bar->hide();
 
+
+	update_views();
+}
+
+void MainWindow::update_views(void)
+{
+	if (!scaled_image)
+		return;
 
 
 	if (horizontalScrollBar->maximum()
 	||  verticalScrollBar  ->maximum())
 	{
-		int crop_x = horizontalScrollBar->value() - precrop_x;
-		int crop_y = verticalScrollBar  ->value() - precrop_y;
-		int crop_w = std::min(preview->width (),static_cast<int>(scaled_image->width ()));
-		int crop_h = std::min(preview->height(),static_cast<int>(scaled_image->height()));
-		boost::shared_ptr<imaginable::Image> tonemapped_cropped_image = imaginable::crop(*tonemapped_precropped_image,crop_x,crop_y,crop_w,crop_h);
+		int crop_x = horizontalScrollBar->value();
+		int crop_y = verticalScrollBar  ->value();
+		int crop_w = std::min(tonemapped_view->width (),static_cast<int>(scaled_image->width ()));
+		int crop_h = std::min(tonemapped_view->height(),static_cast<int>(scaled_image->height()));
 
-		preview->setPixmap(image_to_pixmap(*tonemapped_cropped_image));
+		if (original_view->isVisible())
+			original_view->setImage(image_to_qimage(*imaginable::crop(*scaled_image,crop_x,crop_y,crop_w,crop_h)));
+		tonemapped_view->setImage(image_to_qimage(*imaginable::crop(*tonemapped_scaled_image,crop_x,crop_y,crop_w,crop_h)));
 	}
 	else
-		preview->setPixmap(image_to_pixmap(*tonemapped_precropped_image));
+	{
+		if (original_view->isVisible())
+			original_view->setImage(image_to_qimage(*scaled_image));
+		tonemapped_view->setImage(image_to_qimage(*tonemapped_scaled_image));
+	}
 }
 
 void MainWindow::tonemap_notification(float value)

@@ -37,9 +37,16 @@
 #endif
 
 
+#define USE_GETTIME 1
+
+
 double getHighPrecTime(void)
 {
-#ifdef USE_GETTIMEOFDAY
+#ifdef USE_GETTIME
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC_RAW,&now);
+	return static_cast<double>(now.tv_sec)+(static_cast<double>(now.tv_nsec))/1000000000.;
+#elif USE_GETTIMEOFDAY
 	struct timeval now;
 	gettimeofday(&now,NULL);
 	return static_cast<double>(now.tv_sec)+(static_cast<double>(now.tv_usec))/1000000.;

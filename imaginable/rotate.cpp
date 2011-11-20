@@ -45,7 +45,7 @@ T sign_(const T& value)
 
 #define NOTIFY_STEP 10
 
-boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier notifier)
+SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -81,9 +81,9 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 
 	Point new_center=Point(static_cast<double>(new_width)/2.,static_cast<double>(new_height)/2.);
 
-	boost::shared_ptr<Image> ret(new Image(new_width,new_height));
-	Image::t_planeNames planeNames=img.planeNames();
-	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+	SharedImage ret(new Image(new_width,new_height));
+	Image::PlaneNames planeNames=img.planeNames();
+	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		ret->addPlane(*I);
 	ret->addPlane(Image::PLANE__INTERNAL);
 
@@ -127,7 +127,7 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 
 
 			size_t k_eff[4]={0};
-			Image::pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
+			Image::Pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
 			if ( (src_x>=0)
 			&&   (src_x+1<static_cast<int>(img.width()))
 			&&   (src_y>=0)
@@ -154,14 +154,14 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 				K+=k_eff[i];
 			dst_plane[dst_yo+x]=( K ? ((K*0x100)-1) : 0 );
 
-			for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+			for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 			{
 				dst_plane=ret->plane(*I);
 
 				size_t v=0;
 				if (K)
 				{
-					const Image::pixel* src_plane=img.plane(*I);
+					const Image::Pixel* src_plane=img.plane(*I);
 					for (size_t i=0; i<4; ++i)
 						if (k_eff[i])
 							v+=k_eff[i]*static_cast<size_t>(src_plane[src_yxo+xyo[i]]);
@@ -172,10 +172,10 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 					dst_plane[dst_yo+x]=0;
 					break;
 				default:
-					dst_plane[dst_yo+x]=static_cast<Image::pixel>(v/K);
+					dst_plane[dst_yo+x]=static_cast<Image::Pixel>(v/K);
 					break;
 				case 0x100:
-					dst_plane[dst_yo+x]=static_cast<Image::pixel>(v/0x100);
+					dst_plane[dst_yo+x]=static_cast<Image::Pixel>(v/0x100);
 					break;
 				}
 			}
@@ -184,9 +184,9 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 
 	if (ret->hasTransparency())
 	{
-		const Image::pixel* src_plane=ret->plane(Image::PLANE__INTERNAL);
-		const Image::pixel* alpha_plane=img.plane(Image::PLANE_ALPHA);
-		Image::pixel* dst_plane=ret->plane(Image::PLANE_ALPHA);
+		const Image::Pixel* src_plane=ret->plane(Image::PLANE__INTERNAL);
+		const Image::Pixel* alpha_plane=img.plane(Image::PLANE_ALPHA);
+		Image::Pixel* dst_plane=ret->plane(Image::PLANE_ALPHA);
 		for (size_t y=0; y<new_height; ++y)
 		{
 			if (!(y%NOTIFY_STEP))
@@ -201,7 +201,7 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 				else if (!src_plane[dst_yxo])
 					dst_plane[dst_yxo]=0;
 				else
-					dst_plane[dst_yxo]=static_cast<Image::pixel>(
+					dst_plane[dst_yxo]=static_cast<Image::Pixel>(
 						(static_cast<size_t>(alpha_plane[dst_yxo])
 						*static_cast<size_t>(  src_plane[dst_yxo]))/Image::MAXIMUM
 						);
@@ -213,7 +213,7 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 	{
 		if (img.maximum()!=Image::MAXIMUM)
 		{
-			Image::pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
+			Image::Pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
 			for (size_t y=0; y<new_height; ++y)
 			{
 				if (!(y%NOTIFY_STEP))
@@ -226,7 +226,7 @@ boost::shared_ptr<Image> rotate(const Image& img,double radian,progress_notifier
 					if (dst_plane[dst_yxo]==Image::MAXIMUM)
 						dst_plane[dst_yxo]=img.maximum();
 					else if (dst_plane[dst_yxo])
-						dst_plane[dst_yxo]=static_cast<Image::pixel>(
+						dst_plane[dst_yxo]=static_cast<Image::Pixel>(
 							(img.maximum()
 							*static_cast<size_t>(dst_plane[dst_yxo]))/Image::MAXIMUM
 							);

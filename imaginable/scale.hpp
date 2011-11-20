@@ -34,7 +34,7 @@
 
 namespace imaginable
 {
-	boost::shared_ptr<Image> scale_nearest(const Image& img,size_t width,size_t height,progress_notifier notifier = dont_notify);
+	SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_notifier notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_SCALE__INCLUDED

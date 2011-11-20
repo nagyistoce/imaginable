@@ -54,7 +54,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="Preview" name="original_view">
+           <widget class="Preview" name="original_view" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -66,17 +66,11 @@
               <width>50</width>
               <height>50</height>
              </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="Preview" name="preview">
+           <widget class="Preview" name="tonemapped_view" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -88,12 +82,6 @@
               <width>50</width>
               <height>50</height>
              </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -212,7 +200,7 @@
           <number>100</number>
          </property>
          <property name="value">
-          <number>10</number>
+          <number>35</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -240,7 +228,7 @@
           </size>
          </property>
          <property name="text">
-          <string>+1.0</string>
+          <string>+1.00</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -263,7 +251,7 @@
           <number>100</number>
          </property>
          <property name="value">
-          <number>20</number>
+          <number>42</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -372,7 +360,7 @@
             </size>
            </property>
            <property name="text">
-            <string>0 px</string>
+            <string>1 px</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -394,7 +382,7 @@
        <item>
         <widget class="QPushButton" name="show_original">
          <property name="text">
-          <string>Show &amp;original</string>
+          <string>S&amp;how original</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -557,14 +545,9 @@
  <customwidgets>
   <customwidget>
    <class>Preview</class>
-   <extends>QLabel</extends>
+   <extends>QWidget</extends>
    <header>preview.hpp</header>
-   <slots>
-    <signal>shifted(int,int)</signal>
-    <signal>resized(int,int)</signal>
-    <signal>imageDropped(QImage)</signal>
-    <signal>urlDropped(QString)</signal>
-   </slots>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
@@ -860,7 +843,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>preview</sender>
+   <sender>tonemapped_view</sender>
    <signal>shifted(int,int)</signal>
    <receiver>MainWindow</receiver>
    <slot>previewShifted(int,int)</slot>
@@ -876,7 +859,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>preview</sender>
+   <sender>tonemapped_view</sender>
    <signal>resized(int,int)</signal>
    <receiver>MainWindow</receiver>
    <slot>previewResized(int,int)</slot>
@@ -908,7 +891,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>preview</sender>
+   <sender>tonemapped_view</sender>
    <signal>imageDropped(QImage)</signal>
    <receiver>MainWindow</receiver>
    <slot>previewImageDropped(QImage)</slot>
@@ -940,7 +923,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>preview</sender>
+   <sender>tonemapped_view</sender>
    <signal>urlDropped(QString)</signal>
    <receiver>MainWindow</receiver>
    <slot>previewUrlDropped(QString)</slot>

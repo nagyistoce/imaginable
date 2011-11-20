@@ -34,7 +34,7 @@
 
 namespace imaginable
 {
-	boost::shared_ptr<Image> crop(const Image& img,size_t x,size_t y,size_t width,size_t height,progress_notifier notifier = dont_notify);
+	SharedImage crop(const Image& img,size_t x,size_t y,size_t width,size_t height,progress_notifier notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_AUTOCROP__INCLUDED

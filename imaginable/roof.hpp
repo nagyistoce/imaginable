@@ -23,18 +23,24 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_ROTATE__INCLUDED
-#define IMAGINABLE__TOOLS_ROTATE__INCLUDED
+#ifndef IMAGINABLE__TOOLS_ROOF__INCLUDED
+#define IMAGINABLE__TOOLS_ROOF__INCLUDED
 
-
-#include <boost/shared_ptr.hpp>
 
 #include "tools.hpp"
 
 
 namespace imaginable
 {
-	SharedImage rotate(const Image& img,double radian,progress_notifier notifier = dont_notify);
+	void roof_linear_straight(Image& img, unsigned planeName, double step,             progress_notifier notifier = dont_notify);
+
+	void roof_linear_diagonal(Image& img, unsigned planeName, double step,             progress_notifier notifier = dont_notify);
+
+	void roof_linear_8       (Image& img, unsigned planeName, double step,             progress_notifier notifier = dont_notify);
+
+	void roof_parabolic      (Image& img, unsigned planeName, double k,                progress_notifier notifier = dont_notify);
+
+	void roof_exponential    (Image& img, unsigned planeName, double a, size_t radius, progress_notifier notifier = dont_notify);
 }
 
-#endif // IMAGINABLE__TOOLS_ROTATE__INCLUDED
+#endif // IMAGINABLE__TOOLS_ROOF__INCLUDED

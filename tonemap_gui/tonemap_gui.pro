@@ -28,6 +28,7 @@ TARGET = tonemap_gui
 DESTDIR = ../bin
 
 TEMPLATE = app
+
 QT += core gui
 
 
@@ -35,12 +36,12 @@ SOURCES += \
 	main.cpp\
 	version.cpp \
 	mainwindow.cpp \
-    preview.cpp
+	preview.cpp
 
 HEADERS += \
 	version.hpp \
 	mainwindow.hpp \
-    preview.hpp
+	preview.hpp
 
 FORMS += \
 	mainwindow.ui
@@ -50,6 +51,9 @@ OTHER_FILES += \
 	version-minor.inl \
 	version-label.inl
 
+RESOURCES += \
+	tonemap_gui.qrc
+
 
 INCLUDEPATH += ..
 
@@ -58,7 +62,11 @@ LIBS += \
 	-L../lib \
 	-limaginable
 
-PRE_TARGETDEPS += ../lib/libimaginable.so
+PRE_TARGETDEPS += \
+	../lib/libimaginable.so
+
+TRANSLATIONS = \
+	tonemap_gui_ua.ts
 
 
 autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
@@ -68,6 +76,3 @@ PRE_TARGETDEPS += autoversioning
 autoversioning_echo.commands = "@echo Autoversioning ..."
 
 QMAKE_EXTRA_TARGETS += autoversioning autoversioning_echo
-
-RESOURCES += \
-    tonemap_gui.qrc

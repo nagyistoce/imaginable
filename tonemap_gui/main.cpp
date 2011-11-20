@@ -24,19 +24,33 @@
 
 
 #include <QtGui/QApplication>
+#include <QtCore/QTranslator>
+#include <QtCore/QFileInfo>
 
 #include "mainwindow.hpp"
+#include "version.hpp"
 
 
 int main(int argc,char *argv[])
 {
 	QApplication a(argc, argv);
 
+	a.setOrganizationName("Kuzma Shapran");
+	a.setApplicationName("tonemap");
+	a.setApplicationVersion(QString::fromAscii(version::full_string()));
+
+	QString locale = QLocale::system().name();
+
+	QTranslator translator;
+	QFileInfo app_fi(a.applicationFilePath());
+	translator.load(QFileInfo(app_fi.path()).path()+"/lang/"+app_fi.fileName()+"_" + locale + ".qm");
+	a.installTranslator(&translator);
+
 	MainWindow w;
 	w.show();
 
 	int argi=1;
-	for(bool ok=false; (!ok) && (argi < argc); argi++)
+	for (bool ok=false; (!ok) && (argi != argc); ++argi)
 		ok = w.loadFile(QString::fromLocal8Bit(argv[argi]));
 
 	return a.exec();

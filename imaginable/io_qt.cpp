@@ -74,7 +74,7 @@ void QImage_loader::load(const QImage& qimage)
 		m_image.setSize(mx,my);
 		m_image.setMaximum(0xff);
 
-		Image::pixel* planes[4]={NULL};
+		Image::Pixel* planes[4]={NULL};
 		if( (m_image.addPlane(Image::PLANE_RED))
 		&&  (m_image.addPlane(Image::PLANE_GREEN))
 		&&  (m_image.addPlane(Image::PLANE_BLUE)) )
@@ -115,10 +115,10 @@ void QImage_saver::save(QImage& qimage) const
 
 	switch(m_image.colourSpace())
 	{
-		case Image::IMAGE_MONO:
+		case Image::COLOURSPACE_GRAY:
 		//TODO: mono direct support
 		break;
-		case Image::IMAGE_RGB:
+		case Image::COLOURSPACE_RGB:
 		{
 			size_t mx=m_image.width();
 			size_t my=m_image.height();
@@ -129,7 +129,7 @@ void QImage_saver::save(QImage& qimage) const
 				size_t maximum=static_cast<size_t>(m_image.maximum());
 				bool scale=(maximum!=0xff);
 
-				const Image::pixel* planes[4];
+				const Image::Pixel* planes[4];
 
 				planes[0]=m_image.plane(Image::PLANE_RED);
 				planes[1]=m_image.plane(Image::PLANE_GREEN);
@@ -161,7 +161,7 @@ void QImage_saver::save(QImage& qimage) const
 				size_t maximum=static_cast<size_t>(m_image.maximum());
 				bool scale=(maximum!=0xff);
 
-				const Image::pixel* planes[3];
+				const Image::Pixel* planes[3];
 
 				planes[0]=m_image.plane(Image::PLANE_RED);
 				planes[1]=m_image.plane(Image::PLANE_GREEN);
