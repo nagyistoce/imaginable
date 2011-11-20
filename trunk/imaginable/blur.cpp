@@ -24,6 +24,7 @@
 
 
 #include <boost/scoped_array.hpp>
+#include <boost/bind.hpp>
 
 #include "blur.hpp"
 
@@ -32,30 +33,16 @@ namespace imaginable {
 
 #define NOTIFY_STEP 10
 
-void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha,progress_notifier notifier)
+template <typename PIXEL, typename ALPHA_PIXEL>
+void universal_box_blur(PIXEL *plane,ssize_t width,ssize_t height,size_t radius,ALPHA_PIXEL *alpha,progress_notifier notifier)
 {
-	if(!img.hasData())
-		throw exception(exception::NO_IMAGE);
-
-	if( (!radius) || (radius>(std::max(img.width(),img.height()))) )
-		throw exception(exception::INVALID_RADIUS);
-
-	if(!img.hasPlane(planeName))
-		throw exception(exception::INVALID_PLANE);
-
-
-	ssize_t width =static_cast<ssize_t>(img.width());
-	ssize_t height=static_cast<ssize_t>(img.height());
-
-	Image::pixel* plane=img.plane(planeName);
-	const Image::pixel* alpha=img.plane(Image::PLANE_ALPHA);
 
 	ssize_t sRadius=static_cast<ssize_t>(radius);
 	size_t blur_size=sRadius*2+1;
 
 
-	boost::scoped_array<Image::pixel> sc_acc(new Image::pixel[blur_size]);
-	Image::pixel* acc=sc_acc.get();
+	boost::scoped_array<PIXEL> sc_acc(new PIXEL[blur_size]);
+	PIXEL* acc=sc_acc.get();
 
 	boost::scoped_array<bool> sc_use(new bool[blur_size]);
 	bool* use=sc_use.get();
@@ -87,10 +74,10 @@ void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha,
 
 			if(( use[i_add]=
 				(  (y_add<height)
-				&& ( (!use_alpha)
+				&& ( (!alpha)
 				||   alpha[p_add] ) ) ))
 			{
-				const Image::pixel& value=plane[p_add];
+				const PIXEL& value=plane[p_add];
 				acc[i_add]=value;
 				blur+=static_cast<uint64_t>(value);
 				++areaSize;
@@ -104,7 +91,7 @@ void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha,
 
 			if( (y>=0)
 			&&  areaSize)
-				plane[y*width+x]=static_cast<Image::pixel>(blur/areaSize);
+				plane[y*width+x]=static_cast<PIXEL>(blur/areaSize);
 		}
 	}
 	notifier(0.5);
@@ -136,10 +123,10 @@ void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha,
 
 			if(( use[i_add]=
 				(  (x_add<width)
-				&& ( (!use_alpha)
+				&& ( (!alpha)
 				||   alpha[p_add] ) ) ))
 			{
-				const Image::pixel& value=plane[p_add];
+				const PIXEL& value=plane[p_add];
 				acc[i_add]=value;
 				blur+=static_cast<uint64_t>(value);
 				++areaSize;
@@ -153,14 +140,61 @@ void box_blur(Image& img,unsigned planeName,const size_t& radius,bool use_alpha,
 
 			if( (x>=0)
 			&&  areaSize)
-				plane[y*width+x]=static_cast<Image::pixel>(blur/areaSize);
+				plane[y*width+x]=static_cast<PIXEL>(blur/areaSize);
 		}
 	}
 	notifier(1.0);
 }
 
+template <typename PIXEL, typename ALPHA_PIXEL>
+void universal_gaussian_blur(PIXEL *plane,ssize_t width,ssize_t height,size_t radius,ALPHA_PIXEL *alpha,progress_notifier notifier)
+{
+	size_t radius_3 = radius/3;
+	if (radius_3)
+		universal_box_blur<PIXEL,ALPHA_PIXEL>(plane,width,height,radius_3,alpha,boost::bind(&scaled_notifier,notifier,0.   ,1./3.,_1));
+	radius_3 = radius - 2*radius_3;
+	if (radius_3)
+		universal_box_blur<PIXEL,ALPHA_PIXEL>(plane,width,height,radius_3,alpha,boost::bind(&scaled_notifier,notifier,1./3.,1./3.,_1));
+	radius_3 = radius/3;
+	if (radius_3)
+		universal_box_blur<PIXEL,ALPHA_PIXEL>(plane,width,height,radius_3,alpha,boost::bind(&scaled_notifier,notifier,2./3.,1./3.,_1));
+}
+
+void box_blur(Image& img,unsigned planeName,size_t radius,bool use_alpha,progress_notifier notifier)
+{
+	if(!img.hasData())
+		throw exception(exception::NO_IMAGE);
+
+	if( (!radius) || (radius>(std::max(img.width(),img.height()))) )
+		throw exception(exception::INVALID_RADIUS);
+
+	if(!img.hasPlane(planeName))
+		throw exception(exception::INVALID_PLANE);
+
+	universal_box_blur<Image::Pixel,Image::Pixel>(img.plane(planeName),img.width(),img.height(),radius,use_alpha?img.plane(Image::PLANE_ALPHA):NULL,notifier);
+}
+
+void gaussian_blur(Image& img,unsigned planeName,size_t radius,bool use_alpha,progress_notifier notifier)
+{
+	if(!img.hasData())
+		throw exception(exception::NO_IMAGE);
+
+	if( (!radius) || (radius>(std::max(img.width(),img.height()))) )
+		throw exception(exception::INVALID_RADIUS);
+
+	if(!img.hasPlane(planeName))
+		throw exception(exception::INVALID_PLANE);
+
+	universal_gaussian_blur<Image::Pixel,Image::Pixel>(img.plane(planeName),img.width(),img.height(),radius,use_alpha?img.plane(Image::PLANE_ALPHA):NULL,notifier);
+}
+
+void force_instantiate_template(void)
+{
+	universal_gaussian_blur<uint32_t,Image::Pixel>(NULL,0,0,0,NULL,dont_notify);
+}
+
 #if 0
-Image::pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,const size_t& radius,bool use_alpha)
+Image::Pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,size_t radius,bool use_alpha)
 {
 	if(!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -180,9 +214,9 @@ Image::pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,cons
 
 	img.addPlane(blurred_plane);
 
-	const Image::pixel* src=img.plane(src_plane);
-	Image::pixel* blurred=img.plane(blurred_plane);
-	Image::pixel* alpha=img.plane(Image::PLANE_ALPHA);
+	const Image::Pixel* src=img.plane(src_plane);
+	Image::Pixel* blurred=img.plane(blurred_plane);
+	Image::Pixel* alpha=img.plane(Image::PLANE_ALPHA);
 
 	ssize_t sRadius=static_cast<ssize_t>(radius);
 
@@ -266,7 +300,7 @@ Image::pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,cons
 			if(process)
 			{
 				if(areaSize)
-					blurred[y*width+x]=static_cast<Image::pixel>(blur/areaSize);
+					blurred[y*width+x]=static_cast<Image::Pixel>(blur/areaSize);
 				else
 					blurred[y*width+x]=src[y*width+x];
 			}

@@ -27,14 +27,18 @@
 #define IMAGINABLE__TONEMAP_GUI__PREVIEW__INCLUDED
 
 
-#include <QLabel>
+#include <QtGui/QWidget>
+#include <QtGui/QImage>
+#include <QtCore/QPoint>
 
 
-class Preview : public QLabel
+class Preview : public QWidget
 {
 	Q_OBJECT
 public:
 	explicit Preview(QWidget *parent = NULL);
+
+	void setImage(const QImage&);
 
 protected:
 	void mousePressEvent(QMouseEvent*);
@@ -43,6 +47,7 @@ protected:
 	void resizeEvent(QResizeEvent*);
 	void dragEnterEvent(QDragEnterEvent*);
 	void dropEvent(QDropEvent*);
+	void paintEvent(QPaintEvent*);
 
 signals:
 	void resized(int,int);
@@ -55,6 +60,7 @@ private:
 	int m_old_x;
 	int m_old_y;
 
+	QImage m_image;
 };
 
 #endif // IMAGINABLE__TONEMAP_GUI__PREVIEW__INCLUDED

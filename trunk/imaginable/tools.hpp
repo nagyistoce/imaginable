@@ -71,7 +71,7 @@ namespace imaginable
 				case INVALID_PLANE:           return "Invalid plane";
 				case PLANE_EXISTS:            return "Plane exists";
 				case NOT_AN_HDRI:             return "Not an HDR image";
-				case INVALID_DATA:            return "Invalid pixel data";
+				case INVALID_DATA:            return "Invalid Pixel data";
 			}
 			return std::exception::what();
 		}

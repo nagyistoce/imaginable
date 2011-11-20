@@ -25,12 +25,13 @@
 
 #include <QtGui/QResizeEvent>
 #include <QtCore/QUrl>
+#include <QtGui/QPainter>
 
 #include "preview.hpp"
 
 
 Preview::Preview(QWidget *parent)
-	: QLabel(parent)
+	: QWidget(parent)
 	, m_is_shifting(false)
 {
 	setMouseTracking(true);
@@ -132,4 +133,21 @@ void Preview::dropEvent(QDropEvent *event)
 		event->setDropAction(Qt::IgnoreAction);
 		event->accept();
 	}
+}
+
+void Preview::setImage(const QImage& image)
+{
+	m_image = image;
+	update();
+}
+
+void Preview::paintEvent(QPaintEvent *)
+{
+	QPainter painter;
+	painter.begin(this);
+	painter.setRenderHint(QPainter::Antialiasing);
+
+	painter.drawImage(0,0,m_image);
+
+	painter.end();
 }

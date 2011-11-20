@@ -49,7 +49,8 @@ SOURCES += \
 	colourspace.cpp \
 	blur.cpp \
 	tonemap.cpp \
-	scale.cpp
+	scale.cpp \
+	roof.cpp
 
 HEADERS += \
 	image.hpp \
@@ -68,9 +69,8 @@ HEADERS += \
 	colourspace.hpp \
 	blur.hpp \
 	tonemap.hpp \
-	scale.hpp
-
-
+	scale.hpp \
+	roof.hpp
 
 OTHER_FILES += \
 	version-major.inl \
@@ -85,3 +85,5 @@ PRE_TARGETDEPS += autoversioning
 autoversioning_echo.commands = "@echo Autoversioning ..."
 
 QMAKE_EXTRA_TARGETS += autoversioning autoversioning_echo
+
+

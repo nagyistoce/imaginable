@@ -31,7 +31,7 @@ namespace imaginable {
 
 #define NOTIFY_STEP 10
 
-boost::shared_ptr<Image> scale_nearest(const Image& img,size_t width,size_t height,progress_notifier notifier)
+SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -40,18 +40,18 @@ boost::shared_ptr<Image> scale_nearest(const Image& img,size_t width,size_t heig
 	||   !height )
 		throw exception(exception::EMPTY_IMAGE);
 
-	boost::shared_ptr<Image> ret(new Image(width,height));
-	Image::t_planeNames planeNames=img.planeNames();
-	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+	SharedImage ret(new Image(width,height));
+	Image::PlaneNames planeNames=img.planeNames();
+	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		ret->addPlane(*I);
 
 	float ntf_offset = 0.0;
 	float ntf_scale = 1./static_cast<float>(planeNames.size());
 
-	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 	{
-		const Image::pixel* src_plane=img. plane(*I);
-		/* */ Image::pixel* dst_plane=ret->plane(*I);
+		const Image::Pixel* src_plane=img. plane(*I);
+		/* */ Image::Pixel* dst_plane=ret->plane(*I);
 
 		for (size_t y=0; y<height; ++y)
 		{

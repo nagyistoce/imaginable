@@ -45,77 +45,74 @@ Image::Image(size_t width,size_t height)
 
 Image::~Image()
 {
-	for (t_unloaded_planes::iterator U=m_unloaded_planes.begin(); U!=m_unloaded_planes.end(); ++U)
+	for (UnloadedPlanes::iterator U=m_unloaded_planes.begin(); U!=m_unloaded_planes.end(); ++U)
 		close(U->second);
 }
 
-boost::shared_ptr<Image> Image::copy(void) const
+SharedImage Image::copy(void) const
 {
-	boost::shared_ptr<Image> ret(new Image());
+	SharedImage ret(new Image());
 
 	ret->setSize(m_width,m_height);
 	ret->setMaximum(m_maximum);
-	size_t square=m_width*m_height*sizeof(pixel);
-	for(t_planes::const_iterator I=m_plane.begin();I!=m_plane.end();++I)
+	size_t square=m_width*m_height*sizeof(Pixel);
+	for(Planes::const_iterator I=m_plane.begin();I!=m_plane.end();++I)
 	{
 		ret->addPlane(I->first);
 		memcpy(ret->plane(I->first),I->second.get(),square);
 	}
-	for(t_text::const_iterator I=m_text.begin();I!=m_text.end();++I)
+	for(Text::const_iterator I=m_text.begin();I!=m_text.end();++I)
 		ret->setText(I->first,I->second);
 
 	return ret;
 }
 
-Image::t_colourSpace Image::colourSpace(void) const
+Image::ColourSpace Image::colourSpace(void) const
 {
 	if( m_plane.empty() )
-		return IMAGE_EMPTY;
+		return COLOURSPACE_NONE;
 
 	if( (m_plane.size()==1) && (m_plane.begin()->first==PLANE_ALPHA) )
-		return IMAGE_MASK;
+		return COLOURSPACE_ALPHA;
 
-	t_planeNames names=planeNames();
+	PlaneNames names=planeNames();
 	names.erase(PLANE_ALPHA);
 
 	switch(names.size())
 	{
 		case 1:
-			switch(*names.begin())
-			{
-				case PLANE_MONO:
-					return IMAGE_MONO;
-
-				case PLANE_GREY:
-					return IMAGE_GREY;
-
-				default:;//to shut up compiler
-			}
+			if( *names.begin() == PLANE_GRAY )
+				return COLOURSPACE_GRAY;
 		break;
 		case 3:
-			if( names.find(PLANE_RED)  !=names.end()
-			&&  names.find(PLANE_GREEN)!=names.end()
-			&&  names.find(PLANE_BLUE) !=names.end() )
-				return IMAGE_RGB;
+			if( names.find(PLANE_RED)   != names.end()
+			&&  names.find(PLANE_GREEN) != names.end()
+			&&  names.find(PLANE_BLUE)  != names.end() )
+				return COLOURSPACE_RGB;
 
-			if( names.find(PLANE_HUE)           !=names.end()
-			&&  names.find(PLANE_HSV_SATURATION)!=names.end()
-			&&  names.find(PLANE_HSV_VALUE)     !=names.end() )
-				return IMAGE_HSV;
+			if( names.find(PLANE_HUE)        != names.end()
+			&&  names.find(PLANE_SATURATION) != names.end()
+			&&  names.find(PLANE_LIGHTNESS)  != names.end() )
+				return COLOURSPACE_HSL;
 
-			if( names.find(PLANE_HUE)           !=names.end()
-			&&  names.find(PLANE_HSL_SATURATION)!=names.end()
-			&&  names.find(PLANE_HSL_LIGHTNESS) !=names.end() )
-				return IMAGE_HSL;
+			if( names.find(PLANE_HUE)        != names.end()
+			&&  names.find(PLANE_SATURATION) != names.end()
+			&&  names.find(PLANE_VALUE)      != names.end() )
+				return COLOURSPACE_HSV;
+
+			if( names.find(PLANE_HUE)    != names.end()
+			&&  names.find(PLANE_CHROMA) != names.end()
+			&&  names.find(PLANE_LUMA)   != names.end() )
+				return COLOURSPACE_HCY;
 		break;
 	}
-	return IMAGE_UNUSUAL;
+	return COLOURSPACE_CUSTOM;
 }
 
-Image::t_planeNames Image::planeNames(void) const
+Image::PlaneNames Image::planeNames(void) const
 {
-	t_planeNames ret;
-	for(t_planes::const_iterator I=m_plane.begin();I!=m_plane.end();++I)
+	PlaneNames ret;
+	for(Planes::const_iterator I=m_plane.begin();I!=m_plane.end();++I)
 		ret.insert(I->first);
 	return ret;
 }
@@ -125,19 +122,21 @@ bool Image::addPlane(unsigned planeName)
 	if(empty())
 		return false;
 
-	t_planes::const_iterator I=m_plane.find(planeName);
+	Planes::const_iterator I=m_plane.find(planeName);
 	if(I!=m_plane.end())
 		return false;
 
-	pixel* new_plane=new pixel[m_width*m_height];
-	memset(new_plane,0,m_width*m_height*sizeof(pixel));
-	m_plane[planeName]=t_plane(new_plane);
+	size_t area = m_width*m_height;
+
+	Plane new_plane(new Pixel[area]);
+	memset(new_plane.get(),0,area*sizeof(Pixel));
+	m_plane[planeName]=new_plane;
 	return true;
 }
 
 bool Image::removePlane(unsigned planeName)
 {
-	t_planes::iterator I=m_plane.find(planeName);
+	Planes::iterator I=m_plane.find(planeName);
 	if(I==m_plane.end())
 		return false;
 
@@ -153,11 +152,11 @@ bool Image::renamePlane(unsigned from,unsigned to)
 	if(empty())
 		return false;
 
-	t_planes::iterator F=m_plane.find(from);
+	Planes::iterator F=m_plane.find(from);
 	if(F==m_plane.end())
 		return false;
 
-	t_planes::iterator T=m_plane.find(to);
+	Planes::iterator T=m_plane.find(to);
 	if(T!=m_plane.end())
 		return false;
 
@@ -166,9 +165,9 @@ bool Image::renamePlane(unsigned from,unsigned to)
 	return true;
 }
 
-const Image::pixel* Image::plane(unsigned planeName) const
+const Image::Pixel* Image::plane(unsigned planeName) const
 {
-	t_planes::const_iterator I=m_plane.find(planeName);
+	Planes::const_iterator I=m_plane.find(planeName);
 	if (I==m_plane.end())
 		return NULL;
 	if (!I->second.get())
@@ -179,9 +178,9 @@ const Image::pixel* Image::plane(unsigned planeName) const
 	return I->second.get();
 }
 
-Image::pixel* Image::plane(unsigned planeName)
+Image::Pixel* Image::plane(unsigned planeName)
 {
-	t_planes::iterator I=m_plane.find(planeName);
+	Planes::iterator I=m_plane.find(planeName);
 	if (I==m_plane.end())
 		return NULL;
 	if (!I->second.get())
@@ -194,7 +193,7 @@ Image::pixel* Image::plane(unsigned planeName)
 
 bool Image::unloadPlane(unsigned planeName) const
 {
-	t_planes::iterator I=m_plane.find(planeName);
+	Planes::iterator I=m_plane.find(planeName);
 	if (I==m_plane.end())
 		return false;
 	if (!I->second.get())
@@ -203,7 +202,7 @@ bool Image::unloadPlane(unsigned planeName) const
 	char fn[]="/tmp/imageXXXXXX";
 	int fd=mkstemp(fn);
 	unlink(fn);
-	if (write(fd,I->second.get(),m_width*m_height*sizeof(pixel)) == static_cast<ssize_t>(m_width*m_height*sizeof(pixel)))
+	if (write(fd,I->second.get(),m_width*m_height*sizeof(Pixel)) == static_cast<ssize_t>(m_width*m_height*sizeof(Pixel)))
 	{
 		lseek(fd,SEEK_SET,0);
 		I->second.reset();
@@ -219,7 +218,7 @@ bool Image::unloadPlane(unsigned planeName) const
 
 bool Image::reloadPlane(unsigned planeName) const
 {
-	t_planes::iterator I=m_plane.find(planeName);
+	Planes::iterator I=m_plane.find(planeName);
 	if (I==m_plane.end())
 		return false;
 	if (I->second.get())
@@ -228,24 +227,23 @@ bool Image::reloadPlane(unsigned planeName) const
 	int fd=m_unloaded_planes[planeName];
 	lseek(fd,SEEK_SET,0);
 
-	pixel* new_plane=new pixel[m_width*m_height];
-	if (read(fd,new_plane,m_width*m_height*sizeof(pixel)) == static_cast<ssize_t>(m_width*m_height*sizeof(pixel)))
+	size_t area = m_width*m_height;
+
+	Plane new_plane(new Pixel[area]);
+	if (read(fd,new_plane.get(),area*sizeof(Pixel)) == static_cast<ssize_t>(area*sizeof(Pixel)))
 	{
-		m_plane[planeName]=t_plane(new_plane);
+		m_plane[planeName]=new_plane;
 		close(fd);
 		m_unloaded_planes.erase(planeName);
 		return true;
 	}
 	else
-	{
-		delete[] new_plane;
 		return false;
-	}
 }
 
 bool Image::planeUnloaded(unsigned planeName) const
 {
-	t_planes::iterator I=m_plane.find(planeName);
+	Planes::iterator I=m_plane.find(planeName);
 	if (I==m_plane.end())
 		return false;
 	if (I->second.get())
@@ -288,10 +286,10 @@ void Image::clear(void)
 	m_text.clear();
 }
 
-Image::t_text_keys Image::text_keys(void) const
+Image::TextKeys Image::text_keys(void) const
 {
-	t_text_keys ret;
-	for(t_text::const_iterator I=m_text.begin();I!=m_text.end();++I)
+	TextKeys ret;
+	for(Text::const_iterator I=m_text.begin();I!=m_text.end();++I)
 		ret.insert(I->first);
 	return ret;
 }

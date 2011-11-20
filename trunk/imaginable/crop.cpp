@@ -32,7 +32,7 @@
 
 namespace imaginable {
 
-boost::shared_ptr<Image> crop(const Image& img,size_t left,size_t top,size_t width,size_t height,progress_notifier notifier)
+SharedImage crop(const Image& img,size_t left,size_t top,size_t width,size_t height,progress_notifier notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -46,10 +46,10 @@ boost::shared_ptr<Image> crop(const Image& img,size_t left,size_t top,size_t wid
 	if ( top + height > img.height())
 		height = img.height() - top;
 
-	boost::shared_ptr<Image> ret(new Image(width,height));
+	SharedImage ret(new Image(width,height));
 
-	const Image::t_planeNames& planeNames=img.planeNames();
-	for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+	const Image::PlaneNames& planeNames=img.planeNames();
+	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		ret->addPlane(*I);
 	ret->setMaximum(img.maximum());
 	ret->copyTextFrom(img);
@@ -59,25 +59,25 @@ boost::shared_ptr<Image> crop(const Image& img,size_t left,size_t top,size_t wid
 
 	if ( (left==0) && (width==img.width()) )
 	{
-		for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+		for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		{
 			notifier(static_cast<float>(i++)/static_cast<float>(m));
 
-			const Image::pixel* from=img.plane(*I);
-			Image::pixel* to=ret->plane(*I);
-			memcpy(to,from+top*img.width(),height*width*sizeof(Image::pixel));
+			const Image::Pixel* from=img.plane(*I);
+			Image::Pixel* to=ret->plane(*I);
+			memcpy(to,from+top*img.width(),height*width*sizeof(Image::Pixel));
 		}
 	}
 	else
 	{
-		for (Image::t_planeNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
+		for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		{
 			notifier(static_cast<float>(i++)/static_cast<float>(m));
 
-			const Image::pixel* from=img.plane(*I);
-			Image::pixel* to=ret->plane(*I);
+			const Image::Pixel* from=img.plane(*I);
+			Image::Pixel* to=ret->plane(*I);
 			for (size_t row=0; row<height; ++row)
-				memcpy(to+row*width,from+(row+top)*img.width()+left,width*sizeof(Image::pixel));
+				memcpy(to+row*width,from+(row+top)*img.width()+left,width*sizeof(Image::Pixel));
 		}
 	}
 
