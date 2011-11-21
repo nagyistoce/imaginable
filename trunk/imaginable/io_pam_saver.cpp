@@ -23,6 +23,8 @@
 *************/
 
 
+#include <QtCore/QtEndian>
+
 #include <boost/scoped_array.hpp>
 #include <boost/format.hpp>
 
@@ -165,7 +167,7 @@ void PAM_saver::save(std::ostream& stream) const
 				size_t xdo=yo+x;
 				size_t xso=(yo+x)*depth;
 				for(size_t p=0;p<depth;++p)
-					data[xso+p]=__bswap_16(static_cast<uint16_t>(planes[p][xdo]));
+					data[xso+p]=qFromBigEndian(static_cast<uint16_t>(planes[p][xdo]));
 			}
 		}
 

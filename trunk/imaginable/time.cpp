@@ -23,45 +23,39 @@
 *************/
 
 
+#include <QtCore/QElapsedTimer>
+
 #include "time.hpp"
 
-#include <cstddef>
 
+struct HPT_wrapper
+{
+	QElapsedTimer elapsedTimer;
 
-#if defined(_STRUCT_TIMEVAL) || defined(_TIMEVAL_DEFINED)
-	#define USE_GETTIMEOFDAY 1
-#endif
+	HPT_wrapper()
+	{
+		elapsedTimer.start();
+	}
 
-#ifndef USE_GETTIMEOFDAY
-	static const double start_time=static_cast<double>(time(NULL));
-#endif
-
-
-#define USE_GETTIME 1
-
+	double elapsed(void) const
+	{
+		return static_cast<double>(elapsedTimer.nsecsElapsed())/1000000000.;
+	}
+} highPrecTime;
 
 double getHighPrecTime(void)
 {
-#ifdef USE_GETTIME
-	struct timespec now;
-	clock_gettime(CLOCK_MONOTONIC_RAW,&now);
-	return static_cast<double>(now.tv_sec)+(static_cast<double>(now.tv_nsec))/1000000000.;
-#elif USE_GETTIMEOFDAY
-	struct timeval now;
-	gettimeofday(&now,NULL);
-	return static_cast<double>(now.tv_sec)+(static_cast<double>(now.tv_usec))/1000000.;
-#else
-	#warning clock() is used for high precision timer
-	return static_cast<double>(clock())/static_cast<double>(CLOCKS_PER_SEC)+static_cast<double>(time(NULL))-start_time;
-#endif
+	return highPrecTime.elapsed();
 }
 
+#ifdef Q_OS_LINUX
 void setTimeSpec(struct timespec& time_s,double time)
 {
 	unsigned long time_i=static_cast<unsigned long>(time*1000000000.);
 	time_s.tv_sec =time_i/1000000000;
 	time_s.tv_nsec=time_i%1000000000;
 }
+#endif
 
 void setTimeVal(struct timeval& time_v,double time)
 {

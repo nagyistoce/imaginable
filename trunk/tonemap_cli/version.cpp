@@ -28,6 +28,10 @@
 
 #include <string>
 
+#if !defined(Q_OS_LINUX)
+#	include <cstring>
+#endif
+
 #include "version.hpp"
 
 
@@ -66,7 +70,16 @@ namespace version {
 	void init_stm(void)
 	{
 		if (!stm_inited)
+		{
+#ifdef Q_OS_LINUX
 			stm_inited = ( localtime_r(&time_,&stm) != NULL );
+#else
+			struct tm *ltm = localtime(&time_);
+			if (ltm)
+				memcpy(&stm,ltm,sizeof(struct tm));
+			stm_inited = (ltm != NULL);
+#endif
+		}
 	}
 
 
@@ -83,6 +96,8 @@ namespace version {
 	const char* full_string(void)
 	{
 		if (!full_string_)
+		{
+#ifdef Q_OS_LINUX
 			if (asprintf(&full_string_,"%d.%d.%s.%d%s%s",
 				major_,
 				minor_,
@@ -93,6 +108,24 @@ namespace version {
 			{
 				full_string_ = NULL;
 			}
+#else
+			int length = snprintf(full_string_,0,"%d.%d.%s.%d%s%s",
+				major_,
+				minor_,
+				revision_,
+				number_,
+				(label_[0] != '-') ? "-" : "",
+				label_ );
+			full_string_ = static_cast<char*>(malloc(length));
+			snprintf(full_string_,length,"%d.%d.%s.%d%s%s",
+				major_,
+				minor_,
+				revision_,
+				number_,
+				(label_[0] != '-') ? "-" : "",
+				label_ );
+#endif
+		}
 		return full_string_;
 	}
 
@@ -112,8 +145,14 @@ namespace version {
 		if (!ubuntu_style_string_)
 		{
 			init_stm();
+#ifdef Q_OS_LINUX
 			if (asprintf(&ubuntu_style_string_,"%02d.%02d",stm.tm_year-100,stm.tm_mon+1) < 0)
 				full_string_ = NULL;
+#else
+			int length = snprintf(ubuntu_style_string_,0,"%02d.%02d",stm.tm_year-100,stm.tm_mon+1);
+			ubuntu_style_string_ = static_cast<char*>(malloc(length));
+			snprintf(ubuntu_style_string_,length,"%02d.%02d",stm.tm_year-100,stm.tm_mon+1);
+#endif
 		}
 		return ubuntu_style_string_;
 	}

@@ -23,9 +23,15 @@
 *************/
 
 
+#if !defined(Q_OS_LINUX)
+#	include <QtCore/QTemporaryFile>
+#endif
+
 #include <boost/scoped_array.hpp>
 
 #include <cstring>
+
+#include <unistd.h>
 
 #include "image.hpp"
 
@@ -199,9 +205,18 @@ bool Image::unloadPlane(unsigned planeName) const
 	if (!I->second.get())
 		return false;
 
+	int fd;
+#ifdef Q_OS_LINUX
 	char fn[]="/tmp/imageXXXXXX";
-	int fd=mkstemp(fn);
+	fd=mkstemp(fn);
 	unlink(fn);
+#else
+	{
+		QTemporaryFile tmpFile("/tmp/imageXXXXXX");
+		fd = dup(tmpFile.handle());
+		unlink(qPrintable(tmpFile.fileName()));
+	}
+#endif
 	if (write(fd,I->second.get(),m_width*m_height*sizeof(Pixel)) == static_cast<ssize_t>(m_width*m_height*sizeof(Pixel)))
 	{
 		lseek(fd,SEEK_SET,0);
