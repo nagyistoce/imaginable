@@ -23,6 +23,8 @@
 *************/
 
 
+#include <QtCore/QtEndian>
+
 #include <boost/scoped_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -695,7 +697,7 @@ bool PNM_base_loader::loadAndUnpackPlanes(Image::Pixel** planes,size_t depth)
 					size_t xdo=yo+x;
 					size_t xso=(yo+x)*depth;
 					for(size_t p=0;p<depth;++p)
-						planes[p][xdo]=static_cast<Image::Pixel>(__bswap_16(data[xso+p]));
+						planes[p][xdo]=static_cast<Image::Pixel>(qFromBigEndian(data[xso+p]));
 				}
 			}
 			return true;

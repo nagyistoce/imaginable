@@ -78,12 +78,25 @@ OTHER_FILES += \
 	version-label.inl
 
 
-autoversioning.commands = "@bash $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
+
+win32:CYGWIN_PATH = C:/cygwin/bin
+win32:BOOST_PATH = C:/boost_1_47_0
+
+
+
+win32:INCLUDEPATH += $$BOOST_PATH
+
+
+win32:{
+	autoversioning.BATNAME = $$dirname(_PRO_FILE_PWD_)/autoversion-svn.bat
+	autoversioning.commands = "@cmd /c $$replace(autoversioning.BATNAME, /, \\) $$replace(CYGWIN_PATH, /, \\)"
+}else{
+	autoversioning.commands = "bash"
+}
+autoversioning.commands += " $$dirname(_PRO_FILE_PWD_)/autoversion-svn.sh $$_PRO_FILE_PWD_"
 autoversioning.depends = autoversioning_echo
 PRE_TARGETDEPS += autoversioning
 
 autoversioning_echo.commands = "@echo Autoversioning ..."
 
 QMAKE_EXTRA_TARGETS += autoversioning autoversioning_echo
-
-

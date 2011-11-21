@@ -23,6 +23,7 @@
 *************/
 
 
+
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/format.hpp>
@@ -40,8 +41,14 @@
 #include <imaginable/time.hpp>
 #include <imaginable/version.hpp>
 
+#include <libintl.h>
+
 #include "version.hpp"
 
+
+#if !defined(Q_OS_LINUX)
+char *program_invocation_short_name;
+#endif
 
 void hello(void)
 {
@@ -148,6 +155,10 @@ void percent_printer(float value)
 
 int main(int argc,char* argv[])
 {
+#if !defined(Q_OS_LINUX)
+	program_invocation_short_name = strrchr(argv[0],'\\')+1;
+#endif
+
 	std::string input_name;
 	bool use_stdin = true;
 
