@@ -66,6 +66,7 @@ win32:BOOST_PATH = C:/boost_1_47_0
 win32:GETTEXT_PATH = C:/GnuWin32
 
 
+win32:QMAKE_LFLAGS += -Wl,--enable-auto-import
 
 win32:INCLUDEPATH += $$BOOST_PATH $$GETTEXT_PATH/include
 win32:LIBS += -L$$GETTEXT_PATH/lib -lintl

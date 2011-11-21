@@ -87,15 +87,7 @@ namespace imaginable
 		virtual ~Timed_progress_notifier()
 		{}
 
-		virtual void update(double value) const
-		{
-			double current = this->now();
-			if (current - m_last_update > m_timeout)
-			{
-				m_last_update = current;
-				m_notifier.update(value);
-			}
-		}
+		virtual void update(double value) const;
 
 	protected:
 		virtual double now(void) const;
@@ -118,10 +110,7 @@ namespace imaginable
 		virtual ~Scaled_progress_notifier()
 		{}
 
-		virtual void update(double value) const
-		{
-			m_notifier.update(m_offset + m_scale * value);
-		}
+		virtual void update(double value) const;
 
 	private:
 		const double m_offset;

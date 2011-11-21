@@ -137,7 +137,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	}
 
 
-	/* */
+	//
 	img.addPlane(IMAGE__PLANE__MIDDLE_LUMA);
 	img.addPlane(IMAGE__PLANE__RANGE_LUMA);
 	Image::Pixel *middlePlane=img.plane(IMAGE__PLANE__MIDDLE_LUMA);
@@ -214,9 +214,9 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 		}
 	}
 	img.removePlane(IMAGE__PLANE__MIDDLE_LUMA);
-	/* */
+	//*/
 
-	/* */
+	//
 	{
 		Image::Pixel chroma_map[HDRI_MAXIMUM+1];
 		for (size_t p=0; p<HDRI_MAXIMUM+1; ++p)
@@ -237,7 +237,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 			chroma[p] = chroma_map[chroma[p]];
 		}
 	}
-	/* */
+	//*/
 
 /*
 	double scale=static_cast<double>(LDRI_MAXIMUM)/static_cast<double>(img.maximum());
@@ -283,7 +283,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	img.setMaximum(LDRI_MAXIMUM);
 */
 
-	/* */
+	//
 	img.removePlane(IMAGE__PLANE__MAX_LUMA);
 	img.removePlane(IMAGE__PLANE__MIN_LUMA);
 	/*/
@@ -292,7 +292,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	img.renamePlane(Image::PLANE_LUMA     , Image::PLANE_BLUE);
 	img.renamePlane(IMAGE__PLANE__MIN_LUMA, Image::PLANE_GREEN);
 	img.renamePlane(IMAGE__PLANE__MAX_LUMA, Image::PLANE_RED);
-	/* */
+	//*/
 }
 
 void tonemap_local_minmax_parabolic(Image& img, double colour_gamma, size_t minmax_size, size_t blur_size, double min_range_factor, const Progress_notifier &notifier)
