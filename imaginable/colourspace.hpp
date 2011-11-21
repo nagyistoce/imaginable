@@ -27,51 +27,52 @@
 #define IMAGINABLE__TOOLS_COLOURSPACE__INCLUDED
 
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
-	void rgb_to_hsv(double r,double g,double b,double &h,double &s,double &v);
-	void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b);
+	void rgb_to_hsv(double r, double g, double b, double &h, double &s, double &v);
+	void hsv_to_rgb(double h, double s, double v, double &r, double &g, double &b);
 
-	void rgb_to_hsl(double r,double g,double b,double &h,double &s,double &l);
-	void hsl_to_rgb(double h,double s,double l,double &r,double &g,double &b);
+	void rgb_to_hsl(double r, double g, double b, double &h, double &s, double &l);
+	void hsl_to_rgb(double h, double s, double l, double &r, double &g, double &b);
 
-	void rgb_to_lightness(double r,double g,double b,double &l);
+	void rgb_to_lightness(double r, double g, double b, double &l);
 
-	void rgb_to_hcy(double r,double g,double b,double &h,double &c,double &y);
-	void hcy_to_rgb(double h,double c,double y,double &r,double &g,double &b);
+	void rgb_to_hcy(double r, double g, double b, double &h, double &c, double &y);
+	void hcy_to_rgb(double h, double c, double y, double &r, double &g, double &b);
 
-	void rgb_to_luma(double r,double g,double b,double &l);
-
-
-	void rgb_to_hsv(Image& img,bool keep_rgb=false,progress_notifier notifier = dont_notify);
-	void hsv_to_rgb(Image& img,bool keep_hsv=false,progress_notifier notifier = dont_notify);
-
-	void rgb_to_hsl(Image& img,bool keep_rgb=false,progress_notifier notifier = dont_notify);
-	void hsl_to_rgb(Image& img,bool keep_hsl=false,progress_notifier notifier = dont_notify);
-
-	void rgb_to_lightness(Image& img,bool keep_rgb=false,progress_notifier notifier = dont_notify);
-
-	void rgb_to_hcy(Image& img,bool keep_rgb=false,progress_notifier notifier = dont_notify);
-	void hcy_to_rgb(Image& img,bool keep_hcy=false,progress_notifier notifier = dont_notify);
-
-	void rgb_to_luma(Image& img,bool keep_rgb=false,progress_notifier notifier = dont_notify);
+	void rgb_to_luma(double r, double g, double b, double &l);
 
 
-	inline void rgb_to_hsv(Image& img,progress_notifier notifier) { rgb_to_hsv(img,false,notifier); }
-	inline void hsv_to_rgb(Image& img,progress_notifier notifier) { hsv_to_rgb(img,false,notifier); }
+	void rgb_to_hsv(Image& img, bool keep_rgb=false, const Progress_notifier &notifier = dont_notify);
+	void hsv_to_rgb(Image& img, bool keep_hsv=false, const Progress_notifier &notifier = dont_notify);
 
-	inline void rgb_to_hsl(Image& img,progress_notifier notifier) { rgb_to_hsl(img,false,notifier); }
-	inline void hsl_to_rgb(Image& img,progress_notifier notifier) { hsl_to_rgb(img,false,notifier); }
+	void rgb_to_hsl(Image& img, bool keep_rgb=false, const Progress_notifier &notifier = dont_notify);
+	void hsl_to_rgb(Image& img, bool keep_hsl=false, const Progress_notifier &notifier = dont_notify);
 
-	inline void rgb_to_lightness(Image& img,progress_notifier notifier) { rgb_to_lightness(img,false,notifier); }
+	void rgb_to_lightness(Image& img, bool keep_rgb=false, const Progress_notifier &notifier = dont_notify);
 
-	inline void rgb_to_hcy(Image& img,progress_notifier notifier) { rgb_to_hcy(img,false,notifier); }
-	inline void hcy_to_rgb(Image& img,progress_notifier notifier) { hcy_to_rgb(img,false,notifier); }
+	void rgb_to_hcy(Image& img, bool keep_rgb=false, const Progress_notifier &notifier = dont_notify);
+	void hcy_to_rgb(Image& img, bool keep_hcy=false, const Progress_notifier &notifier = dont_notify);
 
-	inline void rgb_to_luma(Image& img,progress_notifier notifier) { rgb_to_lightness(img,false,notifier); }
+	void rgb_to_luma(Image& img, bool keep_rgb=false, const Progress_notifier &notifier = dont_notify);
+
+
+	inline void rgb_to_hsv(Image& img, const Progress_notifier &notifier) { rgb_to_hsv(img, false, notifier); }
+	inline void hsv_to_rgb(Image& img, const Progress_notifier &notifier) { hsv_to_rgb(img, false, notifier); }
+
+	inline void rgb_to_hsl(Image& img, const Progress_notifier &notifier) { rgb_to_hsl(img, false, notifier); }
+	inline void hsl_to_rgb(Image& img, const Progress_notifier &notifier) { hsl_to_rgb(img, false, notifier); }
+
+	inline void rgb_to_lightness(Image& img, const Progress_notifier &notifier) { rgb_to_lightness(img, false, notifier); }
+
+	inline void rgb_to_hcy(Image& img, const Progress_notifier &notifier) { rgb_to_hcy(img, false, notifier); }
+	inline void hcy_to_rgb(Image& img, const Progress_notifier &notifier) { hcy_to_rgb(img, false, notifier); }
+
+	inline void rgb_to_luma(Image& img, const Progress_notifier &notifier) { rgb_to_lightness(img, false, notifier); }
 }
 
 #endif // IMAGINABLE__TOOLS_COLOURSPACE__INCLUDED

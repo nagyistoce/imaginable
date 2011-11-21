@@ -71,7 +71,7 @@ void QImage_loader::load(const QImage& qimage)
 
 		size_t mx=qimage.width();
 		size_t my=qimage.height();
-		m_image.setSize(mx,my);
+		m_image.setSize(mx, my);
 		m_image.setMaximum(0xff);
 
 		Image::Pixel* planes[4]={NULL};
@@ -124,7 +124,7 @@ void QImage_saver::save(QImage& qimage) const
 			size_t my=m_image.height();
 			if(m_image.hasTransparency())
 			{
-				qimage=QImage(mx,my,QImage::Format_ARGB32);
+				qimage=QImage(mx, my, QImage::Format_ARGB32);
 
 				size_t maximum=static_cast<size_t>(m_image.maximum());
 				bool scale=(maximum!=0xff);
@@ -150,13 +150,13 @@ void QImage_saver::save(QImage& qimage) const
 								static_cast<size_t>(planes[2][yxo])*0xff/maximum,
 								static_cast<size_t>(planes[3][yxo])*0xff/maximum );
 						else
-							src[x]=qRgba(planes[0][yxo],planes[1][yxo],planes[2][yxo],planes[3][yxo]);
+							src[x]=qRgba(planes[0][yxo], planes[1][yxo], planes[2][yxo], planes[3][yxo]);
 					}
 				}
 			}
 			else
 			{
-				qimage=QImage(mx,my,QImage::Format_RGB32);
+				qimage=QImage(mx, my, QImage::Format_RGB32);
 
 				size_t maximum=static_cast<size_t>(m_image.maximum());
 				bool scale=(maximum!=0xff);
@@ -180,7 +180,7 @@ void QImage_saver::save(QImage& qimage) const
 								static_cast<size_t>(planes[1][yxo])*0xff/maximum,
 								static_cast<size_t>(planes[2][yxo])*0xff/maximum );
 						else
-							src[x]=qRgb(planes[0][yxo],planes[1][yxo],planes[2][yxo]);
+							src[x]=qRgb(planes[0][yxo], planes[1][yxo], planes[2][yxo]);
 					}
 				}
 			}

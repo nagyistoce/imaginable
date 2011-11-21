@@ -27,12 +27,13 @@
 
 #include <cstring>
 
+#include "exception.hpp"
 #include "crop.hpp"
 
 
 namespace imaginable {
 
-SharedImage crop(const Image& img,size_t left,size_t top,size_t width,size_t height,progress_notifier notifier)
+SharedImage crop(const Image& img, size_t left, size_t top, size_t width, size_t height, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -46,7 +47,7 @@ SharedImage crop(const Image& img,size_t left,size_t top,size_t width,size_t hei
 	if ( top + height > img.height())
 		height = img.height() - top;
 
-	SharedImage ret(new Image(width,height));
+	SharedImage ret(new Image(width, height));
 
 	const Image::PlaneNames& planeNames=img.planeNames();
 	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
@@ -61,23 +62,23 @@ SharedImage crop(const Image& img,size_t left,size_t top,size_t width,size_t hei
 	{
 		for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		{
-			notifier(static_cast<float>(i++)/static_cast<float>(m));
+			notifier.update(static_cast<double>(i++)/static_cast<double>(m));
 
 			const Image::Pixel* from=img.plane(*I);
 			Image::Pixel* to=ret->plane(*I);
-			memcpy(to,from+top*img.width(),height*width*sizeof(Image::Pixel));
+			memcpy(to, from+top*img.width(), height*width*sizeof(Image::Pixel));
 		}
 	}
 	else
 	{
 		for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		{
-			notifier(static_cast<float>(i++)/static_cast<float>(m));
+			notifier.update(static_cast<double>(i++)/static_cast<double>(m));
 
 			const Image::Pixel* from=img.plane(*I);
 			Image::Pixel* to=ret->plane(*I);
 			for (size_t row=0; row<height; ++row)
-				memcpy(to+row*width,from+(row+top)*img.width()+left,width*sizeof(Image::Pixel));
+				memcpy(to+row*width, from+(row+top)*img.width()+left, width*sizeof(Image::Pixel));
 		}
 	}
 

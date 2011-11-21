@@ -48,8 +48,8 @@ double getHighPrecTime(void)
 	return highPrecTime.elapsed();
 }
 
-#ifdef Q_OS_LINUX
-void setTimeSpec(struct timespec& time_s,double time)
+#ifdef __linux__
+void setTimeSpec(struct timespec& time_s, double time)
 {
 	unsigned long time_i=static_cast<unsigned long>(time*1000000000.);
 	time_s.tv_sec =time_i/1000000000;
@@ -57,7 +57,7 @@ void setTimeSpec(struct timespec& time_s,double time)
 }
 #endif
 
-void setTimeVal(struct timeval& time_v,double time)
+void setTimeVal(struct timeval& time_v, double time)
 {
 	unsigned long time_i=static_cast<unsigned long>(time*1000000.);
 	time_v.tv_sec =time_i/1000000;

@@ -30,7 +30,7 @@
 
 namespace imaginable {
 
-double gamma(double x,double k)
+double gamma(double x, double k)
 {
 	if(k==0.)
 		return x;

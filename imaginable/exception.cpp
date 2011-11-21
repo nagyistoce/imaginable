@@ -23,19 +23,10 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS_AUTOCROP__INCLUDED
-#define IMAGINABLE__TOOLS_AUTOCROP__INCLUDED
-
-
-#include <boost/shared_ptr.hpp>
-
-#include "notifier.hpp"
-#include "image.hpp"
+#include "exception.hpp"
 
 
 namespace imaginable
 {
-	SharedImage auto_crop(const Image& img, size_t& x, size_t& y, const Progress_notifier &notifier = dont_notify);
-}
 
-#endif // IMAGINABLE__TOOLS_AUTOCROP__INCLUDED
+}

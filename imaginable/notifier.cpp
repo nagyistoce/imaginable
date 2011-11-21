@@ -23,50 +23,18 @@
 *************/
 
 
-#include <boost/bind.hpp>
-
 #include "time.hpp"
-#include "tools.hpp"
+#include "notifier.hpp"
 
 
 namespace imaginable
 {
 
-TimedProgress::TimedProgress(progress_notifier notifier,double timeout)
-	: m_notifier(notifier)
-	, m_timeout(timeout)
-	, m_last_update(0)
-{
-}
+Dont_notify dont_notify;
 
-TimedProgress::~TimedProgress()
-{
-}
-
-void TimedProgress::update(float value)
-{
-	double now_=this->now();
-	if (now_ - m_last_update > m_timeout)
-	{
-		m_last_update = now_;
-		m_notifier(value);
-	}
-}
-
-double TimedProgress::now(void)
+double Timed_progress_notifier::now(void) const
 {
 	return getHighPrecTime();
-}
-
-progress_notifier TimedProgress::notifier(void)
-{
-	return boost::bind(&TimedProgress::update,this,_1);
-}
-
-
-void scaled_notifier(progress_notifier notifier,float offset,float scale,float value)
-{
-	notifier(offset+scale*value);
 }
 
 }

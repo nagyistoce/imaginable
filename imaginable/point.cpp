@@ -36,7 +36,7 @@ Point::Point(void)
 {
 }
 
-Point::Point(double x_,double y_)
+Point::Point(double x_, double y_)
 	: x(x_)
 	, y(y_)
 {
@@ -50,7 +50,7 @@ Point Point::polar(void) const
 {
 	Point ret;
 	ret.r=sqrt(x*x+y*y);
-	ret.f=atan2(y,x);
+	ret.f=atan2(y, x);
 	return ret;
 }
 

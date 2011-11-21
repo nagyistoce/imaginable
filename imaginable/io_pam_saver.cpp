@@ -152,7 +152,7 @@ void PAM_saver::save(std::ostream& stream) const
 			}
 		}
 
-		stream.write(reinterpret_cast<char*>(data),total*sizeof(uint8_t));
+		stream.write(reinterpret_cast<char*>(data), total*sizeof(uint8_t));
 	}
 	else
 	{
@@ -171,7 +171,7 @@ void PAM_saver::save(std::ostream& stream) const
 			}
 		}
 
-		stream.write(reinterpret_cast<char*>(data),total*sizeof(uint16_t));
+		stream.write(reinterpret_cast<char*>(data), total*sizeof(uint16_t));
 	}
 }
 

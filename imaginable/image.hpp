@@ -81,9 +81,9 @@ public:
 
 private:
 	typedef boost::shared_array<Pixel> Plane;
-	typedef std::map<unsigned,Plane> Planes;
-	typedef std::map<unsigned,int> UnloadedPlanes;
-	typedef std::map<std::string,std::string> Text;
+	typedef std::map<unsigned, Plane> Planes;
+	typedef std::map<unsigned, int> UnloadedPlanes;
+	typedef std::map<std::string, std::string> Text;
 
 	size_t m_width;
 	size_t m_height;
@@ -95,7 +95,7 @@ private:
 
 public:
 	Image(void);
-	Image(size_t width,size_t height);
+	Image(size_t width, size_t height);
 	~Image();
 
 
@@ -108,7 +108,7 @@ public:
 
 	bool setWidth (size_t);
 	bool setHeight(size_t);
-	bool setSize(size_t width,size_t height);
+	bool setSize(size_t width, size_t height);
 	inline void setMaximum(Pixel maximum) { m_maximum=maximum; }
 
 
@@ -120,7 +120,7 @@ public:
 
 	bool          addPlane   (unsigned);
 	bool          removePlane(unsigned);
-	bool          renamePlane(unsigned from,unsigned to);
+	bool          renamePlane(unsigned from, unsigned to);
 
 	const Pixel* plane(unsigned) const;
 	/* */ Pixel* plane(unsigned);
@@ -141,7 +141,7 @@ public:
 	inline bool        hasText     (const std::string& key)                          const { return m_text.find(key)!=m_text.end(); }
 	inline std::string text        (const std::string& key)                          const { Text::const_iterator I=m_text.find(key); return (I!=m_text.end())?I->second:""; }
 	TextKeys           text_keys   (void)                                            const;
-	inline void        setText     (const std::string& key,const std::string& value)       { m_text[key]=value; }
+	inline void        setText     (const std::string& key, const std::string& value)       { m_text[key]=value; }
 	inline void        removeText  (const std::string& key)                                { m_text.erase(key); }
 	inline void        clearText   (void)                                                  { m_text.clear(); }
 	inline void        copyTextFrom(const Image& src)                                      { m_text=src.m_text; }

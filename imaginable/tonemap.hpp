@@ -27,18 +27,19 @@
 #define IMAGINABLE__TOOLS_TONEMAP__INCLUDED
 
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
-	void tonemap_global(Image& img, double colour_gamma, double lightness_factor, progress_notifier notifier = dont_notify);
+	void tonemap_global(Image& img, double colour_gamma, double lightness_factor, const Progress_notifier &notifier = dont_notify);
 
-	void tonemap_local_average(Image& img, double colour_gamma, size_t blur_size, double mix_factor, progress_notifier notifier = dont_notify);
+	void tonemap_local_average(Image& img, double colour_gamma, size_t blur_size, double mix_factor, const Progress_notifier &notifier = dont_notify);
 
-	void tonemap_local_minmax_parabolic(Image& img, double colour_gamma, size_t minmax_size, size_t blur_size, double min_range_factor, progress_notifier notifier = dont_notify);
+	void tonemap_local_minmax_parabolic(Image& img, double colour_gamma, size_t minmax_size, size_t blur_size, double min_range_factor, const Progress_notifier &notifier = dont_notify);
 
-	void tonemap_local_minmax_exponential(Image& img, double colour_gamma, double exponential_factor, size_t minmax_size, size_t blur_size, double min_range_factor, progress_notifier notifier = dont_notify);
+	void tonemap_local_minmax_exponential(Image& img, double colour_gamma, double exponential_factor, size_t minmax_size, size_t blur_size, double min_range_factor, const Progress_notifier &notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_TONEMAP__INCLUDED

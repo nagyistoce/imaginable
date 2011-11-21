@@ -33,6 +33,7 @@
 #include <fstream>
 
 #include <imaginable/image.hpp>
+#include <imaginable/notifier.hpp>
 #include <imaginable/io_pnm_loader.hpp>
 #include <imaginable/io_pam_saver.hpp>
 #include <imaginable/io_qt.hpp>
@@ -46,7 +47,7 @@
 #include "version.hpp"
 
 
-#if !defined(Q_OS_LINUX)
+#if !defined(__linux__)
 char *program_invocation_short_name;
 #endif
 
@@ -141,22 +142,26 @@ void usage(void)
 		).str();
 }
 
-double last_printer_percent = 0.0;
-
-void percent_printer(float value)
+class Progress_printer : public imaginable::Progress_notifier
 {
-	double now = getHighPrecTime();
-	if (now - last_printer_percent > 1./3.)
+public:
+	Progress_printer()
+		: imaginable::Progress_notifier()
+	{}
+
+	virtual ~Progress_printer()
+	{}
+
+	virtual void update(double value) const
 	{
-		last_printer_percent = now;
 		std::cout << "\b\b\b\b\b\b" << (boost::format(gettext("%|5.1f|%%")) %(value*100) ).str() << std::flush;
 	}
-}
+} percent_printer;
 
-int main(int argc,char* argv[])
+int main(int argc, char* argv[])
 {
-#if !defined(Q_OS_LINUX)
-	program_invocation_short_name = strrchr(argv[0],'\\')+1;
+#if !defined(__linux__)
+	program_invocation_short_name = strrchr(argv[0], '\\')+1;
 #endif
 
 	std::string input_name;
@@ -196,7 +201,7 @@ int main(int argc,char* argv[])
 
 		for (int argi = 1; argi<argc; ++argi)
 		{
-			if (!strcmp(argv[argi],"-i"))
+			if (!strcmp(argv[argi], "-i"))
 			{
 				++argi;
 				if (argi == argc)
@@ -212,7 +217,7 @@ int main(int argc,char* argv[])
 				}
 				use_stdin = false;
 			}
-			else if (!strcmp(argv[argi],"-o"))
+			else if (!strcmp(argv[argi], "-o"))
 			{
 				++argi;
 				if (argi == argc)
@@ -228,7 +233,7 @@ int main(int argc,char* argv[])
 				}
 				use_stdout = false;
 			}
-			else if (!strcmp(argv[argi],"-m"))
+			else if (!strcmp(argv[argi], "-m"))
 			{
 				++argi;
 				if (argi == argc)
@@ -236,10 +241,10 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed method name") << std::endl;
 					throw false;
 				}
-				if (((!strcmp(argv[argi],"g"))) || (!strcmp(argv[argi],"global"))
-				||  ((!strcmp(argv[argi],"a"))) || (!strcmp(argv[argi],"average"))
-				||  ((!strcmp(argv[argi],"p"))) || (!strcmp(argv[argi],"parabolic"))
-				||  ((!strcmp(argv[argi],"e"))) || (!strcmp(argv[argi],"exponential")))
+				if (((!strcmp(argv[argi], "g"))) || (!strcmp(argv[argi], "global"))
+				||  ((!strcmp(argv[argi], "a"))) || (!strcmp(argv[argi], "average"))
+				||  ((!strcmp(argv[argi], "p"))) || (!strcmp(argv[argi], "parabolic"))
+				||  ((!strcmp(argv[argi], "e"))) || (!strcmp(argv[argi], "exponential")))
 					method_name = argv[argi][0];
 				else
 				{
@@ -247,7 +252,7 @@ int main(int argc,char* argv[])
 					throw false;
 				}
 			}
-			else if (!strcmp(argv[argi],"-s"))
+			else if (!strcmp(argv[argi], "-s"))
 			{
 				++argi;
 				if (argi == argc)
@@ -255,14 +260,14 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed saturation_gamma value") << std::endl;
 					throw false;
 				}
-				saturation_gamma = strtod(argv[argi],&tail);
+				saturation_gamma = strtod(argv[argi], &tail);
 				if( (*tail) || (saturation_gamma < -10.) || (saturation_gamma > 10.) )
 				{
 					std::cerr << gettext("Invalid saturation_gamma value") << std::endl;
 					throw false;
 				}
 			}
-			else if (!strcmp(argv[argi],"-l"))
+			else if (!strcmp(argv[argi], "-l"))
 			{
 				++argi;
 				if (argi == argc)
@@ -270,7 +275,7 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed lightness_factor value") << std::endl;
 					throw false;
 				}
-				lightness_factor = strtod(argv[argi],&tail);
+				lightness_factor = strtod(argv[argi], &tail);
 				if( (*tail) || (lightness_factor < -10.) || (lightness_factor > 10.) )
 				{
 					std::cerr << gettext("Invalid lightness_factor value") << std::endl;
@@ -278,7 +283,7 @@ int main(int argc,char* argv[])
 				}
 				lightness_factor_specified = true;
 			}
-			else if (!strcmp(argv[argi],"-bp"))
+			else if (!strcmp(argv[argi], "-bp"))
 			{
 				++argi;
 				if (argi == argc)
@@ -286,7 +291,7 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed blur_px_size value") << std::endl;
 					throw false;
 				}
-				blur_px_size = static_cast<size_t>(strtoull(argv[argi],&tail,10));
+				blur_px_size = static_cast<size_t>(strtoull(argv[argi], &tail, 10));
 				if( (*tail) || (!blur_px_size) || (blur_px_size > 10000) )
 				{
 					std::cerr << gettext("Invalid blur_px_size value") << std::endl;
@@ -295,7 +300,7 @@ int main(int argc,char* argv[])
 				blur_in_pixels = true;
 				blur_specfified = true;
 			}
-			else if (!strcmp(argv[argi],"-bf"))
+			else if (!strcmp(argv[argi], "-bf"))
 			{
 				++argi;
 				if (argi == argc)
@@ -303,7 +308,7 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed blur_size_factor value") << std::endl;
 					throw false;
 				}
-				blur_size_factor = strtod(argv[argi],&tail);
+				blur_size_factor = strtod(argv[argi], &tail);
 				if( (*tail) || (blur_size_factor <= 0.) || (blur_size_factor > 1.) )
 				{
 					std::cerr << gettext("Invalid blur_size_factor value") << std::endl;
@@ -312,7 +317,7 @@ int main(int argc,char* argv[])
 				blur_in_pixels = false;
 				blur_specfified = true;
 			}
-			else if (!strcmp(argv[argi],"-e"))
+			else if (!strcmp(argv[argi], "-e"))
 			{
 				++argi;
 				if (argi == argc)
@@ -320,14 +325,14 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed exponential_factor value") << std::endl;
 					throw false;
 				}
-				exponential_factor = strtod(argv[argi],&tail);
+				exponential_factor = strtod(argv[argi], &tail);
 				if( (*tail) || (exponential_factor <= 0.) || (exponential_factor > 10.) )
 				{
 					std::cerr << gettext("Invalid exponential_factor value") << std::endl;
 					throw false;
 				}
 			}
-			else if (!strcmp(argv[argi],"-f"))
+			else if (!strcmp(argv[argi], "-f"))
 			{
 				++argi;
 				if (argi == argc)
@@ -335,14 +340,14 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed mix_factor value") << std::endl;
 					throw false;
 				}
-				mix_factor = strtod(argv[argi],&tail);
+				mix_factor = strtod(argv[argi], &tail);
 				if( (*tail) || (mix_factor < 0.) || (mix_factor > 1.) )
 				{
 					std::cerr << gettext("Invalid mix_factor value") << std::endl;
 					throw false;
 				}
 			}
-			else if (!strcmp(argv[argi],"-mp"))
+			else if (!strcmp(argv[argi], "-mp"))
 			{
 				++argi;
 				if (argi == argc)
@@ -350,7 +355,7 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed minmax_px_size value") << std::endl;
 					throw false;
 				}
-				minmax_px_size = static_cast<size_t>(strtoull(argv[argi],&tail,10));
+				minmax_px_size = static_cast<size_t>(strtoull(argv[argi], &tail, 10));
 				if( (*tail) || (!minmax_px_size) || (minmax_px_size > 10000) )
 				{
 					std::cerr << gettext("Invalid minmax_px_size value") << std::endl;
@@ -359,7 +364,7 @@ int main(int argc,char* argv[])
 				minmax_in_pixels = true;
 				minmax_specfified = true;
 			}
-			else if (!strcmp(argv[argi],"-mf"))
+			else if (!strcmp(argv[argi], "-mf"))
 			{
 				++argi;
 				if (argi == argc)
@@ -367,7 +372,7 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed minmax_size_factor value") << std::endl;
 					throw false;
 				}
-				minmax_size_factor = strtod(argv[argi],&tail);
+				minmax_size_factor = strtod(argv[argi], &tail);
 				if( (*tail) || (minmax_size_factor <= 0.) || (minmax_size_factor > 1.) )
 				{
 					std::cerr << gettext("Invalid minmax_size_factor value") << std::endl;
@@ -376,7 +381,7 @@ int main(int argc,char* argv[])
 				minmax_in_pixels = false;
 				minmax_specfified = true;
 			}
-			else if (!strcmp(argv[argi],"-r"))
+			else if (!strcmp(argv[argi], "-r"))
 			{
 				++argi;
 				if (argi == argc)
@@ -384,7 +389,7 @@ int main(int argc,char* argv[])
 					std::cerr << gettext("Missed min_range_factor value") << std::endl;
 					throw false;
 				}
-				min_range_factor = strtod(argv[argi],&tail);
+				min_range_factor = strtod(argv[argi], &tail);
 				if( (*tail) || (min_range_factor <= 0.) || (min_range_factor > 1.) )
 				{
 					std::cerr << gettext("Invalid min_range_factor value") << std::endl;
@@ -501,8 +506,8 @@ int main(int argc,char* argv[])
 		std::cin >> imaginable::PNM_loader(*img.get());
 	else
 	{
-		if(boost::algorithm::iends_with(input_name,".pnm")
-		|| boost::algorithm::iends_with(input_name,".pam") )
+		if(boost::algorithm::iends_with(input_name, ".pnm")
+		|| boost::algorithm::iends_with(input_name, ".pam") )
 		{
 			std::ifstream stream(input_name.c_str());
 			if(stream.good())
@@ -523,14 +528,14 @@ int main(int argc,char* argv[])
 	case 'e':
 		if(!minmax_in_pixels)
 		{
-			minmax_px_size=static_cast<imaginable::Image::Pixel>(static_cast<double>(std::min(img->width(),img->height()))*minmax_size_factor);
+			minmax_px_size=static_cast<imaginable::Image::Pixel>(static_cast<double>(std::min(img->width(), img->height()))*minmax_size_factor);
 			std::cout << (boost::format(gettext("Minmax radius: %|d| px")) %minmax_px_size ).str() << std::endl;
 		}
 	// FALL THROUGH
 	case 'a':
 		if(!blur_in_pixels)
 		{
-			blur_px_size=static_cast<imaginable::Image::Pixel>(static_cast<double>(std::min(img->width(),img->height()))*blur_size_factor);
+			blur_px_size=static_cast<imaginable::Image::Pixel>(static_cast<double>(std::min(img->width(), img->height()))*blur_size_factor);
 			std::cout << (boost::format(gettext("Blur radius: %|d| px")) %blur_px_size ).str() << std::endl;
 		}
 		break;
@@ -543,16 +548,16 @@ int main(int argc,char* argv[])
 		switch (method_name)
 		{
 		case 'g':
-			imaginable::tonemap_global(*img.get(), saturation_gamma, lightness_factor, &percent_printer);
+			imaginable::tonemap_global(*img.get(), saturation_gamma, lightness_factor, imaginable::Timed_progress_notifier(percent_printer));
 			break;
 		case 'a':
-			imaginable::tonemap_local_average(*img.get(), saturation_gamma, blur_px_size, mix_factor/2., &percent_printer);
+			imaginable::tonemap_local_average(*img.get(), saturation_gamma, blur_px_size, mix_factor/2., imaginable::Timed_progress_notifier(percent_printer));
 			break;
 		case 'p':
-			imaginable::tonemap_local_minmax_parabolic(*img.get(), saturation_gamma, minmax_px_size, blur_px_size, min_range_factor, &percent_printer);
+			imaginable::tonemap_local_minmax_parabolic(*img.get(), saturation_gamma, minmax_px_size, blur_px_size, min_range_factor, imaginable::Timed_progress_notifier(percent_printer));
 			break;
 		case 'e':
-			imaginable::tonemap_local_minmax_exponential(*img.get(), saturation_gamma, exponential_factor, minmax_px_size, blur_px_size, min_range_factor, &percent_printer);
+			imaginable::tonemap_local_minmax_exponential(*img.get(), saturation_gamma, exponential_factor, minmax_px_size, blur_px_size, min_range_factor, imaginable::Timed_progress_notifier(percent_printer));
 			break;
 		}
 		imaginable::hcy_to_rgb(*img.get(), false);
@@ -571,7 +576,7 @@ int main(int argc,char* argv[])
 			std::cout << imaginable::PAM_saver(*img.get());
 		else
 		{
-			if( boost::algorithm::iends_with(output_name,".pam") )
+			if( boost::algorithm::iends_with(output_name, ".pam") )
 			{
 				std::ofstream stream(output_name.c_str());
 				if(stream.good())

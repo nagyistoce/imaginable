@@ -64,12 +64,12 @@ private:
 	const Image& m_image;
 };
 
-inline void operator >> (const QImage& qimage,QImage_loader io)
+inline void operator >> (const QImage& qimage, QImage_loader io)
 {
 	io.load(qimage);
 }
 
-inline void operator << (QImage& qimage,const QImage_saver& io)
+inline void operator << (QImage& qimage, const QImage_saver& io)
 {
 	io.save(qimage);
 }

@@ -23,7 +23,7 @@
 *************/
 
 
-#if !defined(Q_OS_LINUX)
+#if !defined(__linux__)
 #	include <QtCore/QTemporaryFile>
 #endif
 
@@ -43,10 +43,10 @@ Image::Image(void)
 	clear();
 }
 
-Image::Image(size_t width,size_t height)
+Image::Image(size_t width, size_t height)
 {
 	clear();
-	setSize(width,height);
+	setSize(width, height);
 }
 
 Image::~Image()
@@ -59,16 +59,16 @@ SharedImage Image::copy(void) const
 {
 	SharedImage ret(new Image());
 
-	ret->setSize(m_width,m_height);
+	ret->setSize(m_width, m_height);
 	ret->setMaximum(m_maximum);
 	size_t square=m_width*m_height*sizeof(Pixel);
 	for(Planes::const_iterator I=m_plane.begin();I!=m_plane.end();++I)
 	{
 		ret->addPlane(I->first);
-		memcpy(ret->plane(I->first),I->second.get(),square);
+		memcpy(ret->plane(I->first), I->second.get(), square);
 	}
 	for(Text::const_iterator I=m_text.begin();I!=m_text.end();++I)
-		ret->setText(I->first,I->second);
+		ret->setText(I->first, I->second);
 
 	return ret;
 }
@@ -135,7 +135,7 @@ bool Image::addPlane(unsigned planeName)
 	size_t area = m_width*m_height;
 
 	Plane new_plane(new Pixel[area]);
-	memset(new_plane.get(),0,area*sizeof(Pixel));
+	memset(new_plane.get(), 0, area*sizeof(Pixel));
 	m_plane[planeName]=new_plane;
 	return true;
 }
@@ -153,7 +153,7 @@ bool Image::removePlane(unsigned planeName)
 	return true;
 }
 
-bool Image::renamePlane(unsigned from,unsigned to)
+bool Image::renamePlane(unsigned from, unsigned to)
 {
 	if(empty())
 		return false;
@@ -206,7 +206,7 @@ bool Image::unloadPlane(unsigned planeName) const
 		return false;
 
 	int fd;
-#ifdef Q_OS_LINUX
+#ifdef __linux__
 	char fn[]="/tmp/imageXXXXXX";
 	fd=mkstemp(fn);
 	unlink(fn);
@@ -217,9 +217,9 @@ bool Image::unloadPlane(unsigned planeName) const
 		unlink(qPrintable(tmpFile.fileName()));
 	}
 #endif
-	if (write(fd,I->second.get(),m_width*m_height*sizeof(Pixel)) == static_cast<ssize_t>(m_width*m_height*sizeof(Pixel)))
+	if (write(fd, I->second.get(), m_width*m_height*sizeof(Pixel)) == static_cast<ssize_t>(m_width*m_height*sizeof(Pixel)))
 	{
-		lseek(fd,SEEK_SET,0);
+		lseek(fd, SEEK_SET, 0);
 		I->second.reset();
 		m_unloaded_planes[planeName] = fd;
 		return true;
@@ -240,12 +240,12 @@ bool Image::reloadPlane(unsigned planeName) const
 		return false;
 
 	int fd=m_unloaded_planes[planeName];
-	lseek(fd,SEEK_SET,0);
+	lseek(fd, SEEK_SET, 0);
 
 	size_t area = m_width*m_height;
 
 	Plane new_plane(new Pixel[area]);
-	if (read(fd,new_plane.get(),area*sizeof(Pixel)) == static_cast<ssize_t>(area*sizeof(Pixel)))
+	if (read(fd, new_plane.get(), area*sizeof(Pixel)) == static_cast<ssize_t>(area*sizeof(Pixel)))
 	{
 		m_plane[planeName]=new_plane;
 		close(fd);
@@ -284,7 +284,7 @@ bool Image::setHeight(size_t height)
 	return true;
 }
 
-bool Image::setSize(size_t width,size_t height)
+bool Image::setSize(size_t width, size_t height)
 {
 	if(!m_plane.empty())
 		return false;

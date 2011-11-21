@@ -23,15 +23,14 @@
 *************/
 
 
+#include "exception.hpp"
 #include "scale.hpp"
 
 
 namespace imaginable {
 
 
-#define NOTIFY_STEP 10
-
-SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_notifier notifier)
+SharedImage scale_nearest(const Image& img, size_t width, size_t height, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -40,13 +39,13 @@ SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_n
 	||   !height )
 		throw exception(exception::EMPTY_IMAGE);
 
-	SharedImage ret(new Image(width,height));
+	SharedImage ret(new Image(width, height));
 	Image::PlaneNames planeNames=img.planeNames();
 	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		ret->addPlane(*I);
 
-	float ntf_offset = 0.0;
-	float ntf_scale = 1./static_cast<float>(planeNames.size());
+	double ntf_offset = 0.0;
+	double ntf_scale = 1./static_cast<double>(planeNames.size());
 
 	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 	{
@@ -55,8 +54,7 @@ SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_n
 
 		for (size_t y=0; y<height; ++y)
 		{
-			if (!(y%NOTIFY_STEP))
-				notifier(ntf_offset+ntf_scale*static_cast<float>(y)/static_cast<float>(height));
+			notifier.update(ntf_offset+ntf_scale*static_cast<double>(y)/static_cast<double>(height));
 
 			size_t src_y=( y * img.height() ) / height;
 
@@ -69,9 +67,9 @@ SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_n
 			}
 		}
 		ntf_offset += ntf_scale;
-		notifier(ntf_offset);
+		notifier.update(ntf_offset);
 	}
-	notifier(1.);
+	notifier.update(1.);
 
 	ret->setMaximum(img.maximum());
 	ret->copyTextFrom(img);

@@ -27,13 +27,14 @@
 #define IMAGINABLE__TOOLS_MAXIMUM__INCLUDED
 
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
-	Image::Pixel findMaximum(const Image& img,progress_notifier notifier = dont_notify);
-	Image::Pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier = dont_notify);
+	Image::Pixel findMaximum(const Image& img, const Progress_notifier &notifier = dont_notify);
+	Image::Pixel findMaximum(const Image& img, unsigned planeName, const Progress_notifier &notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_MAXIMUM__INCLUDED

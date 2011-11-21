@@ -23,14 +23,11 @@
 *************/
 
 
-#ifndef IMAGINABLE__TOOLS__INCLUDED
-#define IMAGINABLE__TOOLS__INCLUDED
+#ifndef IMAGINABLE__EXCEPTION__INCLUDED
+#define IMAGINABLE__EXCEPTION__INCLUDED
 
 
-#include <boost/function.hpp>
 #include <exception>
-
-#include "image.hpp"
 
 
 namespace imaginable
@@ -40,16 +37,16 @@ namespace imaginable
 	public:
 		typedef enum
 		{
-			NO_IMAGE=0,             //auto_crop  crop  rgb_to_hsv  box_blur tone_map
-			NO_ALPHA_CHANNEL,       //auto_crop
-			FULLY_TRANSPARENT_IMAGE,//auto_crop
-			EMPTY_IMAGE,            //           crop
-			INVALID_COLOUR_SPACE,   //                 rgb_to_hsv           tone_map
-			INVALID_RADIUS,         //                             box_blur
-			INVALID_PLANE,          //                             box_blur
-			PLANE_EXISTS,           //                             box_blur
-			NOT_AN_HDRI,            //                                      tone_map
-			INVALID_DATA            //                                      tone_map
+			NO_IMAGE=0,              //auto_crop  crop  rgb_to_hsv  box_blur tone_map
+			NO_ALPHA_CHANNEL,        //auto_crop
+			FULLY_TRANSPARENT_IMAGE, //auto_crop
+			EMPTY_IMAGE,             //           crop
+			INVALID_COLOUR_SPACE,    //                 rgb_to_hsv           tone_map
+			INVALID_RADIUS,          //                             box_blur
+			INVALID_PLANE,           //                             box_blur
+			PLANE_EXISTS,            //                             box_blur
+			NOT_AN_HDRI,             //                                      tone_map
+			INVALID_DATA             //                                      tone_map
 		} Type;
 		explicit exception(const Type& type) throw()
 			: std::exception()
@@ -81,31 +78,6 @@ namespace imaginable
 		{}
 		Type m_type;
 	};
-
-
-	typedef boost::function<void (float)> progress_notifier;
-
-	inline void dont_notify(float) {}
-
-	class TimedProgress
-	{
-	public:
-		TimedProgress(progress_notifier,double timeout=0.333);
-		~TimedProgress();
-
-		virtual double now(void);
-
-		void update(float);
-
-		progress_notifier notifier(void);
-
-	private:
-		progress_notifier m_notifier;
-		double m_timeout;
-		double m_last_update;
-	};
-
-	void scaled_notifier(progress_notifier notifier,float offset,float scale,float value);
 }
 
-#endif // IMAGINABLE__TOOLS__INCLUDED
+#endif // IMAGINABLE__EXCEPTION__INCLUDED

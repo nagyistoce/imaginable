@@ -25,12 +25,13 @@
 
 #include <cmath>
 
+#include "exception.hpp"
 #include "maximum.hpp"
 
 
 namespace imaginable {
 
-Image::Pixel findMaximum(const Image& img,progress_notifier notifier)
+Image::Pixel findMaximum(const Image& img, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -43,14 +44,14 @@ Image::Pixel findMaximum(const Image& img,progress_notifier notifier)
 
 	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 	{
-		notifier(static_cast<float>(i++)/static_cast<float>(m));
+		notifier.update(static_cast<double>(i++)/static_cast<double>(m));
 
-		ret=std::max(ret,findMaximum(img,*I));
+		ret=std::max(ret, findMaximum(img, *I));
 	}
 	return ret;
 }
 
-Image::Pixel findMaximum(const Image& img,unsigned planeName,progress_notifier notifier)
+Image::Pixel findMaximum(const Image& img, unsigned planeName, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -63,9 +64,9 @@ Image::Pixel findMaximum(const Image& img,unsigned planeName,progress_notifier n
 	size_t m=img.width()*img.height();
 	for (size_t i=0; i<m; ++i)
 	{
-		notifier(static_cast<float>(i)/static_cast<float>(m));
+		notifier.update(static_cast<double>(i)/static_cast<double>(m));
 
-		ret=std::max(ret,data[i]);
+		ret=std::max(ret, data[i]);
 	}
 	return ret;
 }

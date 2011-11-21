@@ -23,11 +23,11 @@
 *************/
 
 
-#include <boost/bind.hpp>
 //#include <iostream>
 #include <cmath>
 #include <list>
 
+#include "exception.hpp"
 #include "roof.hpp"
 
 
@@ -46,7 +46,7 @@ double roof_negative(double prev, double current, double step)
 	return ((prev - step) < current) ? (prev - step) : current;
 }
 
-void roof_linear_straight(Image& img, unsigned planeName, double step, progress_notifier notifier)
+void roof_linear_straight(Image& img, unsigned planeName, double step, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -65,7 +65,7 @@ void roof_linear_straight(Image& img, unsigned planeName, double step, progress_
 	{
 		for (size_t y=0; y<h; ++y)
 		{
-			notifier(0.00+0.25*static_cast<float>(y)/static_cast<float>(h));
+			notifier.update(0.00+0.25*static_cast<double>(y)/static_cast<double>(h));
 
 			ssize_t yxs=y*w+1;
 			ssize_t yxe=y*w+w-1;
@@ -74,14 +74,14 @@ void roof_linear_straight(Image& img, unsigned planeName, double step, progress_
 
 			for (ssize_t yxo=yxs; yxo<=yxe; ++yxo)
 			{
-				prev = roof(prev,static_cast<double>(plane[yxo]),step);
+				prev = roof(prev, static_cast<double>(plane[yxo]), step);
 				plane[yxo] = static_cast<Image::Pixel>(prev);
 			}
 		}
 
 		for (size_t y=0; y<h; ++y)
 		{
-			notifier(0.25+0.25*static_cast<float>(y)/static_cast<float>(h));
+			notifier.update(0.25+0.25*static_cast<double>(y)/static_cast<double>(h));
 
 			ssize_t yxs=y*w+w-2;
 			ssize_t yxe=y*w;
@@ -90,7 +90,7 @@ void roof_linear_straight(Image& img, unsigned planeName, double step, progress_
 
 			for (ssize_t yxo=yxs; yxo>=yxe; --yxo)
 			{
-				prev = roof(prev,static_cast<double>(plane[yxo]),step);
+				prev = roof(prev, static_cast<double>(plane[yxo]), step);
 				plane[yxo] = static_cast<Image::Pixel>(prev);
 			}
 		}
@@ -100,7 +100,7 @@ void roof_linear_straight(Image& img, unsigned planeName, double step, progress_
 	{
 		for (size_t x=0; x<w; ++x)
 		{
-			notifier(0.50+0.25*static_cast<float>(x)/static_cast<float>(w));
+			notifier.update(0.50+0.25*static_cast<double>(x)/static_cast<double>(w));
 
 			ssize_t yxs=w+x;
 			ssize_t yxe=(h-1)*w+x;
@@ -109,14 +109,14 @@ void roof_linear_straight(Image& img, unsigned planeName, double step, progress_
 
 			for (ssize_t yxo=yxs; yxo<=yxe; yxo+=w)
 			{
-				prev = roof(prev,static_cast<double>(plane[yxo]),step);
+				prev = roof(prev, static_cast<double>(plane[yxo]), step);
 				plane[yxo] = static_cast<Image::Pixel>(prev);
 			}
 		}
 
 		for (size_t x=0; x<w; ++x)
 		{
-			notifier(0.75+0.25*static_cast<float>(x)/static_cast<float>(w));
+			notifier.update(0.75+0.25*static_cast<double>(x)/static_cast<double>(w));
 
 			ssize_t yxs=(h-2)*w+x;
 			ssize_t yxe=x;
@@ -125,32 +125,32 @@ void roof_linear_straight(Image& img, unsigned planeName, double step, progress_
 
 			for (ssize_t yxo=yxs; yxo>=yxe; yxo-=w)
 			{
-				prev = roof(prev,static_cast<double>(plane[yxo]),step);
+				prev = roof(prev, static_cast<double>(plane[yxo]), step);
 				plane[yxo] = static_cast<Image::Pixel>(prev);
 			}
 		}
 	}
-	notifier(1.0);
+	notifier.update(1.0);
 }
 
-void roof_linear_diagonal(Image& img, unsigned planeName, double step, progress_notifier notifier)
+void roof_linear_diagonal(Image& img, unsigned planeName, double step, const Progress_notifier &notifier)
 {
 
 }
 
-void roof_linear_8(Image& img, unsigned planeName, double step, progress_notifier notifier)
+void roof_linear_8(Image& img, unsigned planeName, double step, const Progress_notifier &notifier)
 {
-	roof_linear_straight(img,planeName,step,boost::bind(&scaled_notifier,notifier,0  ,0.5,_1));
-	roof_linear_diagonal(img,planeName,step,boost::bind(&scaled_notifier,notifier,0.5,0.5,_1));
+	roof_linear_straight(img, planeName, step, Scaled_progress_notifier(notifier, 0  , 0.5));
+	roof_linear_diagonal(img, planeName, step, Scaled_progress_notifier(notifier, 0.5, 0.5));
 }
 
 //bool printing_enabled = false;
 
-class Precalculated_tails : public std::map<size_t,double>
+class Precalculated_tails : public std::map<size_t, double>
 {
 public:
 	Precalculated_tails(void)
-		: std::map<size_t,double>()
+		: std::map<size_t, double>()
 	{}
 
 	virtual double tail(size_t distance) = 0;
@@ -201,7 +201,7 @@ public:
 		, radius(static_cast<double>(radius_))
 		, m(static_cast<double>(m_))
 	{
-		m_e_a_1 = m/pow(M_E,a)-1;
+		m_e_a_1 = m/pow(M_E, a)-1;
 		a_r = a / radius;
 	}
 
@@ -211,7 +211,7 @@ public:
 		Precalculated_tails::iterator P = find(distance);
 		if (P == end())
 		{
-			tail = m_e_a_1 * (pow(M_E,(a * static_cast<double>(distance) / radius)) - 1);
+			tail = m_e_a_1 * (pow(M_E, (a * static_cast<double>(distance) / radius)) - 1);
 			(*this)[distance] = tail;
 		}
 		else
@@ -221,7 +221,7 @@ public:
 
 	double intersection(double peak1, double position1, double peak2, double position2)
 	{
-		return log((peak1-peak2) * pow(M_E,a_r*(position1+position2)) / (m_e_a_1 * (pow(M_E,a_r*position2) - pow(M_E,a_r*position1)))) / a_r;
+		return log((peak1-peak2) * pow(M_E, a_r*(position1+position2)) / (m_e_a_1 * (pow(M_E, a_r*position2) - pow(M_E, a_r*position1)))) / a_r;
 	}
 
 private:
@@ -239,7 +239,7 @@ typedef struct square_line
 	size_t position;
 	size_t ends;
 
-	square_line(Precalculated_tails &precalculated_tails_,double peak_, size_t position_ = 0)
+	square_line(Precalculated_tails &precalculated_tails_, double peak_, size_t position_ = 0)
 		: precalculated_tails(precalculated_tails_)
 		, peak(peak_)
 		, position(position_)
@@ -298,13 +298,13 @@ void calc_tail(square_lines &lines, Image::Pixel &this_point, size_t &position, 
 			{
 //				if (printing_enabled) std::cout << "-#" << I->position << ':' << I->peak << "~" << I->tail(position) << " < " << new_line.position << ':' << new_line.peak << std::endl;
 
-				lines.erase(I,lines.end());
+				lines.erase(I, lines.end());
 				if (!lines.empty())
 					lines.back().ends = 0;
 				break;
 			}
 		}
-//		if (printing_enabled) print(lines,position);
+//		if (printing_enabled) print(lines, position);
 
 		size_t i_ends = 0;
 		while (!lines.empty())
@@ -354,10 +354,10 @@ void calc_tail(square_lines &lines, Image::Pixel &this_point, size_t &position, 
 
 		this_point = tail;
 	}
-//	if (printing_enabled) print(lines,position);
+//	if (printing_enabled) print(lines, position);
 }
 
-void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_tails &precalculated_tails, progress_notifier notifier)
+void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_tails &precalculated_tails, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -391,7 +391,7 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 		/* */
 		for (size_t y=0; y<h; ++y)
 		{
-			notifier(0.00+0.25*static_cast<float>(y)/static_cast<float>(h));
+			notifier.update(0.00+0.25*static_cast<double>(y)/static_cast<double>(h));
 
 			ssize_t yxs = y*w+1;
 			ssize_t yxe = y*w+w-1;
@@ -399,20 +399,20 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 
 			position = 0;
 			lines.clear();
-			lines.push_back(square_line(precalculated_tails,plane[yxp]));
+			lines.push_back(square_line(precalculated_tails, plane[yxp]));
 
 			// std::cout << "-----------------------------------" << std::endl
 			// 	<< "y = " << y << std::endl;
-			// print(lines,position);
+			// print(lines, position);
 			for (ssize_t yxo=yxs; yxo<=yxe; ++yxo)
-				calc_tail(lines,plane[yxo],position,precalculated_tails);
+				calc_tail(lines, plane[yxo], position, precalculated_tails);
 		}
 		/* */
 
 		/* */
 		for (size_t y=0; y<h; ++y)
 		{
-			notifier(0.25+0.25*static_cast<float>(y)/static_cast<float>(h));
+			notifier.update(0.25+0.25*static_cast<double>(y)/static_cast<double>(h));
 
 			ssize_t yxs = y*w+w-2;
 			ssize_t yxe = y*w;
@@ -420,13 +420,13 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 
 			position = 0;
 			lines.clear();
-			lines.push_back(square_line(precalculated_tails,plane[yxp]));
+			lines.push_back(square_line(precalculated_tails, plane[yxp]));
 
 			// std::cout << "-----------------------------------" << std::endl
 			// 	<< "y = " << y << std::endl;
-			// print(lines,position);
+			// print(lines, position);
 			for (ssize_t yxo=yxs; yxo>=yxe; --yxo)
-				calc_tail(lines,plane[yxo],position,precalculated_tails);
+				calc_tail(lines, plane[yxo], position, precalculated_tails);
 		}
 		/* */
 	}
@@ -436,7 +436,7 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 		/* */
 		for (size_t x=0; x<w; ++x)
 		{
-			notifier(0.50+0.25*static_cast<float>(x)/static_cast<float>(w));
+			notifier.update(0.50+0.25*static_cast<double>(x)/static_cast<double>(w));
 
 			ssize_t yxs = w+x;
 			ssize_t yxe = (h-1)*w+x;
@@ -444,20 +444,20 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 
 			position = 0;
 			lines.clear();
-			lines.push_back(square_line(precalculated_tails,plane[yxp]));
+			lines.push_back(square_line(precalculated_tails, plane[yxp]));
 
 			// std::cout << "-----------------------------------" << std::endl
 			// 	<< "x = " << x << std::endl;
-			// print(lines,position);
+			// print(lines, position);
 			for (ssize_t yxo=yxs; yxo<=yxe; yxo+=w)
-				calc_tail(lines,plane[yxo],position,precalculated_tails);
+				calc_tail(lines, plane[yxo], position, precalculated_tails);
 		}
 		/* */
 
 		/* */
 		for (size_t x=0; x<w; ++x)
 		{
-			notifier(0.75+0.25*static_cast<float>(x)/static_cast<float>(w));
+			notifier.update(0.75+0.25*static_cast<double>(x)/static_cast<double>(w));
 
 			ssize_t yxs = (h-2)*w+x;
 			ssize_t yxe = x;
@@ -465,12 +465,12 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 
 			position = 0;
 			lines.clear();
-			lines.push_back(square_line(precalculated_tails,plane[yxp]));
+			lines.push_back(square_line(precalculated_tails, plane[yxp]));
 			// std::cout << "-----------------------------------" << std::endl
 			// 	<< "x = " << x << std::endl;
-			// print(lines,position);
+			// print(lines, position);
 			for (ssize_t yxo=yxs; yxo>=yxe; yxo-=w)
-				calc_tail(lines,plane[yxo],position,precalculated_tails);
+				calc_tail(lines, plane[yxo], position, precalculated_tails);
 		}
 		/* */
 	}
@@ -487,10 +487,10 @@ void roof_functional(Image& img, unsigned planeName, bool invert, Precalculated_
 			}
 		}
 	}
-	notifier(1.0);
+	notifier.update(1.0);
 }
 
-void roof_parabolic(Image& img, unsigned planeName, double k, progress_notifier notifier)
+void roof_parabolic(Image& img, unsigned planeName, double k, const Progress_notifier &notifier)
 {
 	if (k == 0.0)
 		throw exception(exception::INVALID_RADIUS);
@@ -499,7 +499,7 @@ void roof_parabolic(Image& img, unsigned planeName, double k, progress_notifier 
 	roof_functional(img, planeName, k < 0.0, precalculated_tails, notifier);
 }
 
-void roof_exponential(Image& img, unsigned planeName, double a, size_t radius, progress_notifier notifier)
+void roof_exponential(Image& img, unsigned planeName, double a, size_t radius, const Progress_notifier &notifier)
 {
 	if (a == 0.0)
 		throw exception(exception::INVALID_RADIUS);

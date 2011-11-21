@@ -46,7 +46,7 @@ private:
 	Image& m_image;
 };
 
-inline std::istream& operator >> (std::istream& stream,PNM_loader pnm)
+inline std::istream& operator >> (std::istream& stream, PNM_loader pnm)
 {
 	pnm.load(stream);
 	return stream;
