@@ -46,7 +46,7 @@ private:
 	const Image& m_image;
 };
 
-inline std::ostream& operator << (std::ostream& stream,const PAM_saver& pam)
+inline std::ostream& operator << (std::ostream& stream, const PAM_saver& pam)
 {
 	pam.save(stream);
 	return stream;

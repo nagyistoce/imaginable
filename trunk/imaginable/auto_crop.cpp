@@ -24,17 +24,17 @@
 
 
 #include <boost/scoped_array.hpp>
-#include <boost/bind.hpp>
 
 #include <cstring>
 
+#include "exception.hpp"
 #include "auto_crop.hpp"
 #include "crop.hpp"
 
 
 namespace imaginable {
 
-SharedImage auto_crop(const Image& img,size_t& left,size_t& top,progress_notifier notifier)
+SharedImage auto_crop(const Image& img, size_t& left, size_t& top, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -55,23 +55,23 @@ SharedImage auto_crop(const Image& img,size_t& left,size_t& top,progress_notifie
 	{
 		size_t oneline_size=width*sizeof(Image::Pixel);
 		boost::scoped_array<Image::Pixel> oneline(new Image::Pixel[width]);
-		memset(oneline.get(),0,oneline_size);
+		memset(oneline.get(), 0, oneline_size);
 
 		for (size_t y=0; y<height; ++y)
 		{
-			notifier(0.2*static_cast<float>(y)/static_cast<float>(height));
+			notifier.update(0.2*static_cast<double>(y)/static_cast<double>(height));
 
 			top=y;
-			if (memcmp(alpha+y*width,oneline.get(),oneline_size))
+			if (memcmp(alpha+y*width, oneline.get(), oneline_size))
 				break;
 		}
 
 		for (size_t y=height; y>0; --y)
 		{
-			notifier(0.2+0.2*static_cast<float>(y)/static_cast<float>(height));
+			notifier.update(0.2+0.2*static_cast<double>(y)/static_cast<double>(height));
 
 			bottom=y;
-			if (memcmp(alpha+(y-1)*width,oneline.get(),oneline_size))
+			if (memcmp(alpha+(y-1)*width, oneline.get(), oneline_size))
 				break;
 		}
 	}
@@ -81,7 +81,7 @@ SharedImage auto_crop(const Image& img,size_t& left,size_t& top,progress_notifie
 		stop=false;
 		for (size_t x=0; x<width; ++x)
 		{
-			notifier(0.4+0.2*static_cast<float>(x)/static_cast<float>(width));
+			notifier.update(0.4+0.2*static_cast<double>(x)/static_cast<double>(width));
 
 			for (size_t y=top; y<bottom; ++y)
 			{
@@ -99,7 +99,7 @@ SharedImage auto_crop(const Image& img,size_t& left,size_t& top,progress_notifie
 		stop=false;
 		for (size_t x=width; x>0; --x)
 		{
-			notifier(0.6+0.2*static_cast<float>(x)/static_cast<float>(width));
+			notifier.update(0.6+0.2*static_cast<double>(x)/static_cast<double>(width));
 
 			for (size_t y=top; y<bottom; ++y)
 			{
@@ -118,9 +118,10 @@ SharedImage auto_crop(const Image& img,size_t& left,size_t& top,progress_notifie
 	if( (left==right) || (top==bottom) )
 		throw exception(exception::FULLY_TRANSPARENT_IMAGE);
 
-	return crop(img,left,top,right-left,bottom-top,boost::bind(&scaled_notifier,notifier,0.8,0.2,_1));
+
+	return crop(img, left, top, right-left, bottom-top, Scaled_progress_notifier(notifier, 0.8, 0.2));
 /*
-	Image* ret=new Image(right-left,bottom-top);
+	Image* ret=new Image(right-left, bottom-top);
 
 	const Image::PlaneNames& planeNames=img.planeNames();
 	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
@@ -135,23 +136,23 @@ SharedImage auto_crop(const Image& img,size_t& left,size_t& top,progress_notifie
 	{
 		for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		{
-			notifier(0.8+0.2*static_cast<float>(i++)/static_cast<float>(m));
+			notifier.update(0.8+0.2*static_cast<double>(i++)/static_cast<double>(m));
 
 			const Image::Pixel* from=img.plane(*I);
 			Image::Pixel* to=ret.plane(*I);
-			memcpy(to,from+top*width,(bottom-top)*width*sizeof(Image::Pixel));
+			memcpy(to, from+top*width, (bottom-top)*width*sizeof(Image::Pixel));
 		}
 	}
 	else
 	{
 		for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		{
-			notifier(0.8+0.2*static_cast<float>(i++)/static_cast<float>(m));
+			notifier.update(0.8+0.2*static_cast<double>(i++)/static_cast<double>(m));
 
 			const Image::Pixel* from=img.plane(*I);
 			Image::Pixel* to=ret.plane(*I);
 			for (size_t y=0; y<(bottom-top); ++y)
-				memcpy(to+y*(right-left),from+(y+top)*width+left,(right-left)*sizeof(Image::Pixel));
+				memcpy(to+y*(right-left), from+(y+top)*width+left, (right-left)*sizeof(Image::Pixel));
 		}
 	}
 

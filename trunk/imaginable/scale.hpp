@@ -29,12 +29,13 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
-	SharedImage scale_nearest(const Image& img,size_t width,size_t height,progress_notifier notifier = dont_notify);
+	SharedImage scale_nearest(const Image& img, size_t width, size_t height, const Progress_notifier &notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_SCALE__INCLUDED

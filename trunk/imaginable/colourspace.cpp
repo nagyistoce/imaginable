@@ -23,19 +23,20 @@
 *************/
 
 
-#include "colourspace.hpp"
-
 #include <cmath>
+
+#include "exception.hpp"
+#include "colourspace.hpp"
 
 
 namespace imaginable {
 
-void rgb_to_hsv(double r,double g,double b,double &h,double &s,double &v)
+void rgb_to_hsv(double r, double g, double b, double &h, double &s, double &v)
 {
 	h=0.;
 	s=0.;
-	double rgbmin=std::min(r,std::min(g,b));
-	v=std::max(r,std::max(g,b));
+	double rgbmin=std::min(r, std::min(g, b));
+	v=std::max(r, std::max(g, b));
 	double rgbdelta=v-rgbmin;
 
 	if (v>0.)
@@ -57,7 +58,7 @@ void rgb_to_hsv(double r,double g,double b,double &h,double &s,double &v)
 	}
 }
 
-void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b)
+void hsv_to_rgb(double h, double s, double v, double &r, double &g, double &b)
 {
 	if (s<=0.)
 	{
@@ -66,7 +67,7 @@ void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b)
 	else
 	{
 		int i;
-		double f,p,q,t;
+		double f, p, q, t;
 
 		if (h>=1.)
 			h=0.;
@@ -89,10 +90,10 @@ void hsv_to_rgb(double h,double s,double v,double &r,double &g,double &b)
 	}
 }
 
-void rgb_to_hsl(double r,double g,double b,double &h,double &s,double &l)
+void rgb_to_hsl(double r, double g, double b, double &h, double &s, double &l)
 {
-	double rgbmin=std::min(r,std::min(g,b));
-	double rgbmax=std::max(r,std::max(g,b));
+	double rgbmin=std::min(r, std::min(g, b));
+	double rgbmax=std::max(r, std::max(g, b));
 	double rgbdelta=rgbmax-rgbmin;
 
 	h=0.;
@@ -117,7 +118,7 @@ void rgb_to_hsl(double r,double g,double b,double &h,double &s,double &l)
 	}
 }
 
-void hsl_to_rgb(double h,double s,double l,double &r,double &g,double &b)
+void hsl_to_rgb(double h, double s, double l, double &r, double &g, double &b)
 {
 	double q = (l>.5) ? (l+s-(l*s)) : (l*(1.+s));
 	double p = 2*l-q;
@@ -137,22 +138,22 @@ void hsl_to_rgb(double h,double s,double l,double &r,double &g,double &b)
 	}
 }
 
-void rgb_to_lightness(double r,double g,double b,double &l)
+void rgb_to_lightness(double r, double g, double b, double &l)
 {
-	double rgbmin = std::min(r,std::min(g,b));
-	double rgbmax = std::max(r,std::max(g,b));
+	double rgbmin = std::min(r, std::min(g, b));
+	double rgbmax = std::max(r, std::max(g, b));
 
 	l = (rgbmax + rgbmin)/2.;
 }
 
-void rgb_to_hcy(double r,double g,double b,double &h, double &c, double &y)
+void rgb_to_hcy(double r, double g, double b, double &h, double &c, double &y)
 {
 	double r_weight = 0.299;
 	double g_weight = 0.587;
 	double b_weight = 0.114;
 
-	double rgbmin = std::min(std::min(r,g),b);
-	double rgbmax = std::max(std::max(r,g),b);
+	double rgbmin = std::min(std::min(r, g), b);
+	double rgbmax = std::max(std::max(r, g), b);
 
 	y = (r_weight * r + g_weight * g + b_weight * b);
 
@@ -248,7 +249,7 @@ void rgb_to_hcy(double r,double g,double b,double &h, double &c, double &y)
 	h = (H_sec + H_insec) / 6.;
 }
 
-void hcy_to_rgb(double h, double c, double y,double &r,double &g,double &b)
+void hcy_to_rgb(double h, double c, double y, double &r, double &g, double &b)
 {
 	double r_weight = 0.299;
 	double g_weight = 0.587;
@@ -327,7 +328,7 @@ void hcy_to_rgb(double h, double c, double y,double &r,double &g,double &b)
 	b += rgbmin;
 }
 
-void rgb_to_luma(double r,double g,double b,double &l)
+void rgb_to_luma(double r, double g, double b, double &l)
 {
 	double r_weight = 0.299;
 	double g_weight = 0.587;
@@ -336,9 +337,9 @@ void rgb_to_luma(double r,double g,double b,double &l)
 	l = (r_weight * r + g_weight * g + b_weight * b);
 }
 
-void pixel_rgb_to_hsv(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Image::Pixel& hue,Image::Pixel& saturation,Image::Pixel& value,double maximum)
+void pixel_rgb_to_hsv(Image::Pixel red, Image::Pixel green, Image::Pixel blue, Image::Pixel& hue, Image::Pixel& saturation, Image::Pixel& value, double maximum)
 {
-	double dh,ds,dv;
+	double dh, ds, dv;
 	rgb_to_hsv(
 		static_cast<double>(red  )/maximum,
 		static_cast<double>(green)/maximum,
@@ -351,9 +352,9 @@ void pixel_rgb_to_hsv(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Imag
 	value      = static_cast<Image::Pixel>(dv*maximum);
 }
 
-void pixel_hsv_to_rgb(Image::Pixel hue,Image::Pixel saturation,Image::Pixel value,Image::Pixel& red,Image::Pixel& green,Image::Pixel& blue,double maximum)
+void pixel_hsv_to_rgb(Image::Pixel hue, Image::Pixel saturation, Image::Pixel value, Image::Pixel& red, Image::Pixel& green, Image::Pixel& blue, double maximum)
 {
-	double dr,dg,db;
+	double dr, dg, db;
 	hsv_to_rgb(
 		static_cast<double>(hue       )/maximum,
 		static_cast<double>(saturation)/maximum,
@@ -366,9 +367,9 @@ void pixel_hsv_to_rgb(Image::Pixel hue,Image::Pixel saturation,Image::Pixel valu
 	blue  = static_cast<Image::Pixel>(db*maximum);
 }
 
-void pixel_rgb_to_hsl(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Image::Pixel& hue,Image::Pixel& saturation,Image::Pixel& lightness,double maximum)
+void pixel_rgb_to_hsl(Image::Pixel red, Image::Pixel green, Image::Pixel blue, Image::Pixel& hue, Image::Pixel& saturation, Image::Pixel& lightness, double maximum)
 {
-	double dh,ds,dl;
+	double dh, ds, dl;
 	rgb_to_hsl(
 		static_cast<double>(red  )/maximum,
 		static_cast<double>(green)/maximum,
@@ -381,9 +382,9 @@ void pixel_rgb_to_hsl(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Imag
 	lightness  = static_cast<Image::Pixel>(dl*maximum);
 }
 
-void pixel_hsl_to_rgb(Image::Pixel hue,Image::Pixel saturation,Image::Pixel lightness,Image::Pixel& red,Image::Pixel& green,Image::Pixel& blue,double maximum)
+void pixel_hsl_to_rgb(Image::Pixel hue, Image::Pixel saturation, Image::Pixel lightness, Image::Pixel& red, Image::Pixel& green, Image::Pixel& blue, double maximum)
 {
-	double dr,dg,db;
+	double dr, dg, db;
 	hsl_to_rgb(
 		static_cast<double>(hue       )/maximum,
 		static_cast<double>(saturation)/maximum,
@@ -396,7 +397,7 @@ void pixel_hsl_to_rgb(Image::Pixel hue,Image::Pixel saturation,Image::Pixel ligh
 	blue  = static_cast<Image::Pixel>(db*maximum);
 }
 
-void pixel_rgb_to_lightness(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Image::Pixel& lightness,double maximum)
+void pixel_rgb_to_lightness(Image::Pixel red, Image::Pixel green, Image::Pixel blue, Image::Pixel& lightness, double maximum)
 {
 	double dl;
 	rgb_to_lightness(
@@ -407,9 +408,9 @@ void pixel_rgb_to_lightness(Image::Pixel red,Image::Pixel green,Image::Pixel blu
 	lightness = static_cast<Image::Pixel>(dl*maximum);
 }
 
-void pixel_rgb_to_hcy(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Image::Pixel& hue,Image::Pixel& chroma,Image::Pixel& luma,double maximum)
+void pixel_rgb_to_hcy(Image::Pixel red, Image::Pixel green, Image::Pixel blue, Image::Pixel& hue, Image::Pixel& chroma, Image::Pixel& luma, double maximum)
 {
-	double dh,dc,dy;
+	double dh, dc, dy;
 	rgb_to_hcy(
 		static_cast<double>(red  )/maximum,
 		static_cast<double>(green)/maximum,
@@ -422,9 +423,9 @@ void pixel_rgb_to_hcy(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Imag
 	luma   = static_cast<Image::Pixel>(dy*maximum);
 }
 
-void pixel_hcy_to_rgb(Image::Pixel hue,Image::Pixel chroma,Image::Pixel luma,Image::Pixel& red,Image::Pixel& green,Image::Pixel& blue,double maximum)
+void pixel_hcy_to_rgb(Image::Pixel hue, Image::Pixel chroma, Image::Pixel luma, Image::Pixel& red, Image::Pixel& green, Image::Pixel& blue, double maximum)
 {
-	double dr,dg,db;
+	double dr, dg, db;
 	hcy_to_rgb(
 		static_cast<double>(hue   )/maximum,
 		static_cast<double>(chroma)/maximum,
@@ -437,7 +438,7 @@ void pixel_hcy_to_rgb(Image::Pixel hue,Image::Pixel chroma,Image::Pixel luma,Ima
 	blue  = static_cast<Image::Pixel>(db*maximum);
 }
 
-void pixel_rgb_to_luma(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Image::Pixel& luma,double maximum)
+void pixel_rgb_to_luma(Image::Pixel red, Image::Pixel green, Image::Pixel blue, Image::Pixel& luma, double maximum)
 {
 	double dl;
 	rgb_to_lightness(
@@ -448,9 +449,7 @@ void pixel_rgb_to_luma(Image::Pixel red,Image::Pixel green,Image::Pixel blue,Ima
 	luma = static_cast<Image::Pixel>(dl*maximum);
 }
 
-#define NOTIFY_STEP 10
-
-void rgb_to_hsv(Image& img,bool keep_rgb,progress_notifier notifier)
+void rgb_to_hsv(Image& img, bool keep_rgb, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -475,14 +474,13 @@ void rgb_to_hsv(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_rgb_to_hsv(red[xyo],green[xyo],blue[xyo],hue[xyo],saturation[xyo],value[xyo],dmax);
+			pixel_rgb_to_hsv(red[xyo], green[xyo], blue[xyo], hue[xyo], saturation[xyo], value[xyo], dmax);
 		}
 	}
 
@@ -494,7 +492,7 @@ void rgb_to_hsv(Image& img,bool keep_rgb,progress_notifier notifier)
 	}
 }
 
-void hsv_to_rgb(Image& img,bool keep_hsv,progress_notifier notifier)
+void hsv_to_rgb(Image& img, bool keep_hsv, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -519,14 +517,13 @@ void hsv_to_rgb(Image& img,bool keep_hsv,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_hsv_to_rgb(hue[xyo],saturation[xyo],value[xyo],red[xyo],green[xyo],blue[xyo],dmax);
+			pixel_hsv_to_rgb(hue[xyo], saturation[xyo], value[xyo], red[xyo], green[xyo], blue[xyo], dmax);
 		}
 	}
 
@@ -538,7 +535,7 @@ void hsv_to_rgb(Image& img,bool keep_hsv,progress_notifier notifier)
 	}
 }
 
-void rgb_to_hsl(Image& img,bool keep_rgb,progress_notifier notifier)
+void rgb_to_hsl(Image& img, bool keep_rgb, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -563,14 +560,13 @@ void rgb_to_hsl(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_rgb_to_hsl(red[xyo],green[xyo],blue[xyo],hue[xyo],saturation[xyo],lightness[xyo],dmax);
+			pixel_rgb_to_hsl(red[xyo], green[xyo], blue[xyo], hue[xyo], saturation[xyo], lightness[xyo], dmax);
 		}
 	}
 
@@ -582,7 +578,7 @@ void rgb_to_hsl(Image& img,bool keep_rgb,progress_notifier notifier)
 	}
 }
 
-void hsl_to_rgb(Image& img,bool keep_hsl,progress_notifier notifier)
+void hsl_to_rgb(Image& img, bool keep_hsl, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -607,14 +603,13 @@ void hsl_to_rgb(Image& img,bool keep_hsl,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_hsl_to_rgb(hue[xyo],saturation[xyo],lightness[xyo],red[xyo],green[xyo],blue[xyo],dmax);
+			pixel_hsl_to_rgb(hue[xyo], saturation[xyo], lightness[xyo], red[xyo], green[xyo], blue[xyo], dmax);
 		}
 	}
 
@@ -626,7 +621,7 @@ void hsl_to_rgb(Image& img,bool keep_hsl,progress_notifier notifier)
 	}
 }
 
-void rgb_to_lightness(Image& img,bool keep_rgb,progress_notifier notifier)
+void rgb_to_lightness(Image& img, bool keep_rgb, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -647,14 +642,13 @@ void rgb_to_lightness(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_rgb_to_lightness(red[xyo],green[xyo],blue[xyo],lightness[xyo],dmax);
+			pixel_rgb_to_lightness(red[xyo], green[xyo], blue[xyo], lightness[xyo], dmax);
 		}
 	}
 
@@ -666,7 +660,7 @@ void rgb_to_lightness(Image& img,bool keep_rgb,progress_notifier notifier)
 	}
 }
 
-void rgb_to_hcy(Image& img,bool keep_rgb,progress_notifier notifier)
+void rgb_to_hcy(Image& img, bool keep_rgb, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -691,14 +685,13 @@ void rgb_to_hcy(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_rgb_to_hcy(red[xyo],green[xyo],blue[xyo],hue[xyo],chroma[xyo],luma[xyo],dmax);
+			pixel_rgb_to_hcy(red[xyo], green[xyo], blue[xyo], hue[xyo], chroma[xyo], luma[xyo], dmax);
 		}
 	}
 
@@ -710,7 +703,7 @@ void rgb_to_hcy(Image& img,bool keep_rgb,progress_notifier notifier)
 	}
 }
 
-void hcy_to_rgb(Image& img,bool keep_hcy,progress_notifier notifier)
+void hcy_to_rgb(Image& img, bool keep_hcy, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -735,14 +728,13 @@ void hcy_to_rgb(Image& img,bool keep_hcy,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_hcy_to_rgb(hue[xyo],chroma[xyo],luma[xyo],red[xyo],green[xyo],blue[xyo],dmax);
+			pixel_hcy_to_rgb(hue[xyo], chroma[xyo], luma[xyo], red[xyo], green[xyo], blue[xyo], dmax);
 		}
 	}
 
@@ -754,7 +746,7 @@ void hcy_to_rgb(Image& img,bool keep_hcy,progress_notifier notifier)
 	}
 }
 
-void rgb_to_luma(Image& img,bool keep_rgb,progress_notifier notifier)
+void rgb_to_luma(Image& img, bool keep_rgb, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -775,14 +767,13 @@ void rgb_to_luma(Image& img,bool keep_rgb,progress_notifier notifier)
 	double dmax=static_cast<double>(img.maximum());
 	for (size_t y=0; y<height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(static_cast<float>(y)/static_cast<float>(height));
+		notifier.update(static_cast<double>(y)/static_cast<double>(height));
 
 		size_t yo=y*width;
 		for (size_t x=0; x<width; ++x)
 		{
 			size_t xyo=yo+x;
-			pixel_rgb_to_luma(red[xyo],green[xyo],blue[xyo],luma[xyo],dmax);
+			pixel_rgb_to_luma(red[xyo], green[xyo], blue[xyo], luma[xyo], dmax);
 		}
 	}
 

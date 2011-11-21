@@ -27,7 +27,7 @@
 #define TOOLS__TIME__INCLUDED
 
 
-#if !defined(Q_OS_LINUX)
+#if !defined(__linux__)
 #	define __need_timeval
 #	include <sys/time.h>
 #endif
@@ -37,9 +37,9 @@
 
 double getHighPrecTime(void);
 
-#ifdef Q_OS_LINUX
-void setTimeSpec(struct timespec&,double);
+#ifdef __linux__
+void setTimeSpec(struct timespec&, double);
 #endif
-void setTimeVal (struct timeval&,double);
+void setTimeVal (struct timeval&, double);
 
 #endif // TOOLS__TIME__INCLUDED

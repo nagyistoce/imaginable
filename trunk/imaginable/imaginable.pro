@@ -39,7 +39,8 @@ SOURCES += \
 	io_pnm_loader.cpp \
 	io_pam_saver.cpp \
 	io_qt.cpp \
-	tools.cpp \
+	exception.cpp \
+	notifier.cpp \
 	time.cpp \
 	maximum.cpp \
 	gamma.cpp \
@@ -48,7 +49,9 @@ SOURCES += \
 	auto_crop.cpp \
 	colourspace.cpp \
 	blur.cpp \
-	tonemap.cpp \
+	tonemap_global.cpp \
+	tonemap_local_average.cpp \
+	tonemap_local_minmax.cpp \
 	scale.cpp \
 	roof.cpp
 
@@ -59,7 +62,8 @@ HEADERS += \
 	io_pnm_loader.hpp \
 	io_pam_saver.hpp \
 	io_qt.hpp \
-	tools.hpp \
+	exception.hpp \
+	notifier.hpp \
 	time.hpp \
 	maximum.hpp \
 	gamma.hpp \

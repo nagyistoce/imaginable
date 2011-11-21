@@ -29,12 +29,13 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
-	SharedImage rotate(const Image& img,double radian,progress_notifier notifier = dont_notify);
+	SharedImage rotate(const Image& img, double radian, const Progress_notifier &notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_ROTATE__INCLUDED

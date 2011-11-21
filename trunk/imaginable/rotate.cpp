@@ -25,6 +25,7 @@
 
 #include <cmath>
 
+#include "exception.hpp"
 #include "point.hpp"
 #include "rotate.hpp"
 
@@ -43,9 +44,7 @@ T sign_(const T& value)
 
 #define sign(VALUE) sign_<double>(VALUE)
 
-#define NOTIFY_STEP 10
-
-SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
+SharedImage rotate(const Image& img, double radian, const Progress_notifier &notifier)
 {
 	if (!img.hasData())
 		throw exception(exception::NO_IMAGE);
@@ -57,11 +56,11 @@ SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 	//   |   |
 	//   +---+
 	//  2     3
-	center=Point(static_cast<double>(img.width())/2.,static_cast<double>(img.height())/2.);
-	corner[0]=Point(           -center.x,            -center.y);
-	corner[1]=Point(img.width()-center.x,            -center.y);
-	corner[2]=Point(           -center.x,img.height()-center.y);
-	corner[3]=Point(img.width()-center.x,img.height()-center.y);
+	center=Point(static_cast<double>(img.width())/2., static_cast<double>(img.height())/2.);
+	corner[0]=Point(           -center.x,             -center.y);
+	corner[1]=Point(img.width()-center.x,             -center.y);
+	corner[2]=Point(           -center.x, img.height()-center.y);
+	corner[3]=Point(img.width()-center.x, img.height()-center.y);
 	for (size_t i=0; i<4; ++i)
 	{
 		Point& p=corner[i];
@@ -70,25 +69,25 @@ SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 		p=p.rect();
 	}
 	Point topleft(
-		std::min(std::min(corner[0].x,corner[1].x),std::min(corner[2].x,corner[3].x)),
-		std::min(std::min(corner[0].y,corner[1].y),std::min(corner[2].y,corner[3].y)) );
+		std::min(std::min(corner[0].x, corner[1].x), std::min(corner[2].x, corner[3].x)),
+		std::min(std::min(corner[0].y, corner[1].y), std::min(corner[2].y, corner[3].y)) );
 	Point bottomright(
-		std::max(std::max(corner[0].x,corner[1].x),std::max(corner[2].x,corner[3].x)),
-		std::max(std::max(corner[0].y,corner[1].y),std::max(corner[2].y,corner[3].y)) );
+		std::max(std::max(corner[0].x, corner[1].x), std::max(corner[2].x, corner[3].x)),
+		std::max(std::max(corner[0].y, corner[1].y), std::max(corner[2].y, corner[3].y)) );
 
 	size_t new_width =static_cast<size_t>(ceil(bottomright.x+.5*sign(bottomright.x))-ceil(topleft.x+.5*sign(topleft.x)));
 	size_t new_height=static_cast<size_t>(ceil(bottomright.y+.5*sign(bottomright.y))-ceil(topleft.y+.5*sign(topleft.y)));
 
-	Point new_center=Point(static_cast<double>(new_width)/2.,static_cast<double>(new_height)/2.);
+	Point new_center=Point(static_cast<double>(new_width)/2., static_cast<double>(new_height)/2.);
 
-	SharedImage ret(new Image(new_width,new_height));
+	SharedImage ret(new Image(new_width, new_height));
 	Image::PlaneNames planeNames=img.planeNames();
 	for (Image::PlaneNames::const_iterator I=planeNames.begin(); I!=planeNames.end(); ++I)
 		ret->addPlane(*I);
 	ret->addPlane(Image::PLANE__INTERNAL);
 
-	int xo[4]={0,1,0,1};
-	int yo[4]={0,0,1,1};
+	int xo[4]={0, 1, 0, 1};
+	int yo[4]={0, 0, 1, 1};
 	int xyo[4];
 	for (size_t i=0; i<4; ++i)
 		xyo[i]=xo[i]+yo[i]*img.width();
@@ -97,13 +96,12 @@ SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 
 	for (size_t y=0; y<new_height; ++y)
 	{
-		if (!(y%NOTIFY_STEP))
-			notifier(mult*static_cast<float>(y)/static_cast<float>(new_height));
+		notifier.update(mult*static_cast<double>(y)/static_cast<double>(new_height));
 
 		size_t dst_yo=y*new_width;
 		for (size_t x=0; x<new_width; ++x)
 		{
-			Point p(static_cast<double>(x)-new_center.x+.5,static_cast<double>(y)-new_center.y+.5);
+			Point p(static_cast<double>(x)-new_center.x+.5, static_cast<double>(y)-new_center.y+.5);
 			p=p.polar();
 			p.f-=radian;
 			p=p.rect();
@@ -189,8 +187,7 @@ SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 		Image::Pixel* dst_plane=ret->plane(Image::PLANE_ALPHA);
 		for (size_t y=0; y<new_height; ++y)
 		{
-			if (!(y%NOTIFY_STEP))
-				notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(new_height));
+			notifier.update(0.5+0.5*static_cast<double>(y)/static_cast<double>(new_height));
 
 			size_t dst_yo=y*new_width;
 			for (size_t x=0; x<new_width; ++x)
@@ -216,8 +213,7 @@ SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 			Image::Pixel* dst_plane=ret->plane(Image::PLANE__INTERNAL);
 			for (size_t y=0; y<new_height; ++y)
 			{
-				if (!(y%NOTIFY_STEP))
-					notifier(0.5+0.5*static_cast<float>(y)/static_cast<float>(new_height));
+				notifier.update(0.5+0.5*static_cast<double>(y)/static_cast<double>(new_height));
 
 				size_t dst_yo=y*new_width;
 				for (size_t x=0;x<new_width;++x)
@@ -233,7 +229,7 @@ SharedImage rotate(const Image& img,double radian,progress_notifier notifier)
 				}
 			}
 		}
-		ret->renamePlane(Image::PLANE__INTERNAL,Image::PLANE_ALPHA);
+		ret->renamePlane(Image::PLANE__INTERNAL, Image::PLANE_ALPHA);
 	}
 
 	ret->setMaximum(img.maximum());

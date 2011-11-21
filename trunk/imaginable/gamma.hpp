@@ -27,12 +27,12 @@
 #define IMAGINABLE__TOOLS_GAMMA__INCLUDED
 
 
-#include "tools.hpp"
+#include "notifier.hpp"
 
 
 namespace imaginable
 {
-	double gamma(double x,double k);
+	double gamma(double x, double k);
 }
 
 #endif // IMAGINABLE__TOOLS_GAMMA__INCLUDED

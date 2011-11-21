@@ -43,8 +43,8 @@ public:
 	};
 
 	Point(void);
-	Point(double x_,double y_);
-	template<typename T> Point(T x_,T y_)
+	Point(double x_, double y_);
+	template<typename T> Point(T x_, T y_)
 		: x(static_cast<double>(x_))
 		, y(static_cast<double>(y_))
 	{

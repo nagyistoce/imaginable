@@ -27,43 +27,44 @@
 #define IMAGINABLE__TOOLS_BLUR__INCLUDED
 
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
 	template <typename PIXEL, typename ALPHA_PIXEL>
-		void universal_box_blur(PIXEL *plane,ssize_t width,ssize_t height,size_t radius,ALPHA_PIXEL *alpha,progress_notifier notifier);
+		void universal_box_blur(PIXEL *plane, ssize_t width, ssize_t height, size_t radius, ALPHA_PIXEL *alpha, const Progress_notifier &notifier);
 
 	template <typename PIXEL, typename ALPHA_PIXEL>
-		void universal_gaussian_blur(PIXEL *plane,ssize_t width,ssize_t height,size_t radius,ALPHA_PIXEL *alpha,progress_notifier notifier);
+		void universal_gaussian_blur(PIXEL *plane, ssize_t width, ssize_t height, size_t radius, ALPHA_PIXEL *alpha, const Progress_notifier &notifier);
 
 
-	void box_blur(Image& img,unsigned plane,size_t radius,bool use_alpha=false,progress_notifier notifier = dont_notify);
+	void box_blur(Image& img, unsigned plane, size_t radius, bool use_alpha=false, const Progress_notifier &notifier = dont_notify);
 
-	inline void box_blur(Image& img,unsigned plane,size_t radius,progress_notifier notifier)
-		{ box_blur(img,plane,radius,false,notifier); }
+	inline void box_blur(Image& img, unsigned plane, size_t radius, const Progress_notifier &notifier)
+		{ box_blur(img, plane, radius, false, notifier); }
 
-	inline void box_blur_alpha(Image& img,unsigned plane,size_t radius,progress_notifier notifier = dont_notify)
-		{ box_blur(img,plane,radius,true,notifier); }
+	inline void box_blur_alpha(Image& img, unsigned plane, size_t radius, const Progress_notifier &notifier = dont_notify)
+		{ box_blur(img, plane, radius, true, notifier); }
 
 
-	void gaussian_blur(Image& img,unsigned plane,size_t radius,bool use_alpha=false,progress_notifier notifier = dont_notify);
+	void gaussian_blur(Image& img, unsigned plane, size_t radius, bool use_alpha=false, const Progress_notifier &notifier = dont_notify);
 
-	inline void gaussian_blur(Image& img,unsigned plane,size_t radius,progress_notifier notifier)
-		{ gaussian_blur(img,plane,radius,false,notifier); }
+	inline void gaussian_blur(Image& img, unsigned plane, size_t radius, const Progress_notifier &notifier)
+		{ gaussian_blur(img, plane, radius, false, notifier); }
 
-	inline void gaussian_blur_alpha(Image& img,unsigned plane,size_t radius,progress_notifier notifier = dont_notify)
-		{ gaussian_blur(img,plane,radius,true,notifier); }
+	inline void gaussian_blur_alpha(Image& img, unsigned plane, size_t radius, const Progress_notifier &notifier = dont_notify)
+		{ gaussian_blur(img, plane, radius, true, notifier); }
 
 #if 0
-	Image::Pixel* box_blur(Image& img,unsigned src_plane,unsigned blurred_plane,size_t radius,bool use_alpha);
+	Image::Pixel* box_blur(Image& img, unsigned src_plane, unsigned blurred_plane, size_t radius, bool use_alpha);
 
-	inline Image::Pixel* box_blur(Image& img,unsigned plane,size_t radius,bool use_alpha)
+	inline Image::Pixel* box_blur(Image& img, unsigned plane, size_t radius, bool use_alpha)
 	{
-		Image::Pixel* ret=box_blur(img,plane,Image::PLANE__INTERNAL,radius,use_alpha);
+		Image::Pixel* ret=box_blur(img, plane, Image::PLANE__INTERNAL, radius, use_alpha);
 		img.removePlane(plane);
-		img.renamePlane(Image::PLANE__INTERNAL,plane);
+		img.renamePlane(Image::PLANE__INTERNAL, plane);
 		return ret;
 	}
 #endif

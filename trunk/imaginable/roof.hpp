@@ -27,20 +27,21 @@
 #define IMAGINABLE__TOOLS_ROOF__INCLUDED
 
 
-#include "tools.hpp"
+#include "notifier.hpp"
+#include "image.hpp"
 
 
 namespace imaginable
 {
-	void roof_linear_straight(Image& img, unsigned planeName, double step,             progress_notifier notifier = dont_notify);
+	void roof_linear_straight(Image& img, unsigned planeName, double step,             const Progress_notifier &notifier = dont_notify);
 
-	void roof_linear_diagonal(Image& img, unsigned planeName, double step,             progress_notifier notifier = dont_notify);
+	void roof_linear_diagonal(Image& img, unsigned planeName, double step,             const Progress_notifier &notifier = dont_notify);
 
-	void roof_linear_8       (Image& img, unsigned planeName, double step,             progress_notifier notifier = dont_notify);
+	void roof_linear_8       (Image& img, unsigned planeName, double step,             const Progress_notifier &notifier = dont_notify);
 
-	void roof_parabolic      (Image& img, unsigned planeName, double k,                progress_notifier notifier = dont_notify);
+	void roof_parabolic      (Image& img, unsigned planeName, double k,                const Progress_notifier &notifier = dont_notify);
 
-	void roof_exponential    (Image& img, unsigned planeName, double a, size_t radius, progress_notifier notifier = dont_notify);
+	void roof_exponential    (Image& img, unsigned planeName, double a, size_t radius, const Progress_notifier &notifier = dont_notify);
 }
 
 #endif // IMAGINABLE__TOOLS_ROOF__INCLUDED
