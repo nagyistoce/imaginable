@@ -131,9 +131,9 @@ namespace version {
 			if (asprintf(&ubuntu_style_string_, "%02d.%02d", dateTime.date().year()-2000, dateTime.date().month()) < 0)
 				full_string_ = NULL;
 #else
-			int length = snprintf(ubuntu_style_string_, 0, "%02d.%02d", stm.tm_year-100, stm.tm_mon+1);
+			int length = snprintf(ubuntu_style_string_, 0, "%02d.%02d", dateTime.date().year()-2000, dateTime.date().month());
 			ubuntu_style_string_ = static_cast<char*>(malloc(length));
-			snprintf(ubuntu_style_string_, length, "%02d.%02d", stm.tm_year-100, stm.tm_mon+1);
+			snprintf(ubuntu_style_string_, length, "%02d.%02d", dateTime.date().year()-2000, dateTime.date().month());
 #endif
 		}
 		return ubuntu_style_string_;

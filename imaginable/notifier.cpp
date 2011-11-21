@@ -37,4 +37,19 @@ double Timed_progress_notifier::now(void) const
 	return getHighPrecTime();
 }
 
+void Timed_progress_notifier::update(double value) const
+{
+	double current = this->now();
+	if (current - m_last_update > m_timeout)
+	{
+		m_last_update = current;
+		m_notifier.update(value);
+	}
+}
+
+void Scaled_progress_notifier::update(double value) const
+{
+	m_notifier.update(m_offset + m_scale * value);
+}
+
 }
