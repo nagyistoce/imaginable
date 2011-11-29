@@ -631,7 +631,6 @@ void MainWindow::update_views(void)
 
 void MainWindow::progress_updated(double value)
 {
-	std::cout << value << std::endl;
 	progress_bar->setValue(value * 100.);
 	QApplication::processEvents();
 }
