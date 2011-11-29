@@ -26,7 +26,7 @@
 #include <cstdio>
 
 #if !defined(__linux__)
-#	include <cstring>
+#	include <cstdlib>
 #endif
 
 #include <QtCore/QDateTime>

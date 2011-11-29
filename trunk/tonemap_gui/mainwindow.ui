@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>390</height>
+    <width>661</width>
+    <height>556</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="tonemap_gui.qrc">
-    <normaloff>:/icon/tonemap</normaloff>:/icon/tonemap</iconset>
+    <normaloff>:/icon/tonemap.svg</normaloff>:/icon/tonemap.svg</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -108,8 +108,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>480</width>
-     <height>19</height>
+     <width>661</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -169,15 +169,83 @@
     <number>8</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
      <property name="spacing">
+      <number>0</number>
+     </property>
+     <property name="leftMargin">
       <number>4</number>
      </property>
-     <property name="margin">
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
       <number>4</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
      </property>
      <item>
-      <layout class="QGridLayout" name="_3">
+      <widget class="QGroupBox" name="groupBox_method">
+       <property name="title">
+        <string>Method</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="margin">
+         <number>4</number>
+        </property>
+        <item>
+         <widget class="QRadioButton" name="radioButton_global">
+          <property name="text">
+           <string>Global</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_local_average">
+          <property name="text">
+           <string>Local Average</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_local_minmax_parabolic">
+          <property name="text">
+           <string>Local Min/Max Parabolic</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_local_minmax_exponential">
+          <property name="text">
+           <string>Local Min/Max Exponential</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QGridLayout" name="gridLayout_method">
        <property name="margin">
         <number>0</number>
        </property>
@@ -197,10 +265,13 @@
        <item row="0" column="1">
         <widget class="QSlider" name="slider_saturation">
          <property name="maximum">
-          <number>100</number>
+          <number>1000</number>
          </property>
-         <property name="value">
-          <number>35</number>
+         <property name="singleStep">
+          <number>10</number>
+         </property>
+         <property name="pageStep">
+          <number>100</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -209,7 +280,7 @@
           <enum>QSlider::TicksBelow</enum>
          </property>
          <property name="tickInterval">
-          <number>10</number>
+          <number>100</number>
          </property>
         </widget>
        </item>
@@ -235,23 +306,26 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_blur">
          <property name="text">
-          <string>Gaussian &amp;blur</string>
+          <string>Gaussian &amp;blur size</string>
          </property>
          <property name="buddy">
           <cstring>slider_blur</cstring>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="3" column="1">
         <widget class="QSlider" name="slider_blur">
          <property name="maximum">
-          <number>100</number>
+          <number>1000</number>
          </property>
-         <property name="value">
-          <number>42</number>
+         <property name="singleStep">
+          <number>10</number>
+         </property>
+         <property name="pageStep">
+          <number>100</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -260,65 +334,14 @@
           <enum>QSlider::TicksBelow</enum>
          </property>
          <property name="tickInterval">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QSlider" name="slider_mix">
-         <property name="maximum">
           <number>100</number>
          </property>
-         <property name="value">
-          <number>50</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksBelow</enum>
-         </property>
-         <property name="tickInterval">
-          <number>10</number>
-         </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_mix">
-         <property name="text">
-          <string>&amp;Mix</string>
-         </property>
-         <property name="buddy">
-          <cstring>slider_mix</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="value_mix">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>40</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>50%</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
+       <item row="3" column="2">
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
-          <number>4</number>
+          <number>15</number>
          </property>
          <property name="margin">
           <number>0</number>
@@ -369,7 +392,202 @@
          </item>
         </layout>
        </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_mix">
+         <property name="text">
+          <string>&amp;Mix factor</string>
+         </property>
+         <property name="buddy">
+          <cstring>slider_mix</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QSlider" name="slider_mix">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="pageStep">
+          <number>10</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksBelow</enum>
+         </property>
+         <property name="tickInterval">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLabel" name="value_mix">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>40</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>50%</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_minmax">
+         <property name="text">
+          <string>Min/Ma&amp;x size</string>
+         </property>
+         <property name="buddy">
+          <cstring>slider_minmax</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QSlider" name="slider_minmax">
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="singleStep">
+          <number>10</number>
+         </property>
+         <property name="pageStep">
+          <number>100</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksBelow</enum>
+         </property>
+         <property name="tickInterval">
+          <number>100</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <property name="spacing">
+          <number>15</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="value_minmax_percent">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>40</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>20%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="value_minmax_pixels">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>1 px</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_lightness">
+         <property name="text">
+          <string>Lightness &amp;factor</string>
+         </property>
+         <property name="buddy">
+          <cstring>slider_lightness</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSlider" name="slider_lightness">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="pageStep">
+          <number>10</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="tickPosition">
+          <enum>QSlider::TicksBelow</enum>
+         </property>
+         <property name="tickInterval">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="value_lightness">
+         <property name="text">
+          <string>1.00</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <layout class="QHBoxLayout" name="_2">
@@ -414,26 +632,13 @@
        </item>
       </layout>
      </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
     </layout>
    </widget>
   </widget>
   <action name="action_Open">
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/file/open</normaloff>:/file/open</iconset>
+     <normaloff>:/file/open.svg</normaloff>:/file/open.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -445,7 +650,7 @@
    </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/file/save</normaloff>:/file/save</iconset>
+     <normaloff>:/file/save.svg</normaloff>:/file/save.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -454,7 +659,7 @@
   <action name="action_Quit">
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/file/quit</normaloff>:/file/quit</iconset>
+     <normaloff>:/file/quit.svg</normaloff>:/file/quit.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -466,7 +671,7 @@
    </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/zoom/in</normaloff>:/zoom/in</iconset>
+     <normaloff>:/zoom/in.svg</normaloff>:/zoom/in.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom &amp;in</string>
@@ -478,7 +683,7 @@
    </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/zoom/out</normaloff>:/zoom/out</iconset>
+     <normaloff>:/zoom/out.svg</normaloff>:/zoom/out.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom &amp;out</string>
@@ -490,6 +695,10 @@
    </property>
    <property name="checked">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="tonemap_gui.qrc">
+     <normaloff>:/view/show_original.svg</normaloff>:/view/show_original.svg</iconset>
    </property>
    <property name="text">
     <string>S&amp;how original</string>
@@ -505,9 +714,12 @@
    <property name="checked">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/zoom/fit</normaloff>:/zoom/fit</iconset>
+     <normaloff>:/zoom/fit.svg</normaloff>:/zoom/fit.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom to fit</string>
@@ -517,9 +729,15 @@
    </property>
   </action>
   <action name="action_Zoom_one">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/zoom/one</normaloff>:/zoom/one</iconset>
+     <normaloff>:/zoom/one.svg</normaloff>:/zoom/one.svg</iconset>
    </property>
    <property name="text">
     <string>Zoom 100%</string>
@@ -534,7 +752,7 @@
    </property>
    <property name="icon">
     <iconset resource="tonemap_gui.qrc">
-     <normaloff>:/file/saveas</normaloff>:/file/saveas</iconset>
+     <normaloff>:/file/saveas.svg</normaloff>:/file/saveas.svg</iconset>
    </property>
    <property name="text">
     <string>Save &amp;as</string>
@@ -550,6 +768,19 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>radioButton_global</tabstop>
+  <tabstop>radioButton_local_average</tabstop>
+  <tabstop>radioButton_local_minmax_parabolic</tabstop>
+  <tabstop>radioButton_local_minmax_exponential</tabstop>
+  <tabstop>slider_saturation</tabstop>
+  <tabstop>slider_lightness</tabstop>
+  <tabstop>slider_minmax</tabstop>
+  <tabstop>slider_blur</tabstop>
+  <tabstop>slider_mix</tabstop>
+  <tabstop>show_original</tabstop>
+  <tabstop>reset_settings</tabstop>
+ </tabstops>
  <resources>
   <include location="tonemap_gui.qrc"/>
  </resources>
@@ -625,8 +856,8 @@
    <slot>trigger()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>59</x>
-     <y>346</y>
+     <x>56</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>
@@ -645,8 +876,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>59</x>
-     <y>346</y>
+     <x>56</x>
+     <y>492</y>
     </hint>
    </hints>
   </connection>
@@ -737,8 +968,8 @@
    <slot>setSaturation(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>292</x>
-     <y>264</y>
+     <x>455</x>
+     <y>355</y>
     </hint>
     <hint type="destinationlabel">
      <x>186</x>
@@ -753,8 +984,8 @@
    <slot>setBlur(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>296</y>
+     <x>455</x>
+     <y>439</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -769,8 +1000,8 @@
    <slot>setMix(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>328</y>
+     <x>455</x>
+     <y>467</y>
     </hint>
     <hint type="destinationlabel">
      <x>396</x>
@@ -785,11 +1016,11 @@
    <slot>resetSliders()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>471</x>
-     <y>356</y>
+     <x>555</x>
+     <y>492</y>
     </hint>
     <hint type="destinationlabel">
-     <x>630</x>
+     <x>560</x>
      <y>318</y>
     </hint>
    </hints>
@@ -801,8 +1032,8 @@
    <slot>horizontallySlided(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>231</x>
-     <y>196</y>
+     <x>239</x>
+     <y>260</y>
     </hint>
     <hint type="destinationlabel">
      <x>239</x>
@@ -817,8 +1048,8 @@
    <slot>verticallySlided(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>467</x>
-     <y>121</y>
+     <x>556</x>
+     <y>180</y>
     </hint>
     <hint type="destinationlabel">
      <x>239</x>
@@ -938,6 +1169,102 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>radioButton_global</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>methodGlobal(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>23</x>
+     <y>319</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-12</x>
+     <y>316</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_local_average</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>methodLocalAverage(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>150</x>
+     <y>319</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_local_minmax_parabolic</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>methodLocalMinmaxParabolic(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>211</x>
+     <y>316</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>624</x>
+     <y>309</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton_local_minmax_exponential</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>methodLocalMinmaxExponential(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>454</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>419</x>
+     <y>532</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slider_lightness</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setLightness(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>210</x>
+     <y>368</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slider_minmax</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setMinMax(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>336</x>
+     <y>396</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>594</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>fileOpen()</slot>
@@ -958,5 +1285,11 @@
   <slot>previewShifted(int,int)</slot>
   <slot>previewImageDropped(QImage)</slot>
   <slot>previewUrlDropped(QString)</slot>
+  <slot>methodGlobal(bool)</slot>
+  <slot>methodLocalAverage(bool)</slot>
+  <slot>methodLocalMinmaxParabolic(bool)</slot>
+  <slot>methodLocalMinmaxExponential(bool)</slot>
+  <slot>setLightness(int)</slot>
+  <slot>setMinMax(int)</slot>
  </slots>
 </ui>

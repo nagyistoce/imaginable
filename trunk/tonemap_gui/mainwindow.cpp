@@ -26,6 +26,7 @@
 #include <QtGui/QProgressBar>
 #include <QtGui/QFileDialog>
 #include <QtGui/QImageWriter>
+#include <QtGui/QMessageBox>
 #include <QtCore/QTimer>
 
 #include <boost/bind.hpp>
@@ -40,10 +41,11 @@
 #include <imaginable/tonemap.hpp>
 #include <imaginable/crop.hpp>
 #include <imaginable/scale.hpp>
-#include <imaginable/tools.hpp>
+#include <imaginable/notifier.hpp>
 #include <imaginable/gamma.hpp>
 
 #include "mainwindow.hpp"
+#include "notification_signaller.hpp"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -52,8 +54,10 @@ MainWindow::MainWindow(QWidget *parent)
 	, progress_bar(new QProgressBar(this))
 	, less_side(0)
 	, m_lock_update(0)
+	, min_zoom(1.0)
 	, m_update_flags(0)
 	, m_prev_update_flags(0)
+	, notification_signaller(new Notification_signaller(this))
 {
 	setupUi(this);
 	status_bar->addPermanentWidget(progress_bar,1);
@@ -92,6 +96,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&update_timer,SIGNAL(timeout()),this,SLOT(updateTimeout()));
 
 
+	connect(notification_signaller, SIGNAL(updated(double)), this, SLOT(progress_updated(double)));
+
+
 	last_user_dir = QDir::homePath();
 
 	open_filters = tr("Portable Arbitrary Map images")+" [*.pam](*.pam);;"+tr("Portable Any Map images")+" [*.pnm](*.pnm)";
@@ -105,6 +112,9 @@ MainWindow::MainWindow(QWidget *parent)
 		save_filters += QString("[")+mask+"]("+mask+");;";
 	}
 	save_filters += tr("All images supported by QT")+"("+qt_can_write.join(" ")+")";
+
+	resetSliders();
+	methodLocalMinmaxParabolic(true);
 }
 
 void MainWindow::imageLoaded(void)
@@ -114,15 +124,23 @@ void MainWindow::imageLoaded(void)
 	action_Save_as    ->setEnabled(true);
 	action_Zoom_in    ->setEnabled(true);
 	action_Zoom_out   ->setEnabled(true);
-	action_Zoom_to_fit->setChecked(true);
+	action_Zoom_to_fit->setEnabled(true);
+	action_Zoom_one   ->setEnabled(true);
+	restrict_zoom_buttons();
 	current_zoom_type = ZOOM_TO_FIT;
 
 	less_side = std::min(original_image->width(),original_image->height());
 
+	min_zoom = 2./static_cast<double>(less_side);
+
 	m_update_flags |= UPDATE_SCALE;
 	update_timer.start();
 
+	setSaturation(slider_saturation->value());
+	setLightness(slider_lightness->value());
+	setMinMax(slider_minmax->value());
 	setBlur(slider_blur->value());
+	setMix(slider_mix->value());
 }
 
 bool MainWindow::loadFile(QString file_name)
@@ -191,13 +209,8 @@ void MainWindow::fileSave(void)
 	else
 	{
 		imaginable::SharedImage tonemapped_image = original_image->copy();
-		imaginable::rgb_to_hcy(*tonemapped_image,false);
 
-		imaginable::TimedProgress timed_progress(boost::bind(&MainWindow::tonemap_notification,this,_1));
-		imaginable::tonemap_local(*tonemapped_image,imaginable::gamma(static_cast<double>(slider_saturation->value())/100.,-3.)*10.,blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
-
-		imaginable::hcy_to_rgb(*tonemapped_image,false);
-
+		tonemap(*tonemapped_image);
 
 		if (safe_as_file_name.endsWith(".pam",Qt::CaseInsensitive))
 		{
@@ -226,10 +239,22 @@ void MainWindow::fileSaveAs(void)
 	}
 }
 
+void MainWindow::restrict_zoom_buttons(void)
+{
+	action_Zoom_in->setEnabled(zoom < 1.0);
+	action_Zoom_out->setEnabled(zoom > min_zoom);
+}
+
 void MainWindow::zoomIn(void)
 {
-	action_Zoom_to_fit->setChecked(false);
 	zoom *= 1.125;
+	if (qAbs(zoom - 1.0) < 0.001)
+		zoom = 1.0;
+
+	action_Zoom_to_fit->setChecked(false);
+	action_Zoom_one->setChecked(false);
+	restrict_zoom_buttons();
+
 	current_zoom_type = ZOOM_CUSTOM;
 
 	m_update_flags |= UPDATE_SCALE;
@@ -237,8 +262,14 @@ void MainWindow::zoomIn(void)
 
 void MainWindow::zoomOut(void)
 {
-	action_Zoom_to_fit->setChecked(false);
 	zoom /= 1.125;
+	if (qAbs(zoom - 1.0) < 0.001)
+		zoom = 1.0;
+
+	action_Zoom_to_fit->setChecked(false);
+	action_Zoom_one->setChecked(false);
+	restrict_zoom_buttons();
+
 	current_zoom_type = ZOOM_CUSTOM;
 
 	m_update_flags |= UPDATE_SCALE;
@@ -246,8 +277,11 @@ void MainWindow::zoomOut(void)
 
 void MainWindow::zoomOne(void)
 {
+	zoom = 1.0;
+
 	action_Zoom_to_fit->setChecked(false);
-	zoom = 1.;
+	restrict_zoom_buttons();
+
 	current_zoom_type = ZOOM_ONE;
 
 	m_update_flags |= UPDATE_SCALE;
@@ -255,6 +289,9 @@ void MainWindow::zoomOne(void)
 
 void MainWindow::zoomToFit(void)
 {
+	action_Zoom_one->setChecked(false);
+	restrict_zoom_buttons();
+
 	current_zoom_type = ZOOM_TO_FIT;
 
 	m_update_flags |= UPDATE_SCALE;
@@ -262,16 +299,52 @@ void MainWindow::zoomToFit(void)
 
 void MainWindow::setSaturation(int value)
 {
-	value_saturation->setText(QString("+%1").arg(imaginable::gamma(static_cast<double>(value)/100.,-3.)*10.,1,'f',2,'0'));
+	value_saturation->setText(QString("+%1").arg(imaginable::gamma(static_cast<double>(value)/1000., -3.) * 10.,  1, 'f', 2, '0'));
 
 	if (!m_lock_update)
 		m_update_flags |= UPDATE_TONEMAP;
 }
 
+void MainWindow::setLightness(int value)
+{
+	value_lightness->setText(QString("%1").arg(static_cast<double>(value)/10.));
+
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_TONEMAP;
+}
+
+void MainWindow::setMinMax(int value)
+{
+	double corrected_minmax = imaginable::gamma(static_cast<double>(value) / 1000., -2.);
+	value_minmax_percent->setText(QString("%1%").arg(static_cast<size_t>(corrected_minmax * 100.)));
+	minmax_in_pixels        = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side)        * corrected_minmax));
+	scaled_minmax_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_minmax));
+	value_minmax_pixels->setText(QString("%1 px").arg(minmax_in_pixels));
+
+	switch (current_method)
+	{
+	case METHOD_LOCAL_MINMAX_PARABOLIC:
+	case METHOD_LOCAL_MINMAX_EXPONENTIAL:
+		setBlur(slider_blur->value());
+	default:;
+	}
+
+	if (!m_lock_update)
+		m_update_flags |= UPDATE_TONEMAP;
+}
 void MainWindow::setBlur(int value)
 {
-	double corrected_blur = imaginable::gamma(static_cast<double>(value)/100.,-2.);
-	value_blur_percent->setText(QString("%1%").arg(static_cast<size_t>(corrected_blur*100.)));
+	double corrected_blur = imaginable::gamma(static_cast<double>(value) / 1000., -2.);
+
+	switch (current_method)
+	{
+	case METHOD_LOCAL_MINMAX_PARABOLIC:
+	case METHOD_LOCAL_MINMAX_EXPONENTIAL:
+		corrected_blur *= /*corrected_minmax*/ imaginable::gamma(static_cast<double>(slider_minmax->value()) / 1000., -2.);
+	default:;
+	}
+
+	value_blur_percent->setText(QString("%1%").arg(static_cast<size_t>(corrected_blur * 100.)));
 	blur_in_pixels        = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side)        * corrected_blur));
 	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_blur));
 	value_blur_pixels->setText(QString("%1 px").arg(blur_in_pixels));
@@ -291,9 +364,11 @@ void MainWindow::setMix(int value)
 void MainWindow::resetSliders(void)
 {
 	++m_lock_update;
-		slider_saturation->setValue(imaginable::gamma(0.1,3.)*100.);
-		slider_blur      ->setValue(imaginable::gamma(0.2,2.)*100.);
-		slider_mix       ->setValue(50);
+		slider_saturation->setValue(imaginable::gamma(0.1, 3.) * 1000.);
+		slider_lightness ->setValue(1. * 10.);
+		slider_minmax    ->setValue(imaginable::gamma(0.204, 2.) * 1000.);
+		slider_blur      ->setValue(imaginable::gamma(0.204, 2.) * 1000.);
+		slider_mix       ->setValue(0.5 * 100.);
 	--m_lock_update;
 
 	m_update_flags |= UPDATE_TONEMAP;
@@ -322,7 +397,7 @@ void MainWindow::showOriginal(bool value)
 
 void MainWindow::previewResized(int,int)
 {
-	m_update_flags |= action_Zoom_to_fit->isChecked() ? UPDATE_SCALE : UPDATE_VIEWS;
+	m_update_flags |= UPDATE_SCALE;
 }
 
 void MainWindow::previewShifted(int dx,int dy)
@@ -385,7 +460,7 @@ void MainWindow::update_scale(void)
 			static_cast<double>(tonemapped_view->height())/static_cast<double>(original_image->height()) );
 	// FALL THROUGH
 	case ZOOM_CUSTOM:
-		zoom = std::min(std::max(zoom,2./static_cast<double>(std::min(original_image->width(),original_image->height()))),1.);
+		zoom = std::min(std::max(zoom, min_zoom), 1.);
 		scaled_image = scale_nearest(*original_image,
 				static_cast<size_t>(static_cast<double>(original_image->width ())*zoom),
 				static_cast<size_t>(static_cast<double>(original_image->height())*zoom) );
@@ -442,7 +517,18 @@ void MainWindow::update_scale(void)
 
 
 	less_scaled_side = std::min(scaled_image->width(),scaled_image->height());
-	double corrected_blur = imaginable::gamma(static_cast<double>(slider_blur->value())/100.,-2.);
+
+	double corrected_minmax = imaginable::gamma(static_cast<double>(slider_minmax->value())/1000., -2.);
+	scaled_minmax_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_minmax));
+
+	double corrected_blur = imaginable::gamma(static_cast<double>(slider_blur->value())/1000., -2.);
+	switch (current_method)
+	{
+	case METHOD_LOCAL_MINMAX_PARABOLIC:
+	case METHOD_LOCAL_MINMAX_EXPONENTIAL:
+		corrected_blur *= corrected_minmax;
+	default:;
+	}
 	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_blur));
 
 	update_tonemap();
@@ -458,17 +544,63 @@ void MainWindow::update_tonemap(void)
 
 	progress_bar->show();
 
-	imaginable::rgb_to_hcy(*tonemapped_scaled_image,false);
-
-	imaginable::TimedProgress timed_progress(boost::bind(&MainWindow::tonemap_notification,this,_1));
-	imaginable::tonemap_local(*tonemapped_scaled_image,imaginable::gamma(static_cast<double>(slider_saturation->value())/100.,-3.)*10.,scaled_blur_in_pixels,static_cast<double>(slider_mix->value())/100./2.,timed_progress.notifier());
-
-	imaginable::hcy_to_rgb(*tonemapped_scaled_image,false);
+	tonemap(*tonemapped_scaled_image);
 
 	progress_bar->hide();
 
-
 	update_views();
+}
+
+void MainWindow::tonemap(imaginable::Image& img)
+{
+	try
+	{
+		imaginable::rgb_to_hcy(img,false);
+
+		switch (current_method)
+		{
+		case METHOD_GLOBAL:
+			imaginable::tonemap_global(
+				img,
+				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
+				static_cast<double>(slider_lightness->value())/10.,
+				imaginable::Timed_progress_notifier(*notification_signaller));
+			break;
+		case METHOD_LOCAL_AVERAGE:
+			imaginable::tonemap_local_average(
+				img,
+				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
+				scaled_blur_in_pixels,
+				static_cast<double>(slider_mix->value())/100./2.,
+				imaginable::Timed_progress_notifier(*notification_signaller));
+			break;
+		case METHOD_LOCAL_MINMAX_PARABOLIC:
+			imaginable::tonemap_local_minmax_parabolic(
+				img,
+				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
+				scaled_minmax_in_pixels,
+				scaled_blur_in_pixels,
+				static_cast<double>(slider_mix->value())/100.,
+				imaginable::Timed_progress_notifier(*notification_signaller));
+			break;
+		case METHOD_LOCAL_MINMAX_EXPONENTIAL:
+			imaginable::tonemap_local_minmax_exponential(
+				img,
+				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
+				qMax(0.001, static_cast<double>(slider_lightness->value())/10.),
+				scaled_minmax_in_pixels,
+				scaled_blur_in_pixels,
+				static_cast<double>(slider_mix->value())/100.,
+				imaginable::Timed_progress_notifier(*notification_signaller));
+			break;
+		}
+
+		imaginable::hcy_to_rgb(img,false);
+	}
+	catch (const std::exception &e)
+	{
+		QMessageBox(QMessageBox::Critical, tr("Imaginable exception"), tr("Imaginable engine has thrown an exception:\n")+QString::fromLocal8Bit(e.what()), QMessageBox::Ok, this, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint ).exec();
+	}
 }
 
 void MainWindow::update_views(void)
@@ -497,7 +629,110 @@ void MainWindow::update_views(void)
 	}
 }
 
-void MainWindow::tonemap_notification(float value)
+void MainWindow::progress_updated(double value)
 {
-	progress_bar->setValue(value * 100);
+	std::cout << value << std::endl;
+	progress_bar->setValue(value * 100.);
+	QApplication::processEvents();
+}
+
+void MainWindow::methodGlobal(bool value)
+{
+	if (value)
+	{
+		label_minmax->hide();
+		slider_minmax->hide();
+		value_minmax_percent->hide();
+		value_minmax_pixels->hide();
+		label_blur->hide();
+		slider_blur->hide();
+		value_blur_percent->hide();
+		value_blur_pixels->hide();
+		label_mix->hide();
+		slider_mix->hide();
+		value_mix->hide();
+		label_lightness->setText(tr("Lightness &factor"));
+		label_lightness->show();
+		slider_lightness->show();
+		value_lightness->show();
+
+		current_method = METHOD_GLOBAL;
+		m_update_flags |= UPDATE_TONEMAP;
+	}
+}
+
+void MainWindow::methodLocalAverage(bool value)
+{
+	if (value)
+	{
+		label_lightness->hide();
+		slider_lightness->hide();
+		value_lightness->hide();
+		label_minmax->hide();
+		slider_minmax->hide();
+		value_minmax_percent->hide();
+		value_minmax_pixels->hide();
+		label_mix->setText(tr("&Mix factor"));
+		label_blur->show();
+		slider_blur->show();
+		value_blur_percent->show();
+		value_blur_pixels->show();
+		label_mix->show();
+		slider_mix->show();
+		value_mix->show();
+
+		current_method = METHOD_LOCAL_AVERAGE;
+		m_update_flags |= UPDATE_TONEMAP;
+	}
+}
+
+void MainWindow::methodLocalMinmaxParabolic(bool value)
+{
+	if (value)
+	{
+		label_lightness->hide();
+		slider_lightness->hide();
+		value_lightness->hide();
+		label_mix->setText(tr("&Min range factor"));
+		label_minmax->show();
+		slider_minmax->show();
+		value_minmax_percent->show();
+		value_minmax_pixels->show();
+		label_blur->show();
+		slider_blur->show();
+		value_blur_percent->show();
+		value_blur_pixels->show();
+		label_mix->show();
+		slider_mix->show();
+		value_mix->show();
+
+		current_method = METHOD_LOCAL_MINMAX_PARABOLIC;
+		m_update_flags |= UPDATE_TONEMAP;
+	}
+}
+
+void MainWindow::methodLocalMinmaxExponential(bool value)
+{
+	if (value)
+	{
+		label_lightness->setText(tr("Exponential &factor"));
+		label_mix->setText(tr("&Min range factor"));
+		label_lightness->show();
+		slider_lightness->show();
+		value_lightness->show();
+		label_minmax->show();
+		slider_minmax->show();
+		value_minmax_percent->show();
+		value_minmax_pixels->show();
+		label_blur->show();
+		slider_blur->show();
+		value_blur_percent->show();
+		value_blur_pixels->show();
+		label_mix->show();
+		slider_mix->show();
+		value_mix->show();
+
+		current_method = METHOD_LOCAL_MINMAX_EXPONENTIAL;
+		m_update_flags |= UPDATE_TONEMAP;
+	}
 }

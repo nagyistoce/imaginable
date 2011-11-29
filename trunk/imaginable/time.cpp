@@ -39,7 +39,11 @@ struct HPT_wrapper
 
 	double elapsed(void) const
 	{
+#if QT_VERSION < 0x040800
+		return static_cast<double>(elapsedTimer.elapsed())/1000.;
+#else
 		return static_cast<double>(elapsedTimer.nsecsElapsed())/1000000000.;
+#endif
 	}
 } highPrecTime;
 

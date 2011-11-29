@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   version="1.1"
+   width="32"
+   height="32"
+   id="svg2985">
+  <defs
+     id="defs2987" />
+  <metadata
+     id="metadata2990">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1">
+    <path
+       d="m 10.180569,-3.5426896 a 10.805692,10.805692 0 1 1 -21.611383,0 10.805692,10.805692 0 1 1 21.611383,0 z"
+       transform="translate(16.625123,19.54269)"
+       id="path3758"
+       style="fill:#79b8ff;fill-opacity:1;stroke:#0062d1;stroke-width:0.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <path
+       d="m 30.739161,1.2595145 0,3.03125 0,6.3750005 -3.03125,0 0,-4.1875005 -3.34375,3.34375 0,0.8437505 -2.96875,0 0,-3.0312505 0.90625,0 3.34375,-3.34375 -4.25,0 0,-3.03125 6.3125,0 3.03125,0 z"
+       id="path3772"
+       style="fill:#0062d1;fill-opacity:1;stroke:#002956;stroke-width:0.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <path
+       d="m 1.25,30.75 0,-3.03125 0,-6.375 3.03125,0 0,4.1875 3.34375,-3.34375 0,-0.84375 2.96875,0 0,3.03125 -0.90625,0 -3.34375,3.34375 4.25,0 0,3.03125 -6.3125,0 -3.03125,0 z"
+       id="path3768"
+       style="fill:#0062d1;fill-opacity:1;stroke:#002956;stroke-width:0.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <path
+       d="m 30.739161,30.75 0,-3.03125 0,-6.375 -3.03125,0 0,4.1875 -3.34375,-3.34375 0,-0.84375 -2.96875,0 0,3.03125 0.90625,0 3.34375,3.34375 -4.25,0 0,3.03125 6.3125,0 3.03125,0 z"
+       id="path3770"
+       style="fill:#0062d1;fill-opacity:1;stroke:#002956;stroke-width:0.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+    <path
+       d="m 1.25,1.25 0,3.03125 0,6.375 3.03125,0 0,-4.1875 3.34375,3.34375 0,0.84375 2.96875,0 0,-3.03125 -0.90625,0 -3.34375,-3.34375 4.25,0 0,-3.03125 -6.3125,0 -3.03125,0 z"
+       id="path2994"
+       style="fill:#0062d1;fill-opacity:1;stroke:#002956;stroke-width:0.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+  </g>
+</svg>
