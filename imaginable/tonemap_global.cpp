@@ -45,8 +45,8 @@ void tonemap_global(Image& img, double colour_gamma, double lightness_factor, co
 	if(!img.hasData())
 		throw exception(exception::NO_IMAGE);
 
-	if(img.maximum()<=LDRI_MAXIMUM)
-		throw exception(exception::NOT_AN_HDRI);
+//	if(img.maximum()<=LDRI_MAXIMUM)
+//		throw exception(exception::NOT_AN_HDRI);
 
 	if(img.colourSpace()!=Image::COLOURSPACE_HCY)
 		throw exception(exception::INVALID_COLOUR_SPACE);

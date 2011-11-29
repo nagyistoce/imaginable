@@ -24,9 +24,12 @@
 
 
 #include <cstdio>
-#include <cstdlib>
 
-#include <string>
+#if !defined(__linux__)
+#	include <cstdlib>
+#endif
+
+#include <QtCore/QDateTime>
 
 #include "version.hpp"
 
@@ -60,14 +63,7 @@ namespace version {
 #include "version-time.auto.inl"
 	;
 
-	bool stm_inited = false;
-	struct tm stm;
-
-	void init_stm(void)
-	{
-		if (!stm_inited)
-			stm_inited = ( localtime_r(&time_,&stm) != NULL );
-	}
+	QDateTime dateTime = QDateTime::fromTime_t(time_);
 
 
 	unsigned    major   (void) { return major_; }
@@ -83,7 +79,9 @@ namespace version {
 	const char* full_string(void)
 	{
 		if (!full_string_)
-			if (asprintf(&full_string_,"%d.%d.%s.%d%s%s",
+		{
+#ifdef __linux__
+			if (asprintf(&full_string_, "%d.%d.%s.%d%s%s",
 				major_,
 				minor_,
 				revision_,
@@ -93,16 +91,34 @@ namespace version {
 			{
 				full_string_ = NULL;
 			}
+#else
+			int length = snprintf(full_string_, 0, "%d.%d.%s.%d%s%s",
+				major_,
+				minor_,
+				revision_,
+				number_,
+				(label_[0] != '-') ? "-" : "",
+				label_ );
+			full_string_ = static_cast<char*>(malloc(length));
+			snprintf(full_string_, length, "%d.%d.%s.%d%s%s",
+				major_,
+				minor_,
+				revision_,
+				number_,
+				(label_[0] != '-') ? "-" : "",
+				label_ );
+#endif
+		}
 		return full_string_;
 	}
 
 
-	unsigned year   (void) { init_stm(); return stm.tm_year+1900; }
-	unsigned month  (void) { init_stm(); return stm.tm_mon+1; }
-	unsigned day    (void) { init_stm(); return stm.tm_mday; }
-	unsigned hour   (void) { init_stm(); return stm.tm_hour; }
-	unsigned minute (void) { init_stm(); return stm.tm_min; }
-	unsigned second (void) { init_stm(); return stm.tm_sec; }
+	unsigned year   (void) { return dateTime.date().year();   }
+	unsigned month  (void) { return dateTime.date().month();  }
+	unsigned day    (void) { return dateTime.date().day();    }
+	unsigned hour   (void) { return dateTime.time().hour();   }
+	unsigned minute (void) { return dateTime.time().minute(); }
+	unsigned second (void) { return dateTime.time().second(); }
 
 
 	char *ubuntu_style_string_ = NULL;
@@ -111,17 +127,21 @@ namespace version {
 	{
 		if (!ubuntu_style_string_)
 		{
-			init_stm();
-			if (asprintf(&ubuntu_style_string_,"%02d.%02d",stm.tm_year-100,stm.tm_mon+1) < 0)
+#ifdef __linux__
+			if (asprintf(&ubuntu_style_string_, "%02d.%02d", dateTime.date().year()-2000, dateTime.date().month()) < 0)
 				full_string_ = NULL;
+#else
+			int length = snprintf(ubuntu_style_string_, 0, "%02d.%02d", dateTime.date().year()-2000, dateTime.date().month());
+			ubuntu_style_string_ = static_cast<char*>(malloc(length));
+			snprintf(ubuntu_style_string_, length, "%02d.%02d", dateTime.date().year()-2000, dateTime.date().month());
+#endif
 		}
 		return ubuntu_style_string_;
 	}
 
 	inline double ubuntu_style(void)
 	{
-		init_stm();
-		return static_cast<double>(stm.tm_year-100)+static_cast<double>(stm.tm_mon+1)/100.;
+		return static_cast<double>(dateTime.date().year()-2000) + static_cast<double>(dateTime.date().month())/100.;
 	}
 
 }

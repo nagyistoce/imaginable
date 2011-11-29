@@ -53,4 +53,4 @@ namespace version {
 	double      ubuntu_style(void);
 }
 
-#endif // IMAGINABLE__TINEMAP_CLI__VERSION__INCLUDED
+#endif // IMAGINABLE__TINEMAP_GUI__VERSION__INCLUDED

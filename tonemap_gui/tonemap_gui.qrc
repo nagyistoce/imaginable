@@ -1,17 +1,20 @@
 <RCC>
     <qresource prefix="/file">
-        <file alias="open">fileopen.svg</file>
-        <file alias="save">filesave.svg</file>
-        <file alias="saveas">filesaveas.svg</file>
-        <file alias="quit">filequit.svg</file>
+        <file alias="open.svg">file_open.svg</file>
+        <file alias="save.svg">file_save.svg</file>
+        <file alias="saveas.svg">file_save_as.svg</file>
+        <file alias="quit.svg">file_quit.svg</file>
     </qresource>
     <qresource prefix="/zoom">
-        <file alias="out">zoomout.svg</file>
-        <file alias="in">zoomin.svg</file>
-        <file alias="fit">zoomfit.svg</file>
-        <file alias="one">zoomone.svg</file>
+        <file alias="out.svg">zoom_out.svg</file>
+        <file alias="in.svg">zoom_in.svg</file>
+        <file alias="fit.svg">zoom_fit.svg</file>
+        <file alias="one.svg">zoom_one.svg</file>
     </qresource>
     <qresource prefix="/icon">
-        <file alias="tonemap">tonemap.svg</file>
+        <file alias="tonemap.svg">tonemap.svg</file>
+    </qresource>
+    <qresource prefix="/view">
+        <file alias="show_original.svg">show_original.svg</file>
     </qresource>
 </RCC>

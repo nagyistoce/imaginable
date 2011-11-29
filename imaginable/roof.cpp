@@ -294,7 +294,7 @@ void calc_tail(square_lines &lines, Image::Pixel &this_point, size_t &position, 
 
 		for (square_lines::iterator I = lines.begin(); I != lines.end(); ++I)
 		{
-			if (I->tail(position) < new_line.peak)
+			if (I->tail(position) <= new_line.peak)
 			{
 //				if (printing_enabled) std::cout << "-#" << I->position << ':' << I->peak << "~" << I->tail(position) << " < " << new_line.position << ':' << new_line.peak << std::endl;
 

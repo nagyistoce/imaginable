@@ -25,6 +25,7 @@
 
 #include "time.hpp"
 #include "notifier.hpp"
+#include <cmath>
 
 
 namespace imaginable
@@ -40,8 +41,10 @@ double Timed_progress_notifier::now(void) const
 void Timed_progress_notifier::update(double value) const
 {
 	double current = this->now();
-	if (current - m_last_update > m_timeout)
+	if ((current - m_last_update > m_timeout) || (fabs(value - 1.0) < 0.00001))
 	{
+		if (fabs(value - 1.0) < 0.00001)
+			value = 1.0;
 		m_last_update = current;
 		m_notifier.update(value);
 	}

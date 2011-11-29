@@ -70,7 +70,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	if (img.colourSpace() != Image::COLOURSPACE_HCY)
 		throw exception(exception::INVALID_COLOUR_SPACE);
 
-	if ((min_range_factor <= 0.) || (min_range_factor > 1.))
+	if ((min_range_factor < 0.) || (min_range_factor > 1.))
 		throw exception(exception::INVALID_DATA);
 
 //	Image::Pixel *alpha=img.plane(Image::PLANE_ALPHA);
@@ -94,7 +94,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 					for (size_t p=0; p<square; ++p)
 					{
 						if (!(p % w))
-							notifier.update(0+1./6.*static_cast<double>(p)/static_cast<double>(square)/plane_count);
+							notifier.update(0+1./22.*static_cast<double>(p)/static_cast<double>(square)/plane_count);
 
 						plane[p] <<= 8;
 					}
@@ -102,12 +102,11 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 					for (size_t p=0; p<square; ++p)
 					{
 						if (!(p % w))
-							notifier.update(0+1./6.*static_cast<double>(p)/static_cast<double>(square)/plane_count);
+							notifier.update(0+1./22.*static_cast<double>(p)/static_cast<double>(square)/plane_count);
 
 						plane[p] = static_cast<Image::Pixel>(static_cast<double>(plane[p])*scale);
 					}
 			}
-			notifier.update(1.);
 		}
 		img.setMaximum(HDRI_MAXIMUM);
 	}
@@ -127,12 +126,12 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	switch (minmax_roof_parameters.function)
 	{
 	case Minmax_roof_parameters::FUNCTION_PARABOLIC:
-		roof_parabolic(img, IMAGE__PLANE__MAX_LUMA,  static_cast<double>(minmax_roof_parameters.minmax_size)/sqrt(static_cast<double>(img.maximum())), Scaled_progress_notifier(notifier, 1./6., 1./6.));
-		roof_parabolic(img, IMAGE__PLANE__MIN_LUMA, -static_cast<double>(minmax_roof_parameters.minmax_size)/sqrt(static_cast<double>(img.maximum())), Scaled_progress_notifier(notifier, 2./6., 1./6.));
+		roof_parabolic(img, IMAGE__PLANE__MAX_LUMA,  static_cast<double>(minmax_roof_parameters.minmax_size)/sqrt(static_cast<double>(img.maximum())), Scaled_progress_notifier(notifier, 1./22., 8./22.));
+		roof_parabolic(img, IMAGE__PLANE__MIN_LUMA, -static_cast<double>(minmax_roof_parameters.minmax_size)/sqrt(static_cast<double>(img.maximum())), Scaled_progress_notifier(notifier, 9./22., 8./22.));
 		break;
 	case Minmax_roof_parameters::FUNCTION_EXPONENTIAL:
-		roof_exponential(img, IMAGE__PLANE__MAX_LUMA,  minmax_roof_parameters.exponential_factor, minmax_roof_parameters.minmax_size, Scaled_progress_notifier(notifier, 1./6., 1./6.));
-		roof_exponential(img, IMAGE__PLANE__MIN_LUMA, -minmax_roof_parameters.exponential_factor, minmax_roof_parameters.minmax_size, Scaled_progress_notifier(notifier, 2./6., 1./6.));
+		roof_exponential(img, IMAGE__PLANE__MAX_LUMA,  minmax_roof_parameters.exponential_factor, minmax_roof_parameters.minmax_size, Scaled_progress_notifier(notifier, 1./22., 8./22.));
+		roof_exponential(img, IMAGE__PLANE__MIN_LUMA, -minmax_roof_parameters.exponential_factor, minmax_roof_parameters.minmax_size, Scaled_progress_notifier(notifier, 9./22., 8./22.));
 		break;
 	}
 
@@ -144,7 +143,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	Image::Pixel *rangePlane=img.plane(IMAGE__PLANE__RANGE_LUMA);
 	for (size_t y=0; y<h; ++y)
 	{
-		notifier.update(3./6.+1./6.*static_cast<double>(y)/static_cast<double>(h));
+		notifier.update(17./22.+1./22.*static_cast<double>(y)/static_cast<double>(h));
 
 		size_t yo=y*w;
 		for (size_t x=0; x<w; ++x)
@@ -159,14 +158,14 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 	if (alpha_present)
 		img.renamePlane(Image::PLANE_ALPHA, IMAGE__PLANE__ALPHA_BACKUP);
 	img.renamePlane(IMAGE__PLANE__RANGE_LUMA, Image::PLANE_ALPHA);
-	gaussian_blur_alpha(img, IMAGE__PLANE__MIDDLE_LUMA, blur_size);
+	gaussian_blur_alpha(img, IMAGE__PLANE__MIDDLE_LUMA, blur_size, Scaled_progress_notifier(notifier, 18./22., 1./22.));
 	img.removePlane(Image::PLANE_ALPHA);
 	img.removePlane(IMAGE__PLANE__RANGE_LUMA);
 	if (alpha_present)
 		img.renamePlane(IMAGE__PLANE__ALPHA_BACKUP, Image::PLANE_ALPHA);
 	for (size_t y=0; y<h; ++y)
 	{
-		notifier.update(4./6.+1./6.*static_cast<double>(y)/static_cast<double>(h));
+		notifier.update(19./22.+1./22.*static_cast<double>(y)/static_cast<double>(h));
 
 		size_t yo=y*w;
 		for (size_t x=0; x<w; ++x)
@@ -190,13 +189,14 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 				maxPlane[yxo] = static_cast<Image::Pixel>(maxPixel);
 			}
 
-			uint32_t delta = maxPlane[yxo] - minPlane[yxo];
+			ssize_t delta = maxPlane[yxo] - minPlane[yxo];
+			ssize_t scaled_min_range = std::max(static_cast<ssize_t>(1), std::min(static_cast<ssize_t>(HDRI_MAXIMUM), static_cast<ssize_t>(static_cast<double>(HDRI_MAXIMUM) * min_range_factor)));
 			middlePixel = minPlane[yxo] + delta/2;
-			if (delta < HDRI_MAXIMUM * min_range_factor)
+			if (delta < scaled_min_range)
 			{
-				delta = HDRI_MAXIMUM * min_range_factor;
-				ssize_t minAdjusted = static_cast<ssize_t>(middlePixel) - static_cast<ssize_t>(delta)/2;
-				ssize_t maxAdjusted = static_cast<ssize_t>(middlePixel) + static_cast<ssize_t>(delta)/2;
+				delta = scaled_min_range;
+				ssize_t minAdjusted = static_cast<ssize_t>(middlePixel) - delta/2;
+				ssize_t maxAdjusted = static_cast<ssize_t>(middlePixel) - delta/2 + delta;
 				if (minAdjusted < 0)
 				{
 					maxAdjusted -= minAdjusted;
@@ -221,6 +221,8 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 		Image::Pixel chroma_map[HDRI_MAXIMUM+1];
 		for (size_t p=0; p<HDRI_MAXIMUM+1; ++p)
 		{
+			if (!(p % LDRI_MAXIMUM))
+				notifier.update(20./22.+1./22.*static_cast<double>(p)/static_cast<double>(HDRI_MAXIMUM));
 			double value = gamma(static_cast<double>(p)/static_cast<double>(HDRI_MAXIMUM), colour_gamma);
 			chroma_map[p] =
 				(value > 1.) ? HDRI_MAXIMUM :
@@ -232,7 +234,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 		for (size_t p=0; p<square; ++p)
 		{
 			if (!(p % w))
-				notifier.update(5./6.+1./6.*static_cast<double>(p)/static_cast<double>(square));
+				notifier.update(21./22.+1./22.*static_cast<double>(p)/static_cast<double>(square));
 
 			chroma[p] = chroma_map[chroma[p]];
 		}

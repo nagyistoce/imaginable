@@ -36,6 +36,7 @@
 
 class QProgressBar;
 class QLabel;
+class Notification_signaller;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -67,11 +68,20 @@ public slots:
 	void previewUrlDropped(QString);
 
 	void setSaturation(int);
+	void setLightness(int);
+	void setMinMax(int);
 	void setBlur(int);
 	void setMix(int);
 	void resetSliders(void);
 
+	void progress_updated(double);
+
 	void updateTimeout(void);
+
+	void methodGlobal(bool);
+	void methodLocalAverage(bool);
+	void methodLocalMinmaxParabolic(bool);
+	void methodLocalMinmaxExponential(bool);
 
 private:
 	QLabel *current_zoom;
@@ -93,9 +103,11 @@ private:
 	size_t scaled_height;
 
 	size_t less_side;
+	size_t minmax_in_pixels;
 	size_t blur_in_pixels;
 
 	size_t less_scaled_side;
+	size_t scaled_minmax_in_pixels;
 	size_t scaled_blur_in_pixels;
 
 	size_t m_lock_update;
@@ -103,6 +115,8 @@ private:
 	imaginable::SharedImage original_image;
 	imaginable::SharedImage scaled_image;
 	imaginable::SharedImage tonemapped_scaled_image;
+
+	double min_zoom;
 
 
 //	static QPixmap image_to_pixmap(const imaginable::Image&);
@@ -129,7 +143,18 @@ private:
 	void update_tonemap(void);
 	void update_views  (void);
 
-	void tonemap_notification(float);
+	Notification_signaller *notification_signaller;
+
+	void restrict_zoom_buttons(void);
+
+	enum {
+		METHOD_GLOBAL,
+		METHOD_LOCAL_AVERAGE,
+		METHOD_LOCAL_MINMAX_PARABOLIC,
+		METHOD_LOCAL_MINMAX_EXPONENTIAL
+	} current_method;
+
+	void tonemap(imaginable::Image&);
 };
 
 #endif // IMAGINABLE__TONEMAP_GUI__MAINWINDOW__INCLUDED
