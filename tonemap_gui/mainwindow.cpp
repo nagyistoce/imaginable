@@ -335,15 +335,6 @@ void MainWindow::setMinMax(int value)
 void MainWindow::setBlur(int value)
 {
 	double corrected_blur = imaginable::gamma(static_cast<double>(value) / 1000., -2.);
-
-	switch (current_method)
-	{
-	case METHOD_LOCAL_MINMAX_PARABOLIC:
-	case METHOD_LOCAL_MINMAX_EXPONENTIAL:
-		corrected_blur *= /*corrected_minmax*/ imaginable::gamma(static_cast<double>(slider_minmax->value()) / 1000., -2.);
-	default:;
-	}
-
 	value_blur_percent->setText(QString("%1%").arg(static_cast<size_t>(corrected_blur * 100.)));
 	blur_in_pixels        = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side)        * corrected_blur));
 	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_blur));
@@ -522,13 +513,6 @@ void MainWindow::update_scale(void)
 	scaled_minmax_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_minmax));
 
 	double corrected_blur = imaginable::gamma(static_cast<double>(slider_blur->value())/1000., -2.);
-	switch (current_method)
-	{
-	case METHOD_LOCAL_MINMAX_PARABOLIC:
-	case METHOD_LOCAL_MINMAX_EXPONENTIAL:
-		corrected_blur *= corrected_minmax;
-	default:;
-	}
 	scaled_blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_scaled_side) * corrected_blur));
 
 	update_tonemap();
