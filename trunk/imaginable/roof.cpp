@@ -306,14 +306,20 @@ void calc_tail(square_lines &lines, Image::Pixel &this_point, size_t &position, 
 		}
 //		if (printing_enabled) print(lines, position);
 
+		bool add_new_line = true;
 		size_t i_ends = 0;
 		while (!lines.empty())
 		{
 			square_line& last = lines.back();
 			double ends = precalculated_tails.intersection(last.peak, last.position, new_line.peak, new_line.position);
+			if ((!(std::isfinite(ends))) || (new_line.real_tail(static_cast<size_t>(ends)) < 0))
+			{
+				add_new_line = false;
+				break;
+			}
 			if (ends > 0.0)
 			{
-				i_ends = ends;
+				i_ends = static_cast<size_t>(ends);
 //				if (printing_enabled) std::cout << "ends = " << ends
 //					<< " [#" << last.position << ".." << last.ends << ':' << last.peak << '~' << last.tail(i_ends) << '~' << last.tail(i_ends+1) << "] <> [#" << new_line.position << ".." << new_line.ends << ':' << new_line.peak << '~' << new_line.tail(i_ends) << '~' << new_line.tail(i_ends+1) << ']' << std::endl;
 				bool can_exit = true;
@@ -348,7 +354,8 @@ void calc_tail(square_lines &lines, Image::Pixel &this_point, size_t &position, 
 		if (!lines.empty())
 			lines.back().ends = i_ends;
 //		if (printing_enabled) std::cout << "+#" << new_line.position << ':' << new_line.peak << std::endl;
-		lines.push_back(new_line);
+		if (add_new_line)
+			lines.push_back(new_line);
 
 //		if (printing_enabled) std::cout << '~' << tail << std::endl;
 

@@ -138,9 +138,7 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 
 	//
 	img.addPlane(IMAGE__PLANE__MIDDLE_LUMA);
-	img.addPlane(IMAGE__PLANE__RANGE_LUMA);
 	Image::Pixel *middlePlane=img.plane(IMAGE__PLANE__MIDDLE_LUMA);
-	Image::Pixel *rangePlane=img.plane(IMAGE__PLANE__RANGE_LUMA);
 	for (size_t y=0; y<h; ++y)
 	{
 		notifier.update(17./22.+1./22.*static_cast<double>(y)/static_cast<double>(h));
@@ -150,19 +148,11 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 		{
 			size_t yxo = yo+x;
 			middlePlane[yxo] = static_cast<Image::Pixel>( (static_cast<uint32_t>(maxPlane[yxo]) + static_cast<uint32_t>(minPlane[yxo])) / 2);
-			rangePlane[yxo] = maxPlane[yxo] - minPlane[yxo];
 		}
 	}
 
-	bool alpha_present = img.hasPlane(Image::PLANE_ALPHA);
-	if (alpha_present)
-		img.renamePlane(Image::PLANE_ALPHA, IMAGE__PLANE__ALPHA_BACKUP);
-	img.renamePlane(IMAGE__PLANE__RANGE_LUMA, Image::PLANE_ALPHA);
-	gaussian_blur_alpha(img, IMAGE__PLANE__MIDDLE_LUMA, blur_size, Scaled_progress_notifier(notifier, 18./22., 1./22.));
-	img.removePlane(Image::PLANE_ALPHA);
-	img.removePlane(IMAGE__PLANE__RANGE_LUMA);
-	if (alpha_present)
-		img.renamePlane(IMAGE__PLANE__ALPHA_BACKUP, Image::PLANE_ALPHA);
+	gaussian_blur(img, IMAGE__PLANE__MIDDLE_LUMA, blur_size, Scaled_progress_notifier(notifier, 18./22., 1./22.));
+
 	for (size_t y=0; y<h; ++y)
 	{
 		notifier.update(19./22.+1./22.*static_cast<double>(y)/static_cast<double>(h));
@@ -173,25 +163,33 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 			size_t yxo = yo+x;
 
 			Image::Pixel middlePixel = middlePlane[yxo];
-			ssize_t bigger_delta = static_cast<ssize_t>(maxPlane[yxo] - middlePixel) - static_cast<ssize_t>(middlePixel - minPlane[yxo]);
+			Image::Pixel minPixel = minPlane[yxo];
+			Image::Pixel maxPixel = maxPlane[yxo];
+
+			if (minPixel > middlePixel)
+				minPixel = middlePixel;
+			if (maxPixel < middlePixel)
+				maxPixel = middlePixel;
+
+			ssize_t bigger_delta = static_cast<ssize_t>(maxPixel - middlePixel) - static_cast<ssize_t>(middlePixel - minPixel);
 			if (bigger_delta > 0)
 			{
-				ssize_t minPixel = 2*static_cast<ssize_t>(middlePixel) - maxPlane[yxo];
-				if (minPixel < 0)
-					minPixel = 0;
-				minPlane[yxo] = static_cast<Image::Pixel>(minPixel);
+				ssize_t minPixelZ = 2*static_cast<ssize_t>(middlePixel) - maxPixel;
+				if (minPixelZ < 0)
+					minPixelZ = 0;
+				minPixel = static_cast<Image::Pixel>(minPixelZ);
 			}
 			else if (bigger_delta < 0)
 			{
-				ssize_t maxPixel = 2*static_cast<ssize_t>(middlePixel) - minPlane[yxo];
-				if (maxPixel > 0xffff)
-					maxPixel = 0xffff;
-				maxPlane[yxo] = static_cast<Image::Pixel>(maxPixel);
+				ssize_t maxPixelZ = 2*static_cast<ssize_t>(middlePixel) - minPixel;
+				if (maxPixelZ > 0xffff)
+					maxPixelZ = 0xffff;
+				maxPixel = static_cast<Image::Pixel>(maxPixelZ);
 			}
 
-			ssize_t delta = maxPlane[yxo] - minPlane[yxo];
+			ssize_t delta = maxPixel - minPixel;
 			ssize_t scaled_min_range = std::max(static_cast<ssize_t>(1), std::min(static_cast<ssize_t>(HDRI_MAXIMUM), static_cast<ssize_t>(static_cast<double>(HDRI_MAXIMUM) * min_range_factor)));
-			middlePixel = minPlane[yxo] + delta/2;
+			middlePixel = minPixel + delta/2;
 			if (delta < scaled_min_range)
 			{
 				delta = scaled_min_range;
@@ -207,10 +205,10 @@ void tonemap_local_minmax(Image& img, double colour_gamma, const Minmax_roof_par
 					minAdjusted -= maxAdjusted-HDRI_MAXIMUM;
 					maxAdjusted = HDRI_MAXIMUM;
 				}
-				minPlane[yxo] = minAdjusted;
-				maxPlane[yxo] = maxAdjusted;
+				minPixel = minAdjusted;
+				maxPixel = maxAdjusted;
 			}
-			luma[yxo] = static_cast<Image::Pixel>((static_cast<uint32_t>(luma[yxo] - minPlane[yxo]) * HDRI_MAXIMUM ) / delta);
+			luma[yxo] = static_cast<Image::Pixel>((static_cast<uint32_t>(luma[yxo] - minPixel) * HDRI_MAXIMUM ) / delta);
 		}
 	}
 	img.removePlane(IMAGE__PLANE__MIDDLE_LUMA);
