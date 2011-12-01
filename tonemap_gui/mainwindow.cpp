@@ -210,7 +210,15 @@ void MainWindow::fileSave(void)
 	{
 		imaginable::SharedImage tonemapped_image = original_image->copy();
 
-		tonemap(*tonemapped_image);
+		size_t less_side = std::min(tonemapped_image->width(),tonemapped_image->height());
+
+		double corrected_minmax = imaginable::gamma(static_cast<double>(slider_minmax->value())/1000., -2.);
+		size_t minmax_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side) * corrected_minmax));
+
+		double corrected_blur = imaginable::gamma(static_cast<double>(slider_blur->value())/1000., -2.);
+		size_t blur_in_pixels = std::max(static_cast<size_t>(1),static_cast<size_t>(static_cast<double>(less_side) * corrected_blur));
+
+		tonemap(*tonemapped_image, minmax_in_pixels, blur_in_pixels);
 
 		if (safe_as_file_name.endsWith(".pam",Qt::CaseInsensitive))
 		{
@@ -526,17 +534,15 @@ void MainWindow::update_tonemap(void)
 
 	tonemapped_scaled_image = scaled_image->copy();
 
-	progress_bar->show();
-
-	tonemap(*tonemapped_scaled_image);
-
-	progress_bar->hide();
+	tonemap(*tonemapped_scaled_image, scaled_minmax_in_pixels, scaled_blur_in_pixels);
 
 	update_views();
 }
 
-void MainWindow::tonemap(imaginable::Image& img)
+void MainWindow::tonemap(imaginable::Image& img, size_t minmax_in_pixels, size_t blur_in_pixels)
 {
+	progress_bar->show();
+
 	try
 	{
 		imaginable::rgb_to_hcy(img,false);
@@ -554,7 +560,7 @@ void MainWindow::tonemap(imaginable::Image& img)
 			imaginable::tonemap_local_average(
 				img,
 				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
-				scaled_blur_in_pixels,
+				blur_in_pixels,
 				static_cast<double>(slider_mix->value())/100./2.,
 				imaginable::Timed_progress_notifier(*notification_signaller));
 			break;
@@ -562,8 +568,8 @@ void MainWindow::tonemap(imaginable::Image& img)
 			imaginable::tonemap_local_minmax_parabolic(
 				img,
 				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
-				scaled_minmax_in_pixels,
-				scaled_blur_in_pixels,
+				minmax_in_pixels,
+				blur_in_pixels,
 				static_cast<double>(slider_mix->value())/100.,
 				imaginable::Timed_progress_notifier(*notification_signaller));
 			break;
@@ -572,8 +578,8 @@ void MainWindow::tonemap(imaginable::Image& img)
 				img,
 				imaginable::gamma(static_cast<double>(slider_saturation->value())/1000.,-3.)*10.,
 				qMax(0.001, static_cast<double>(slider_lightness->value())/10.),
-				scaled_minmax_in_pixels,
-				scaled_blur_in_pixels,
+				minmax_in_pixels,
+				blur_in_pixels,
 				static_cast<double>(slider_mix->value())/100.,
 				imaginable::Timed_progress_notifier(*notification_signaller));
 			break;
@@ -585,6 +591,8 @@ void MainWindow::tonemap(imaginable::Image& img)
 	{
 		QMessageBox(QMessageBox::Critical, tr("Imaginable exception"), tr("Imaginable engine has thrown an exception:\n")+QString::fromLocal8Bit(e.what()), QMessageBox::Ok, this, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint ).exec();
 	}
+
+	progress_bar->hide();
 }
 
 void MainWindow::update_views(void)

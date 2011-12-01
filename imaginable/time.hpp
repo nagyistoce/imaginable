@@ -27,7 +27,7 @@
 #define TOOLS__TIME__INCLUDED
 
 
-#if !defined(__linux__)
+#if defined(__linux__)
 #	define __need_timeval
 #	include <sys/time.h>
 #endif

@@ -37,13 +37,13 @@ SOURCES += \
 	version.cpp \
 	mainwindow.cpp \
 	preview.cpp \
-    notification_signaller.cpp
+	notification_signaller.cpp
 
 HEADERS += \
 	version.hpp \
 	mainwindow.hpp \
 	preview.hpp \
-    notification_signaller.hpp
+	notification_signaller.hpp
 
 FORMS += \
 	mainwindow.ui
@@ -67,12 +67,6 @@ LIBS += \
 
 TRANSLATIONS = \
 	tonemap_gui_ua.ts
-
-win32:{
-	PRE_TARGETDEPS += ../lib/imaginable.dll
-}else{
-	PRE_TARGETDEPS += ../lib/libimaginable.so
-}
 
 
 win32:RC_FILE = tonemap_gui.rc

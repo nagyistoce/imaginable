@@ -154,7 +154,7 @@ private:
 		METHOD_LOCAL_MINMAX_EXPONENTIAL
 	} current_method;
 
-	void tonemap(imaginable::Image&);
+	void tonemap(imaginable::Image&, size_t minmax_in_pixels, size_t blur_in_pixels);
 };
 
 #endif // IMAGINABLE__TONEMAP_GUI__MAINWINDOW__INCLUDED
